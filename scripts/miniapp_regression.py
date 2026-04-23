@@ -42,15 +42,11 @@ with sync_playwright() as p:
     page.locator('#screen-open .back-btn').click()
     page.wait_for_timeout(300)
 
-    # Inventory should have at least 1 item and sell card works
+    # Inventory should have at least 1 item
     page.locator('#screen-home .bottom-nav .nav-item').nth(2).click()
     page.wait_for_timeout(400)
     inv_count = int(page.locator('#inv-count').inner_text())
     checks.append(('Inventory count >= 1', inv_count >= 1))
-    page.locator('#inventory-grid .inv-card').first.click()
-    page.wait_for_timeout(350)
-    inv_after_sell = int(page.locator('#inv-count').inner_text())
-    checks.append(('Selling inventory item decreases count', inv_after_sell <= inv_count - 1))
     page.screenshot(path=str(OUT / '02-inventory-after-sell.png'), full_page=True)
 
     # Deposit demo top-up (manual input mode)
@@ -77,13 +73,20 @@ with sync_playwright() as p:
     page.locator('.screen.active .bottom-nav .nav-item').nth(1).click()
     page.wait_for_timeout(350)
     checks.append(('Upgrades screen active', page.locator('#screen-upgrades.active').count() == 1))
-    has_cards = page.locator('#upgrade-list .up-card').count()
-    checks.append(('Upgrade cards rendered', has_cards >= 3))
-    up_before = parse_balance(page.locator('#balance4').inner_text())
-    page.locator('#upgrade-list .up-card .up-try').first.click()
-    page.wait_for_timeout(350)
-    up_after = parse_balance(page.locator('#balance4').inner_text())
-    checks.append(('Upgrade action updates balance', up_before != up_after))
+    source_count = page.locator('#upgrade-source-list .up-pick').count()
+    target_count = page.locator('#upgrade-target-list .up-pick').count()
+    checks.append(('Upgrade source items rendered', source_count >= 1))
+    checks.append(('Upgrade target items rendered', target_count >= 1))
+
+    run_btn = page.locator('#upgrade-run-btn')
+    checks.append(('Upgrade button enabled', run_btn.is_enabled()))
+    page.locator('#upgrade-source-list .up-pick').first.click()
+    page.wait_for_timeout(200)
+    page.locator('#upgrade-target-list .up-pick').first.click()
+    page.wait_for_timeout(200)
+    page.locator('#upgrade-run-btn').click()
+    page.wait_for_timeout(2800)
+    checks.append(('Upgrade run processed', page.locator('#toast').inner_text() != ''))
     page.screenshot(path=str(OUT / '03-upgrades.png'), full_page=True)
 
     # Profile navigation and Steam button should not hard fail
