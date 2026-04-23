@@ -5,6 +5,7 @@
   tg.ready();
   tg.expand();
 </script>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -27,807 +28,506 @@
     --rare: #9d4edd;
     --legendary: #e8a630;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Exo 2', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    max-width: 430px;
-    margin: 0 auto;
-    position: relative;
+    background:var(--bg); color:var(--text);
+    font-family:'Exo 2',sans-serif;
+    min-height:100vh; overflow-x:hidden;
+    max-width:430px; margin:0 auto; position:relative;
   }
-
-  /* BG texture */
   body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: 
-      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(78,158,255,0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(232,166,48,0.06) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background: radial-gradient(ellipse 80% 60% at 50% -10%,rgba(78,158,255,.08) 0%,transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 100%,rgba(232,166,48,.06) 0%,transparent 50%);
   }
+  .screen { display:none; flex-direction:column; min-height:100vh; position:relative; z-index:1; }
+  .screen.active { display:flex; }
 
-  .screen { display: none; flex-direction: column; min-height: 100vh; position: relative; z-index: 1; }
-  .screen.active { display: flex; }
-
-  /* ===== HEADER ===== */
+  /* ── HEADER ── */
   .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px 12px;
-    position: sticky;
-    top: 0;
-    background: rgba(10,11,15,0.9);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border);
-    z-index: 100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px 12px; position:sticky; top:0;
+    background:rgba(10,11,15,.9); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border); z-index:100;
   }
-
-  .logo {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    color: var(--accent);
-    text-shadow: 0 0 20px rgba(232,166,48,0.4);
-  }
-
+  .logo { font-family:'Rajdhani',sans-serif; font-size:22px; font-weight:700; letter-spacing:3px; color:var(--accent); text-shadow:0 0 20px rgba(232,166,48,.4); }
   .balance-pill {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 6px 14px 6px 10px;
-    cursor: pointer;
-    transition: all 0.2s;
+    display:flex; align-items:center; gap:8px;
+    background:var(--surface2); border:1px solid var(--border);
+    border-radius:20px; padding:6px 14px 6px 10px;
+    cursor:pointer; transition:.2s;
   }
-  .balance-pill:active { transform: scale(0.96); }
-  .balance-pill .icon { font-size: 14px; }
-  .balance-pill .amount { font-size: 15px; font-weight: 700; color: var(--accent); }
-  .plus-btn {
-    width: 20px; height: 20px;
-    background: var(--accent);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 700; color: #000;
-    line-height: 1;
-  }
+  .balance-pill:active { transform:scale(.96); }
+  .balance-pill .amount { font-size:15px; font-weight:700; color:var(--accent); }
+  .plus-btn { width:20px; height:20px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#000; }
 
-  /* ===== NAV ===== */
+  /* ── NAV ── */
   .bottom-nav {
-    position: fixed;
-    bottom: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 100%; max-width: 430px;
-    background: rgba(17,19,24,0.96);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border);
-    display: flex;
-    padding: 8px 0 20px;
-    z-index: 200;
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:430px;
+    background:rgba(17,19,24,.96); backdrop-filter:blur(20px);
+    border-top:1px solid var(--border);
+    display:flex; padding:8px 0 20px; z-index:200;
   }
+  .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 0; cursor:pointer; transition:.2s; }
+  .nav-icon { font-size:22px; transition:transform .2s; }
+  .nav-label { font-size:10px; font-weight:600; color:var(--muted); letter-spacing:.5px; text-transform:uppercase; }
+  .nav-item.active .nav-label { color:var(--accent); }
+  .nav-item.active .nav-icon { filter:drop-shadow(0 0 6px rgba(232,166,48,.6)); transform:translateY(-1px); }
 
-  .nav-item {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    padding: 6px 0;
-    cursor: pointer;
-    transition: all 0.2s;
-    -webkit-tap-highlight-color: transparent;
+  .scroll-area { flex:1; overflow-y:auto; padding-bottom:90px; -webkit-overflow-scrolling:touch; }
+  .scroll-area::-webkit-scrollbar { display:none; }
+
+  /* ── STEAM AUTH SCREEN ── */
+  #screen-auth {
+    background:var(--bg);
+    align-items:center; justify-content:center;
+    padding:40px 24px;
+    text-align:center;
   }
-  .nav-icon { font-size: 22px; transition: transform 0.2s; }
-  .nav-label { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
-  .nav-item.active .nav-label { color: var(--accent); }
-  .nav-item.active .nav-icon { filter: drop-shadow(0 0 6px rgba(232,166,48,0.6)); transform: translateY(-1px); }
-
-  /* ===== MAIN SCROLL ===== */
-  .scroll-area {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 90px;
-    -webkit-overflow-scrolling: touch;
+  .auth-glow {
+    width:160px; height:160px; border-radius:50%;
+    background:radial-gradient(circle, rgba(78,158,255,.2), transparent 70%);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 32px; position:relative;
+    animation:pulse-slow 3s ease-in-out infinite;
   }
-  .scroll-area::-webkit-scrollbar { display: none; }
+  @keyframes pulse-slow { 0%,100%{transform:scale(1);opacity:.8} 50%{transform:scale(1.08);opacity:1} }
+  .auth-glow::before {
+    content:''; position:absolute; inset:-12px; border-radius:50%;
+    border:1px solid rgba(78,158,255,.2);
+    animation:pulse-slow 3s ease-in-out infinite reverse;
+  }
+  .auth-logo { font-family:'Rajdhani',sans-serif; font-size:28px; font-weight:700; letter-spacing:4px; color:var(--accent); margin-bottom:8px; text-shadow:0 0 30px rgba(232,166,48,.4); }
+  .auth-sub { font-size:14px; color:var(--muted); margin-bottom:36px; line-height:1.6; }
+  .steam-btn {
+    width:100%; padding:18px;
+    background:linear-gradient(135deg,#1b2838,#2a475e);
+    border:1px solid rgba(78,158,255,.3);
+    border-radius:16px; cursor:pointer; transition:.2s;
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    margin-bottom:12px;
+  }
+  .steam-btn:active { transform:scale(.98); }
+  .steam-icon { font-size:28px; }
+  .steam-text { text-align:left; }
+  .steam-text strong { display:block; font-size:17px; font-weight:800; color:#fff; }
+  .steam-text span { font-size:12px; color:rgba(255,255,255,.5); }
+  .auth-note { font-size:11px; color:var(--muted); line-height:1.6; }
+  .auth-note a { color:var(--blue); }
 
-  /* ===== HERO BANNER ===== */
+  /* ── HOME ── */
   .hero {
-    margin: 16px 16px 0;
-    background: linear-gradient(135deg, #111829 0%, #1a1020 100%);
-    border: 1px solid rgba(232,166,48,0.2);
-    border-radius: 16px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
+    margin:16px 16px 0;
+    background:linear-gradient(135deg,#111829,#1a1020);
+    border:1px solid rgba(232,166,48,.2); border-radius:16px;
+    padding:20px; position:relative; overflow:hidden;
   }
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 180px; height: 180px;
-    background: radial-gradient(circle, rgba(232,166,48,0.15), transparent 70%);
-    pointer-events: none;
-  }
-  .hero-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(232,166,48,0.12);
-    border: 1px solid rgba(232,166,48,0.3);
-    border-radius: 20px;
-    padding: 3px 10px;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
-  .hero h2 { font-size: 22px; font-weight: 800; line-height: 1.2; margin-bottom: 6px; }
-  .hero h2 span { color: var(--accent); }
-  .hero p { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
-  .hero-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--accent);
-    color: #000;
-    font-weight: 800;
-    font-size: 14px;
-    padding: 10px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.5px;
-  }
-  .hero-btn:active { transform: scale(0.96); }
+  .hero::before { content:''; position:absolute; top:-40px; right:-40px; width:180px; height:180px; background:radial-gradient(circle,rgba(232,166,48,.15),transparent 70%); pointer-events:none; }
+  .hero-tag { display:inline-flex; align-items:center; gap:6px; background:rgba(232,166,48,.12); border:1px solid rgba(232,166,48,.3); border-radius:20px; padding:3px 10px; font-size:11px; font-weight:700; color:var(--accent); letter-spacing:1px; text-transform:uppercase; margin-bottom:10px; }
+  .hero h2 { font-size:22px; font-weight:800; line-height:1.2; margin-bottom:6px; }
+  .hero h2 span { color:var(--accent); }
+  .hero p { font-size:13px; color:var(--muted); margin-bottom:16px; }
+  .hero-btn { display:inline-flex; align-items:center; gap:8px; background:var(--accent); color:#000; font-weight:800; font-size:14px; padding:10px 20px; border-radius:10px; cursor:pointer; transition:.2s; }
+  .hero-btn:active { transform:scale(.96); }
+  .section { padding:20px 16px 0; }
+  .section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .section-title { font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+  .see-all { font-size:13px; color:var(--blue); font-weight:600; cursor:pointer; }
 
-  /* ===== SECTION ===== */
-  .section {
-    padding: 20px 16px 0;
-  }
-  .section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-  .section-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-  .see-all { font-size: 13px; color: var(--blue); font-weight: 600; cursor: pointer; }
+  .case-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .case-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; cursor:pointer; transition:.25s; position:relative; animation:fadeUp .3s ease backwards; }
+  .case-card:active { transform:scale(.97); }
+  .case-card:nth-child(1){animation-delay:.05s} .case-card:nth-child(2){animation-delay:.1s}
+  .case-card:nth-child(3){animation-delay:.15s} .case-card:nth-child(4){animation-delay:.2s}
+  .case-card.featured { grid-column:1/-1; display:flex; align-items:center; }
+  .case-card.featured .case-img-wrap { width:120px; flex-shrink:0; }
+  .case-card.featured .case-info { flex:1; padding:16px; }
+  .case-badge { position:absolute; top:8px; left:8px; font-size:10px; font-weight:800; letter-spacing:.5px; padding:3px 8px; border-radius:6px; text-transform:uppercase; z-index:2; }
+  .badge-hot { background:var(--accent2); color:#fff; }
+  .badge-new { background:var(--green); color:#000; }
+  .badge-top { background:var(--rare); color:#fff; }
+  .case-img-wrap { aspect-ratio:1; display:flex; align-items:center; justify-content:center; position:relative; padding:20px; }
+  .case-img-wrap::before { content:''; position:absolute; inset:0; opacity:.15; }
+  .case-card:nth-child(1) .case-img-wrap::before{background:radial-gradient(circle,var(--accent),transparent 70%)}
+  .case-card:nth-child(2) .case-img-wrap::before{background:radial-gradient(circle,var(--blue),transparent 70%)}
+  .case-card:nth-child(3) .case-img-wrap::before{background:radial-gradient(circle,var(--rare),transparent 70%)}
+  .case-card:nth-child(4) .case-img-wrap::before{background:radial-gradient(circle,var(--accent2),transparent 70%)}
+  .case-card.featured .case-img-wrap::before{background:radial-gradient(circle,var(--legendary),transparent 70%);opacity:.2}
+  .case-emoji { font-size:52px; filter:drop-shadow(0 4px 12px rgba(0,0,0,.5)); }
+  .case-card.featured .case-emoji { font-size:64px; }
+  .case-info { padding:0 12px 14px; }
+  .case-name { font-size:14px; font-weight:700; margin-bottom:4px; line-height:1.3; }
+  .case-sub { font-size:11px; color:var(--muted); margin-bottom:10px; }
+  .case-price-row { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+  .case-price { font-size:16px; font-weight:800; color:var(--accent); }
+  .open-btn { background:rgba(232,166,48,.12); border:1px solid rgba(232,166,48,.25); color:var(--accent); font-size:12px; font-weight:700; padding:5px 12px; border-radius:8px; cursor:pointer; transition:.2s; white-space:nowrap; }
+  .open-btn:active { background:rgba(232,166,48,.25); transform:scale(.96); }
+  .stars-row { display:flex; gap:4px; margin-top:6px; }
+  .star-dot { width:8px; height:8px; border-radius:50%; }
 
-  /* ===== CASE GRID ===== */
-  .case-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
+  .drops-scroll { display:flex; gap:10px; overflow-x:auto; padding-bottom:6px; -webkit-overflow-scrolling:touch; }
+  .drops-scroll::-webkit-scrollbar { display:none; }
+  .drop-card { flex-shrink:0; width:90px; background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; padding:10px 8px; text-align:center; cursor:pointer; }
+  .drop-skin-emoji { font-size:32px; margin-bottom:6px; display:block; }
+  .drop-name { font-size:10px; font-weight:600; line-height:1.3; margin-bottom:3px; }
+  .drop-price { font-size:12px; font-weight:800; }
+  .drop-price.common{color:#aaa} .drop-price.uncommon{color:var(--blue)} .drop-price.rare{color:var(--rare)} .drop-price.legendary{color:var(--legendary)}
+  .drop-user { font-size:10px; color:var(--muted); margin-top:2px; }
+  .drop-bar { height:2px; border-radius:1px; margin:-10px -8px 10px; }
+  .bar-common{background:#444} .bar-uncommon{background:var(--blue)} .bar-rare{background:var(--rare)} .bar-legendary{background:var(--legendary);box-shadow:0 0 8px rgba(232,166,48,.5)}
 
-  .case-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.25s;
-    position: relative;
-  }
-  .case-card:active { transform: scale(0.97); }
-  .case-card.featured {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-  }
-  .case-card.featured .case-img-wrap { width: 120px; flex-shrink: 0; }
-  .case-card.featured .case-info { flex: 1; padding: 16px; }
+  /* ── CASE OPEN ── */
+  .open-header { display:flex; align-items:center; gap:12px; padding:16px 20px; border-bottom:1px solid var(--border); }
+  .back-btn { width:36px; height:36px; background:var(--surface2); border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; transition:.2s; }
+  .back-btn:active { transform:scale(.9); }
+  .open-header h2 { font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; letter-spacing:1px; }
+  .case-showcase { display:flex; flex-direction:column; align-items:center; padding:32px 20px 24px; gap:8px; }
+  .case-big-emoji { font-size:110px; filter:drop-shadow(0 0 40px rgba(232,166,48,.3)); transition:.3s; cursor:pointer; }
+  .case-big-name { font-size:20px; font-weight:800; text-align:center; }
+  .case-big-sub { font-size:13px; color:var(--muted); }
+  .roulette-wrap { width:100%; padding:0 0 24px; position:relative; overflow:hidden; display:none; }
+  .roulette-pointer { position:absolute; top:0; bottom:0; left:50%; transform:translateX(-50%); width:3px; background:var(--accent); z-index:10; box-shadow:0 0 12px rgba(232,166,48,.8); }
+  .roulette-pointer::before,.roulette-pointer::after { content:''; position:absolute; left:50%; transform:translateX(-50%); border-left:8px solid transparent; border-right:8px solid transparent; }
+  .roulette-pointer::before { top:0; border-top:10px solid var(--accent); }
+  .roulette-pointer::after { bottom:0; border-bottom:10px solid var(--accent); }
+  .roulette-track { display:flex; align-items:center; height:110px; transition:transform 6s cubic-bezier(.17,.67,.12,.99); will-change:transform; }
+  .roulette-item { flex-shrink:0; width:100px; height:100px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--surface2); border:2px solid var(--border); border-radius:12px; margin:0 5px; font-size:36px; gap:4px; }
+  .roulette-item span { font-size:11px; font-weight:700; color:var(--muted); }
+  .roulette-item.rarity-common{border-color:#555}
+  .roulette-item.rarity-uncommon{border-color:var(--blue);background:rgba(78,158,255,.05)}
+  .roulette-item.rarity-rare{border-color:var(--rare);background:rgba(157,78,221,.05)}
+  .roulette-item.rarity-legendary{border-color:var(--legendary);background:rgba(232,166,48,.08)}
+  .open-actions { padding:0 20px 16px; display:flex; flex-direction:column; gap:10px; }
+  .multi-open { display:flex; gap:8px; }
+  .multi-btn { flex:1; padding:10px; background:var(--surface2); border:1px solid var(--border); border-radius:10px; text-align:center; cursor:pointer; font-size:13px; font-weight:700; color:var(--muted); transition:.2s; }
+  .multi-btn.active { border-color:var(--accent); color:var(--accent); background:rgba(232,166,48,.08); }
+  .multi-btn:active { transform:scale(.96); }
+  .btn-primary { width:100%; padding:16px; background:var(--accent); color:#000; font-size:17px; font-weight:800; border-radius:14px; text-align:center; cursor:pointer; transition:.2s; letter-spacing:.5px; border:none; }
+  .btn-primary:active { transform:scale(.98); opacity:.9; }
+  .btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+  .btn-secondary { width:100%; padding:14px; background:var(--surface2); color:var(--text); font-size:15px; font-weight:700; border-radius:14px; text-align:center; cursor:pointer; transition:.2s; border:1px solid var(--border); }
+  .btn-secondary:active { transform:scale(.98); }
+  .case-contents { padding:0 20px 20px; }
+  .contents-title { font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+  .contents-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .content-item { background:var(--surface2); border-radius:10px; padding:10px 6px 8px; text-align:center; }
+  .content-item.c{border-top:2px solid #555} .content-item.u{border-top:2px solid var(--blue)}
+  .content-item.r{border-top:2px solid var(--rare)} .content-item.l{border-top:2px solid var(--legendary)}
+  .content-item .ci-emoji { font-size:26px; display:block; margin-bottom:3px; }
+  .content-item .ci-name { font-size:9px; font-weight:600; color:var(--muted); line-height:1.3; }
+  .content-item .ci-chance { font-size:10px; font-weight:800; margin-top:3px; }
+  .content-item.c .ci-chance{color:#888} .content-item.u .ci-chance{color:var(--blue)}
+  .content-item.r .ci-chance{color:var(--rare)} .content-item.l .ci-chance{color:var(--legendary)}
 
-  .case-badge {
-    position: absolute;
-    top: 8px; left: 8px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    padding: 3px 8px;
-    border-radius: 6px;
-    text-transform: uppercase;
-    z-index: 2;
-  }
-  .badge-hot { background: var(--accent2); color: #fff; }
-  .badge-new { background: var(--green); color: #000; }
-  .badge-top { background: var(--rare); color: #fff; }
+  /* ── UPGRADER ── */
+  .upgrader-wrap { padding:16px; }
+  .upgrader-title { font-family:'Rajdhani',sans-serif; font-size:22px; font-weight:700; letter-spacing:2px; text-transform:uppercase; text-align:center; margin-bottom:4px; }
+  .upgrader-sub { font-size:13px; color:var(--muted); text-align:center; margin-bottom:20px; }
 
-  .case-img-wrap {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 20px;
+  .upgrade-arena {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:20px; padding:20px; margin-bottom:16px;
+    position:relative; overflow:hidden;
   }
-  .case-img-wrap::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: 0.15;
-  }
-  .case-card:nth-child(1) .case-img-wrap::before { background: radial-gradient(circle, var(--accent), transparent 70%); }
-  .case-card:nth-child(2) .case-img-wrap::before { background: radial-gradient(circle, var(--blue), transparent 70%); }
-  .case-card:nth-child(3) .case-img-wrap::before { background: radial-gradient(circle, var(--rare), transparent 70%); }
-  .case-card:nth-child(4) .case-img-wrap::before { background: radial-gradient(circle, var(--accent2), transparent 70%); }
-  .case-card.featured .case-img-wrap::before { background: radial-gradient(circle, var(--legendary), transparent 70%); opacity: 0.2; }
-
-  .case-emoji { font-size: 52px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5)); }
-  .case-card.featured .case-emoji { font-size: 64px; }
-
-  .case-info { padding: 0 12px 14px; }
-  .case-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
-  .case-sub { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
-  .case-price-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-  .case-price {
-    font-size: 16px; font-weight: 800; color: var(--accent);
-  }
-  .open-btn {
-    background: rgba(232,166,48,0.12);
-    border: 1px solid rgba(232,166,48,0.25);
-    color: var(--accent);
-    font-size: 12px;
-    font-weight: 700;
-    padding: 5px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .open-btn:active { background: rgba(232,166,48,0.25); transform: scale(0.96); }
-
-  /* Stars small row */
-  .stars-row {
-    display: flex; gap: 4px; margin-top: 6px;
-  }
-  .star-dot {
-    width: 8px; height: 8px; border-radius: 50%;
+  .upgrade-arena::before {
+    content:''; position:absolute; inset:0; opacity:.05;
+    background:radial-gradient(ellipse at 50% 50%, var(--accent), transparent 70%);
+    pointer-events:none;
   }
 
-  /* ===== RECENT DROPS ===== */
-  .drops-scroll {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 6px;
-    -webkit-overflow-scrolling: touch;
+  .upgrade-slots { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+  .upgrade-slot {
+    flex:1; background:var(--surface2); border:2px dashed rgba(255,255,255,.1);
+    border-radius:16px; padding:16px 10px; text-align:center;
+    cursor:pointer; transition:.2s; min-height:130px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
   }
-  .drops-scroll::-webkit-scrollbar { display: none; }
+  .upgrade-slot:active { transform:scale(.97); }
+  .upgrade-slot.filled { border-style:solid; cursor:default; }
+  .upgrade-slot.filled.c{border-color:#555} .upgrade-slot.filled.u{border-color:var(--blue)} .upgrade-slot.filled.r{border-color:var(--rare)} .upgrade-slot.filled.l{border-color:var(--legendary)}
+  .upgrade-slot .slot-emoji { font-size:40px; }
+  .upgrade-slot .slot-name { font-size:10px; font-weight:700; color:var(--muted); line-height:1.3; }
+  .upgrade-slot .slot-price { font-size:14px; font-weight:800; }
+  .slot-label { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+  .slot-empty-icon { font-size:28px; opacity:.3; }
+  .slot-empty-text { font-size:11px; color:var(--muted); }
 
-  .drop-card {
-    flex-shrink: 0;
-    width: 90px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    padding: 10px 8px;
-    text-align: center;
-    cursor: pointer;
+  .upgrade-arrow {
+    font-size:28px; flex-shrink:0;
+    animation:arrow-pulse 1.5s ease-in-out infinite;
   }
-  .drop-skin-emoji { font-size: 32px; margin-bottom: 6px; display: block; }
-  .drop-name { font-size: 10px; font-weight: 600; line-height: 1.3; margin-bottom: 3px; }
-  .drop-price { font-size: 12px; font-weight: 800; }
-  .drop-price.common { color: #aaa; }
-  .drop-price.uncommon { color: var(--blue); }
-  .drop-price.rare { color: var(--rare); }
-  .drop-price.legendary { color: var(--legendary); }
-  .drop-user { font-size: 10px; color: var(--muted); margin-top: 2px; }
-  .drop-bar {
-    height: 2px;
-    border-radius: 1px;
-    margin: -10px -8px 10px;
-  }
-  .bar-common { background: #444; }
-  .bar-uncommon { background: var(--blue); }
-  .bar-rare { background: var(--rare); }
-  .bar-legendary { background: var(--legendary); box-shadow: 0 0 8px rgba(232,166,48,0.5); }
+  @keyframes arrow-pulse { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.2);opacity:1} }
 
-  /* ===== CASE OPEN SCREEN ===== */
-  #screen-open {
-    background: var(--bg);
+  /* Chance wheel */
+  .chance-display {
+    text-align:center; margin-bottom:16px;
   }
+  .chance-wheel-wrap {
+    width:120px; height:120px; margin:0 auto 12px;
+    position:relative;
+  }
+  .chance-wheel-wrap svg { transform:rotate(-90deg); }
+  .chance-track { fill:none; stroke:var(--surface3); stroke-width:10; }
+  .chance-fill { fill:none; stroke-width:10; stroke-linecap:round; transition:stroke-dasharray .5s ease, stroke .5s ease; }
+  .chance-center {
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+  }
+  .chance-pct { font-size:26px; font-weight:800; }
+  .chance-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:1px; text-transform:uppercase; }
 
-  .open-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .back-btn {
-    width: 36px; height: 36px;
-    background: var(--surface2);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 18px;
-    transition: all 0.2s;
-  }
-  .back-btn:active { transform: scale(0.9); }
-  .open-header h2 { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+  .chance-info { font-size:13px; color:var(--muted); }
+  .chance-info span { color:var(--text); font-weight:700; }
 
-  .case-showcase {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 32px 20px 24px;
-    gap: 8px;
+  .upgrade-btn-wrap { display:flex; gap:10px; }
+  .upgrade-go {
+    flex:2; padding:16px; background:var(--accent); color:#000;
+    font-size:16px; font-weight:800; border-radius:14px;
+    text-align:center; cursor:pointer; transition:.2s;
+    border:none;
   }
-  .case-big-emoji {
-    font-size: 110px;
-    filter: drop-shadow(0 0 40px rgba(232,166,48,0.3));
-    transition: all 0.3s;
-    cursor: pointer;
+  .upgrade-go:active { transform:scale(.98); }
+  .upgrade-go:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+  .upgrade-clear {
+    flex:1; padding:16px; background:var(--surface2);
+    border:1px solid var(--border); border-radius:14px;
+    text-align:center; cursor:pointer; font-size:14px;
+    font-weight:700; transition:.2s;
   }
-  .case-big-name { font-size: 20px; font-weight: 800; text-align: center; }
-  .case-big-sub { font-size: 13px; color: var(--muted); }
+  .upgrade-clear:active { transform:scale(.98); }
 
-  /* Roulette spinner */
-  .roulette-wrap {
-    width: 100%;
-    padding: 0 0 24px;
-    position: relative;
-    overflow: hidden;
-    display: none;
+  /* skin picker modal */
+  .modal-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.7);
+    backdrop-filter:blur(8px); z-index:400;
+    display:none; flex-direction:column;
   }
-  .roulette-pointer {
-    position: absolute;
-    top: 0; bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 3px;
-    background: var(--accent);
-    z-index: 10;
-    box-shadow: 0 0 12px rgba(232,166,48,0.8);
+  .modal-overlay.show { display:flex; }
+  .modal-sheet {
+    margin-top:auto; background:var(--surface);
+    border-radius:24px 24px 0 0; padding:20px;
+    max-height:70vh; overflow-y:auto;
   }
-  .roulette-pointer::before,
-  .roulette-pointer::after {
-    content: '';
-    position: absolute;
-    left: 50%; transform: translateX(-50%);
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
+  .modal-sheet::-webkit-scrollbar { display:none; }
+  .modal-handle { width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 16px; }
+  .modal-title { font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:1px; margin-bottom:14px; }
+  .picker-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  .picker-item {
+    background:var(--surface2); border:1px solid var(--border);
+    border-radius:12px; padding:12px 8px 10px;
+    text-align:center; cursor:pointer; transition:.2s;
   }
-  .roulette-pointer::before { top: 0; border-top: 10px solid var(--accent); }
-  .roulette-pointer::after { bottom: 0; border-bottom: 10px solid var(--accent); }
+  .picker-item:active { transform:scale(.95); }
+  .picker-item.c{border-bottom:2px solid #555} .picker-item.u{border-bottom:2px solid var(--blue)}
+  .picker-item.r{border-bottom:2px solid var(--rare)} .picker-item.l{border-bottom:2px solid var(--legendary)}
+  .picker-emoji { font-size:32px; display:block; margin-bottom:5px; }
+  .picker-name { font-size:10px; font-weight:600; color:var(--muted); line-height:1.3; margin-bottom:3px; }
+  .picker-price { font-size:13px; font-weight:800; }
+  .picker-item.c .picker-price{color:#888} .picker-item.u .picker-price{color:var(--blue)}
+  .picker-item.r .picker-price{color:var(--rare)} .picker-item.l .picker-price{color:var(--legendary)}
 
-  .roulette-track {
-    display: flex;
-    align-items: center;
-    height: 110px;
-    transition: transform 6s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-    will-change: transform;
+  /* upgrade spin overlay */
+  .upgrade-spin-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:500;
+    display:none; flex-direction:column; align-items:center; justify-content:center; gap:24px;
   }
+  .upgrade-spin-overlay.show { display:flex; }
+  .spin-ring {
+    width:160px; height:160px; border-radius:50%;
+    border:4px solid var(--surface3);
+    border-top-color:var(--accent);
+    animation:spin-ring 1s linear infinite;
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  @keyframes spin-ring { to { transform:rotate(360deg); } }
+  .spin-inner { position:absolute; font-size:60px; animation:counter-spin 1s linear infinite; }
+  @keyframes counter-spin { to { transform:rotate(-360deg); } }
+  .spin-text { font-size:16px; font-weight:700; color:var(--muted); }
 
-  .roulette-item {
-    flex-shrink: 0;
-    width: 100px;
-    height: 100px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: var(--surface2);
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    margin: 0 5px;
-    font-size: 36px;
-    gap: 4px;
-    position: relative;
-    overflow: hidden;
+  /* upgrade result */
+  .upgrade-result {
+    position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:500;
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    padding:30px; text-align:center;
   }
-  .roulette-item span { font-size: 11px; font-weight: 700; color: var(--muted); }
-  .roulette-item.rarity-common { border-color: #555; }
-  .roulette-item.rarity-uncommon { border-color: var(--blue); background: rgba(78,158,255,0.05); }
-  .roulette-item.rarity-rare { border-color: var(--rare); background: rgba(157,78,221,0.05); }
-  .roulette-item.rarity-legendary { border-color: var(--legendary); background: rgba(232,166,48,0.08); }
+  .upgrade-result.show { display:flex; }
+  .result-label { font-size:13px; font-weight:800; letter-spacing:3px; text-transform:uppercase; margin-bottom:12px; }
+  .result-label.win { color:var(--green); }
+  .result-label.lose { color:var(--accent2); }
+  .result-emoji { font-size:80px; margin-bottom:12px; animation:win-pop .5s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes win-pop { from{transform:scale(0)} to{transform:scale(1)} }
+  .result-name { font-size:20px; font-weight:800; margin-bottom:4px; }
+  .result-price { font-size:32px; font-weight:800; margin-bottom:20px; }
+  .result-win .result-price{color:var(--green)} .result-lose .result-price{color:var(--accent2)}
+  .result-actions { display:flex; gap:10px; width:100%; }
+  .result-again { flex:1; padding:14px; background:var(--accent); color:#000; font-weight:800; border-radius:12px; cursor:pointer; font-size:15px; transition:.2s; }
+  .result-again:active { transform:scale(.97); }
+  .result-close { flex:1; padding:14px; background:var(--surface2); border:1px solid var(--border); font-weight:700; border-radius:12px; cursor:pointer; font-size:15px; transition:.2s; }
+  .result-close:active { transform:scale(.97); }
 
-  .open-actions {
-    padding: 0 20px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  /* ── DEPOSIT / STARS ── */
+  .deposit-wrap { padding:20px; }
+  .stars-highlight {
+    background:linear-gradient(135deg,#1a1632,#120d1a);
+    border:1px solid rgba(138,92,246,.3);
+    border-radius:16px; padding:20px; margin-bottom:20px;
+    text-align:center; position:relative; overflow:hidden;
   }
+  .stars-highlight::before {
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(ellipse at 50% 0%,rgba(138,92,246,.15),transparent 60%);
+    pointer-events:none;
+  }
+  .stars-highlight .sh-icon { font-size:40px; margin-bottom:8px; display:block; }
+  .stars-highlight h3 { font-size:18px; font-weight:800; margin-bottom:4px; }
+  .stars-highlight p { font-size:12px; color:var(--muted); }
+  .sh-badge { display:inline-block; background:rgba(138,92,246,.2); border:1px solid rgba(138,92,246,.4); border-radius:20px; padding:3px 12px; font-size:11px; font-weight:700; color:#a78bfa; margin-top:8px; }
 
-  .btn-primary {
-    width: 100%;
-    padding: 16px;
-    background: var(--accent);
-    color: #000;
-    font-size: 17px;
-    font-weight: 800;
-    border-radius: 14px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.5px;
-    border: none;
-  }
-  .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .section-label { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+  .amount-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px; }
+  .amount-pill { padding:14px 10px; background:var(--surface2); border:1px solid var(--border); border-radius:12px; text-align:center; cursor:pointer; transition:.2s; }
+  .amount-pill:active { transform:scale(.96); }
+  .amount-pill.selected { border-color:#a78bfa; background:rgba(167,139,250,.08); }
+  .amount-pill .ap-amount { font-size:15px; font-weight:800; color:#c4b5fd; }
+  .amount-pill .ap-bonus { font-size:11px; color:var(--green); font-weight:600; margin-top:2px; }
+  .method-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:24px; }
+  .method-pill { padding:14px 8px; background:var(--surface2); border:1px solid var(--border); border-radius:12px; text-align:center; cursor:pointer; transition:.2s; }
+  .method-pill:active { transform:scale(.96); }
+  .method-pill.selected { border-color:var(--blue); background:rgba(78,158,255,.08); }
+  .method-icon { font-size:24px; display:block; margin-bottom:4px; }
+  .method-name { font-size:11px; font-weight:700; color:var(--muted); }
 
-  .btn-secondary {
-    width: 100%;
-    padding: 14px;
-    background: var(--surface2);
-    color: var(--text);
-    font-size: 15px;
-    font-weight: 700;
-    border-radius: 14px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: 1px solid var(--border);
+  .stars-pay-btn {
+    width:100%; padding:18px;
+    background:linear-gradient(135deg,#7c3aed,#a855f7);
+    color:#fff; font-size:17px; font-weight:800;
+    border-radius:14px; text-align:center;
+    cursor:pointer; transition:.2s; border:none;
+    box-shadow:0 4px 20px rgba(124,58,237,.3);
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    margin-bottom:10px;
   }
-  .btn-secondary:active { transform: scale(0.98); }
+  .stars-pay-btn:active { transform:scale(.98); }
+  .pay-note { font-size:11px; color:var(--muted); text-align:center; }
 
-  .multi-open {
-    display: flex; gap: 8px;
-  }
-  .multi-btn {
-    flex: 1;
-    padding: 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    text-align: center;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--muted);
-    transition: all 0.2s;
-  }
-  .multi-btn.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(232,166,48,0.08);
-  }
-  .multi-btn:active { transform: scale(0.96); }
+  /* ── INVENTORY ── */
+  .inv-header { padding:16px 20px 0; display:flex; gap:10px; flex-direction:column; }
+  .inv-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  .inv-stat { background:var(--surface2); border-radius:12px; padding:12px; text-align:center; }
+  .inv-stat-val { font-size:18px; font-weight:800; color:var(--accent); }
+  .inv-stat-key { font-size:11px; color:var(--muted); margin-top:2px; }
+  .sell-all-btn { width:100%; padding:13px; background:rgba(61,220,132,.1); border:1px solid rgba(61,220,132,.3); color:var(--green); font-weight:800; font-size:15px; border-radius:12px; cursor:pointer; transition:.2s; }
+  .sell-all-btn:active { transform:scale(.98); }
+  .inventory-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; padding:16px; }
+  .inv-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 8px 10px; text-align:center; cursor:pointer; transition:.2s; }
+  .inv-card:active { transform:scale(.95); }
+  .inv-card.ic{border-bottom:2px solid #555} .inv-card.iu{border-bottom:2px solid var(--blue)}
+  .inv-card.ir{border-bottom:2px solid var(--rare)} .inv-card.il{border-bottom:2px solid var(--legendary)}
+  .inv-emoji { font-size:36px; display:block; margin-bottom:6px; }
+  .inv-name { font-size:10px; font-weight:600; color:var(--muted); line-height:1.3; margin-bottom:4px; }
+  .inv-price { font-size:14px; font-weight:800; }
+  .ic .inv-price{color:#888} .iu .inv-price{color:var(--blue)} .ir .inv-price{color:var(--rare)} .il .inv-price{color:var(--legendary)}
 
-  .case-contents {
-    padding: 0 20px 20px;
-  }
-  .contents-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 12px;
-  }
-  .contents-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-  }
-  .content-item {
-    background: var(--surface2);
-    border-radius: 10px;
-    padding: 10px 6px 8px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .content-item::before {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 2px;
-  }
-  .content-item.c { border-top: 2px solid #555; }
-  .content-item.u { border-top: 2px solid var(--blue); }
-  .content-item.r { border-top: 2px solid var(--rare); }
-  .content-item.l { border-top: 2px solid var(--legendary); }
-  .content-item .ci-emoji { font-size: 26px; display: block; margin-bottom: 3px; }
-  .content-item .ci-name { font-size: 9px; font-weight: 600; color: var(--muted); line-height: 1.3; }
-  .content-item .ci-chance { font-size: 10px; font-weight: 800; margin-top: 3px; }
-  .content-item.c .ci-chance { color: #888; }
-  .content-item.u .ci-chance { color: var(--blue); }
-  .content-item.r .ci-chance { color: var(--rare); }
-  .content-item.l .ci-chance { color: var(--legendary); }
+  /* ── PROFILE ── */
+  .profile-wrap { padding:20px 20px 0; }
+  .profile-top { display:flex; align-items:center; gap:16px; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:16px; }
+  .avatar { width:64px; height:64px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; flex-shrink:0; }
+  .profile-name { font-size:18px; font-weight:800; }
+  .profile-level { display:flex; align-items:center; gap:6px; margin-top:4px; }
+  .level-badge { background:var(--accent); color:#000; font-size:11px; font-weight:800; padding:2px 8px; border-radius:6px; }
+  .profile-exp { font-size:12px; color:var(--muted); }
+  .exp-bar-wrap { margin-top:10px; }
+  .exp-bar-bg { height:4px; background:var(--surface3); border-radius:2px; overflow:hidden; }
+  .exp-bar-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--blue)); border-radius:2px; width:68%; }
+  .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; }
+  .stat-card-val { font-size:22px; font-weight:800; margin-bottom:4px; }
+  .stat-card-key { font-size:12px; color:var(--muted); }
+  .stat-card.highlight { border-color:rgba(232,166,48,.3); background:rgba(232,166,48,.05); }
+  .stat-card.highlight .stat-card-val { color:var(--accent); }
+  .menu-list { display:flex; flex-direction:column; gap:8px; }
+  .menu-item { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:.2s; }
+  .menu-item:active { transform:scale(.98); }
+  .menu-icon { font-size:22px; }
+  .menu-text { flex:1; }
+  .menu-text strong { display:block; font-size:15px; font-weight:700; }
+  .menu-text span { font-size:12px; color:var(--muted); }
+  .menu-arrow { font-size:16px; color:var(--muted); }
+  .menu-badge { background:var(--accent2); color:#fff; font-size:11px; font-weight:800; padding:2px 8px; border-radius:10px; }
+  .steam-connected { display:flex; align-items:center; gap:10px; background:rgba(78,158,255,.05); border:1px solid rgba(78,158,255,.2); border-radius:14px; padding:14px 16px; margin-bottom:16px; }
+  .steam-connected .sc-icon { font-size:24px; }
+  .steam-connected .sc-text strong { display:block; font-size:14px; font-weight:700; }
+  .steam-connected .sc-text span { font-size:12px; color:var(--muted); }
+  .sc-check { font-size:18px; color:var(--green); margin-left:auto; }
 
-  /* ===== WIN OVERLAY ===== */
-  .win-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 500;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 30px;
-    text-align: center;
-  }
-  .win-overlay.show { display: flex; }
+  /* ── WIN OVERLAY ── */
+  .win-overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:500; display:none; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center; }
+  .win-overlay.show { display:flex; }
+  .win-glow { position:absolute; width:300px; height:300px; border-radius:50%; opacity:.3; animation:pulse-glow 1.5s ease-in-out infinite; }
+  @keyframes pulse-glow { 0%,100%{transform:scale(.9);opacity:.2} 50%{transform:scale(1.1);opacity:.4} }
+  .win-emoji-big { font-size:90px; position:relative; z-index:2; margin-bottom:16px; animation:win-pop .5s cubic-bezier(.34,1.56,.64,1); }
+  .win-rarity { font-size:12px; font-weight:800; letter-spacing:2px; text-transform:uppercase; padding:4px 14px; border-radius:20px; margin-bottom:10px; position:relative; z-index:2; }
+  .win-name { font-size:24px; font-weight:800; margin-bottom:4px; position:relative; z-index:2; }
+  .win-price { font-size:36px; font-weight:800; color:var(--accent); margin-bottom:8px; position:relative; z-index:2; }
+  .win-actions { display:flex; gap:10px; width:100%; margin-top:16px; position:relative; z-index:2; }
+  .win-sell { flex:1; padding:14px; background:var(--green); color:#000; font-weight:800; border-radius:12px; cursor:pointer; font-size:15px; transition:.2s; }
+  .win-sell:active { transform:scale(.97); }
+  .win-keep { flex:1; padding:14px; background:var(--surface2); border:1px solid var(--border); font-weight:700; border-radius:12px; cursor:pointer; font-size:15px; transition:.2s; }
+  .win-keep:active { transform:scale(.97); }
 
-  .win-glow {
-    position: absolute;
-    width: 300px; height: 300px;
-    border-radius: 50%;
-    opacity: 0.3;
-    animation: pulse-glow 1.5s ease-in-out infinite;
-  }
-  @keyframes pulse-glow {
-    0%, 100% { transform: scale(0.9); opacity: 0.2; }
-    50% { transform: scale(1.1); opacity: 0.4; }
-  }
-
-  .win-emoji-big { font-size: 90px; position: relative; z-index: 2; margin-bottom: 16px; animation: win-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
-  @keyframes win-pop { from { transform: scale(0); } to { transform: scale(1); } }
-
-  .win-rarity {
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 4px 14px;
-    border-radius: 20px;
-    margin-bottom: 10px;
-    position: relative; z-index: 2;
-  }
-  .win-name { font-size: 24px; font-weight: 800; margin-bottom: 4px; position: relative; z-index: 2; }
-  .win-price { font-size: 36px; font-weight: 800; color: var(--accent); margin-bottom: 8px; position: relative; z-index: 2; }
-
-  .win-actions { display: flex; gap: 10px; width: 100%; margin-top: 16px; position: relative; z-index: 2; }
-  .win-sell { flex: 1; padding: 14px; background: var(--green); color: #000; font-weight: 800; border-radius: 12px; cursor: pointer; font-size: 15px; transition: 0.2s; }
-  .win-sell:active { transform: scale(0.97); }
-  .win-keep { flex: 1; padding: 14px; background: var(--surface2); border: 1px solid var(--border); font-weight: 700; border-radius: 12px; cursor: pointer; font-size: 15px; transition: 0.2s; }
-  .win-keep:active { transform: scale(0.97); }
-
-  /* ===== INVENTORY SCREEN ===== */
-  .inventory-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    padding: 16px;
-  }
-  .inv-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 8px 10px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .inv-card:active { transform: scale(0.95); }
-  .inv-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0; height: 2px;
-  }
-  .inv-card.ic { border-bottom: 2px solid #555; }
-  .inv-card.iu { border-bottom: 2px solid var(--blue); }
-  .inv-card.ir { border-bottom: 2px solid var(--rare); }
-  .inv-card.il { border-bottom: 2px solid var(--legendary); }
-  .inv-emoji { font-size: 36px; display: block; margin-bottom: 6px; }
-  .inv-name { font-size: 10px; font-weight: 600; color: var(--muted); line-height: 1.3; margin-bottom: 4px; }
-  .inv-price { font-size: 14px; font-weight: 800; }
-  .ic .inv-price { color: #888; }
-  .iu .inv-price { color: var(--blue); }
-  .ir .inv-price { color: var(--rare); }
-  .il .inv-price { color: var(--legendary); }
-
-  .inv-header {
-    padding: 16px 20px 0;
-    display: flex; gap: 10px; flex-direction: column;
-  }
-  .inv-stats {
-    display: grid; grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-  }
-  .inv-stat {
-    background: var(--surface2);
-    border-radius: 12px;
-    padding: 12px;
-    text-align: center;
-  }
-  .inv-stat-val { font-size: 18px; font-weight: 800; color: var(--accent); }
-  .inv-stat-key { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-  .sell-all-btn {
-    width: 100%;
-    padding: 13px;
-    background: rgba(61,220,132,0.1);
-    border: 1px solid rgba(61,220,132,0.3);
-    color: var(--green);
-    font-weight: 800;
-    font-size: 15px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  .sell-all-btn:active { transform: scale(0.98); }
-
-  /* ===== PROFILE SCREEN ===== */
-  .profile-wrap { padding: 20px 20px 0; }
-  .profile-top {
-    display: flex; align-items: center; gap: 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 16px;
-  }
-  .avatar {
-    width: 64px; height: 64px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px; flex-shrink: 0;
-  }
-  .profile-name { font-size: 18px; font-weight: 800; }
-  .profile-level {
-    display: flex; align-items: center; gap: 6px; margin-top: 4px;
-  }
-  .level-badge {
-    background: var(--accent);
-    color: #000;
-    font-size: 11px;
-    font-weight: 800;
-    padding: 2px 8px;
-    border-radius: 6px;
-  }
-  .profile-exp { font-size: 12px; color: var(--muted); }
-
-  .exp-bar-wrap { margin-top: 10px; }
-  .exp-bar-bg { height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
-  .exp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--blue)); border-radius: 2px; width: 68%; }
-
-  .stat-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px; margin-bottom: 16px;
-  }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-  }
-  .stat-card-val { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
-  .stat-card-key { font-size: 12px; color: var(--muted); }
-  .stat-card.highlight { border-color: rgba(232,166,48,0.3); background: rgba(232,166,48,0.05); }
-  .stat-card.highlight .stat-card-val { color: var(--accent); }
-
-  .menu-list { display: flex; flex-direction: column; gap: 8px; }
-  .menu-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    display: flex; align-items: center; gap: 12px;
-    cursor: pointer; transition: 0.2s;
-  }
-  .menu-item:active { transform: scale(0.98); }
-  .menu-icon { font-size: 22px; }
-  .menu-text { flex: 1; }
-  .menu-text strong { display: block; font-size: 15px; font-weight: 700; }
-  .menu-text span { font-size: 12px; color: var(--muted); }
-  .menu-arrow { font-size: 16px; color: var(--muted); }
-  .menu-badge {
-    background: var(--accent2);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 800;
-    padding: 2px 8px;
-    border-radius: 10px;
-  }
-
-  /* ===== DEPOSIT SCREEN ===== */
-  .deposit-wrap { padding: 20px; }
-  .amount-grid {
-    display: grid; grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px; margin-bottom: 20px;
-  }
-  .amount-pill {
-    padding: 14px 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  .amount-pill:active { transform: scale(0.96); }
-  .amount-pill.selected { border-color: var(--accent); background: rgba(232,166,48,0.08); }
-  .amount-pill .ap-amount { font-size: 16px; font-weight: 800; color: var(--accent); }
-  .amount-pill .ap-bonus { font-size: 11px; color: var(--green); font-weight: 600; margin-top: 2px; }
-
-  .method-grid {
-    display: grid; grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px; margin-bottom: 24px;
-  }
-  .method-pill {
-    padding: 14px 8px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  .method-pill:active { transform: scale(0.96); }
-  .method-pill.selected { border-color: var(--blue); background: rgba(78,158,255,0.08); }
-  .method-icon { font-size: 24px; display: block; margin-bottom: 4px; }
-  .method-name { font-size: 11px; font-weight: 700; color: var(--muted); }
-
-  /* Animations */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .case-card { animation: fadeUp 0.3s ease backwards; }
-  .case-card:nth-child(1) { animation-delay: 0.05s; }
-  .case-card:nth-child(2) { animation-delay: 0.1s; }
-  .case-card:nth-child(3) { animation-delay: 0.15s; }
-  .case-card:nth-child(4) { animation-delay: 0.2s; }
-  .case-card:nth-child(5) { animation-delay: 0.25s; }
-
-  .toast {
-    position: fixed;
-    bottom: 100px; left: 50%; transform: translateX(-50%);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 600;
-    z-index: 1000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-    white-space: nowrap;
-  }
-  .toast.show { opacity: 1; }
+  /* utils */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--surface2); border:1px solid var(--border); padding:10px 20px; border-radius:20px; font-size:14px; font-weight:600; z-index:1000; opacity:0; pointer-events:none; transition:opacity .3s; white-space:nowrap; }
+  .toast.show { opacity:1; }
 </style>
 </head>
 <body>
 
-<!-- ===== HOME SCREEN ===== -->
-<div id="screen-home" class="screen active">
+<!-- ════════════════════════════════════
+     STEAM AUTH SCREEN
+════════════════════════════════════ -->
+<div id="screen-auth" class="screen active">
+  <div style="font-size:60px;margin-bottom:0">
+    <div class="auth-glow">🎯</div>
+  </div>
+  <div class="auth-logo">VAULT</div>
+  <div class="auth-sub">Лут-боксы CS2 прямо в Telegram.<br>Авторизуйся через Steam — и в бой.</div>
+
+  <div class="steam-btn" onclick="doSteamAuth()">
+    <span class="steam-icon">🎮</span>
+    <div class="steam-text">
+      <strong>Войти через Steam</strong>
+      <span>Быстро и безопасно · Steam OpenID</span>
+    </div>
+  </div>
+
+  <div class="auth-note">
+    Авторизуясь, ты принимаешь <a href="#">условия использования</a>.<br>
+    Мы не получаем доступ к твоему паролю Steam.<br>
+    Аккаунт создаётся автоматически при первом входе.
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     HOME SCREEN
+════════════════════════════════════ -->
+<div id="screen-home" class="screen">
   <div class="header">
     <div class="logo">VAULT</div>
     <div class="balance-pill" onclick="showDeposit()">
-      <span class="icon">⭐</span>
+      <span>⭐</span>
       <span class="amount" id="balance">2,450</span>
       <div class="plus-btn">+</div>
     </div>
   </div>
-
   <div class="scroll-area">
-    <!-- Hero -->
     <div class="hero">
       <div class="hero-tag">⚡ Горячее предложение</div>
       <h2>Открой кейс —<br>получи <span>легендарку</span></h2>
       <p>Ежедневный бесплатный кейс ждёт тебя</p>
       <div class="hero-btn" onclick="showCase('free')">🎁 Открыть бесплатно</div>
     </div>
-
-    <!-- Cases -->
     <div class="section">
       <div class="section-head">
         <div class="section-title">🔥 Популярные</div>
@@ -841,10 +541,8 @@
             <div class="case-name">Premier Case</div>
             <div class="case-sub">14 скинов · до AK-47 Asiimov</div>
             <div class="stars-row">
-              <div class="star-dot" style="background:#555"></div>
-              <div class="star-dot" style="background:#555"></div>
-              <div class="star-dot" style="background:var(--blue)"></div>
-              <div class="star-dot" style="background:var(--rare)"></div>
+              <div class="star-dot" style="background:#555"></div><div class="star-dot" style="background:#555"></div>
+              <div class="star-dot" style="background:var(--blue)"></div><div class="star-dot" style="background:var(--rare)"></div>
               <div class="star-dot" style="background:var(--legendary)"></div>
             </div>
             <div class="case-price-row" style="margin-top:10px">
@@ -853,134 +551,72 @@
             </div>
           </div>
         </div>
-
         <div class="case-card" onclick="showCase('gamma')">
           <div class="case-badge badge-new">NEW</div>
           <div class="case-img-wrap"><div class="case-emoji">🌊</div></div>
           <div class="case-info">
             <div class="case-name">Gamma 2 Case</div>
             <div class="case-sub">12 скинов</div>
-            <div class="case-price-row">
-              <div class="case-price">⭐ 620</div>
-              <div class="open-btn">↗</div>
-            </div>
+            <div class="case-price-row"><div class="case-price">⭐ 620</div><div class="open-btn">↗</div></div>
           </div>
         </div>
-
         <div class="case-card" onclick="showCase('danger')">
           <div class="case-badge badge-top">TOP</div>
           <div class="case-img-wrap"><div class="case-emoji">💎</div></div>
           <div class="case-info">
             <div class="case-name">Danger Zone</div>
             <div class="case-sub">16 скинов</div>
-            <div class="case-price-row">
-              <div class="case-price">⭐ 1,200</div>
-              <div class="open-btn">↗</div>
-            </div>
+            <div class="case-price-row"><div class="case-price">⭐ 1,200</div><div class="open-btn">↗</div></div>
           </div>
         </div>
-
         <div class="case-card" onclick="showCase('clutch')">
           <div class="case-img-wrap"><div class="case-emoji">⚔️</div></div>
           <div class="case-info">
             <div class="case-name">Clutch Case</div>
             <div class="case-sub">18 скинов</div>
-            <div class="case-price-row">
-              <div class="case-price">⭐ 430</div>
-              <div class="open-btn">↗</div>
-            </div>
+            <div class="case-price-row"><div class="case-price">⭐ 430</div><div class="open-btn">↗</div></div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Recent drops -->
     <div class="section" style="margin-top:4px">
-      <div class="section-head">
-        <div class="section-title">🏆 Последние дропы</div>
-      </div>
-      <div class="drops-scroll" id="drops-feed">
-        <div class="drop-card">
-          <div class="drop-bar bar-legendary"></div>
-          <span class="drop-skin-emoji">🔫</span>
-          <div class="drop-name">AK-47 | Fire Serpent</div>
-          <div class="drop-price legendary">$420</div>
-          <div class="drop-user">@vlad_k</div>
-        </div>
-        <div class="drop-card">
-          <div class="drop-bar bar-rare"></div>
-          <span class="drop-skin-emoji">🗡️</span>
-          <div class="drop-name">M4A1-S Hyper Beast</div>
-          <div class="drop-price rare">$85</div>
-          <div class="drop-user">@pro_1337</div>
-        </div>
-        <div class="drop-card">
-          <div class="drop-bar bar-uncommon"></div>
-          <span class="drop-skin-emoji">🎯</span>
-          <div class="drop-name">AWP | Atheris</div>
-          <div class="drop-price uncommon">$22</div>
-          <div class="drop-user">@ksusha</div>
-        </div>
-        <div class="drop-card">
-          <div class="drop-bar bar-legendary"></div>
-          <span class="drop-skin-emoji">🔪</span>
-          <div class="drop-name">Karambit | Tiger</div>
-          <div class="drop-price legendary">$890</div>
-          <div class="drop-user">@max_cs</div>
-        </div>
-        <div class="drop-card">
-          <div class="drop-bar bar-common"></div>
-          <span class="drop-skin-emoji">💣</span>
-          <div class="drop-name">USP-S | Cortex</div>
-          <div class="drop-price common">$8</div>
-          <div class="drop-user">@n00b</div>
-        </div>
+      <div class="section-head"><div class="section-title">🏆 Последние дропы</div></div>
+      <div class="drops-scroll">
+        <div class="drop-card"><div class="drop-bar bar-legendary"></div><span class="drop-skin-emoji">🔫</span><div class="drop-name">AK-47 Fire Serpent</div><div class="drop-price legendary">$420</div><div class="drop-user">@vlad_k</div></div>
+        <div class="drop-card"><div class="drop-bar bar-rare"></div><span class="drop-skin-emoji">🗡️</span><div class="drop-name">M4A1-S Hyper Beast</div><div class="drop-price rare">$85</div><div class="drop-user">@pro_1337</div></div>
+        <div class="drop-card"><div class="drop-bar bar-uncommon"></div><span class="drop-skin-emoji">🎯</span><div class="drop-name">AWP | Atheris</div><div class="drop-price uncommon">$22</div><div class="drop-user">@ksusha</div></div>
+        <div class="drop-card"><div class="drop-bar bar-legendary"></div><span class="drop-skin-emoji">🔪</span><div class="drop-name">Karambit Tiger</div><div class="drop-price legendary">$890</div><div class="drop-user">@max_cs</div></div>
+        <div class="drop-card"><div class="drop-bar bar-common"></div><span class="drop-skin-emoji">💣</span><div class="drop-name">USP-S Cortex</div><div class="drop-price common">$8</div><div class="drop-user">@n00b</div></div>
       </div>
     </div>
-
     <div style="height:16px"></div>
   </div>
-
   <nav class="bottom-nav">
-    <div class="nav-item active" onclick="setNav(0)">
-      <span class="nav-icon">🏠</span>
-      <span class="nav-label">Главная</span>
-    </div>
-    <div class="nav-item" onclick="setNav(1)">
-      <span class="nav-icon">⚔️</span>
-      <span class="nav-label">Батлы</span>
-    </div>
-    <div class="nav-item" onclick="goInventory()">
-      <span class="nav-icon">🎒</span>
-      <span class="nav-label">Инвентарь</span>
-    </div>
-    <div class="nav-item" onclick="goProfile()">
-      <span class="nav-icon">👤</span>
-      <span class="nav-label">Профиль</span>
-    </div>
+    <div class="nav-item active" id="nav-home" onclick="goHome()"><span class="nav-icon">🏠</span><span class="nav-label">Главная</span></div>
+    <div class="nav-item" id="nav-upgrade" onclick="goUpgrader()"><span class="nav-icon">⬆️</span><span class="nav-label">Апгрейд</span></div>
+    <div class="nav-item" id="nav-inv" onclick="goInventory()"><span class="nav-icon">🎒</span><span class="nav-label">Инвентарь</span></div>
+    <div class="nav-item" id="nav-prof" onclick="goProfile()"><span class="nav-icon">👤</span><span class="nav-label">Профиль</span></div>
   </nav>
 </div>
 
-<!-- ===== CASE OPEN SCREEN ===== -->
+<!-- ════════════════════════════════════
+     CASE OPEN SCREEN
+════════════════════════════════════ -->
 <div id="screen-open" class="screen">
   <div class="open-header">
     <div class="back-btn" onclick="goHome()">←</div>
     <h2 id="open-case-name">Premier Case</h2>
   </div>
-
-  <div class="scroll-area" style="padding-bottom: 0">
+  <div class="scroll-area" style="padding-bottom:0">
     <div class="case-showcase">
       <div class="case-big-emoji" id="big-case-emoji" onclick="triggerOpen()">🎯</div>
       <div class="case-big-name" id="big-case-title">Premier Case</div>
-      <div class="case-big-sub">Нажми, чтобы открыть</div>
+      <div class="case-big-sub">Нажми на кейс или кнопку ниже</div>
     </div>
-
-    <!-- Roulette -->
     <div class="roulette-wrap" id="roulette-wrap">
       <div class="roulette-pointer"></div>
       <div class="roulette-track" id="roulette-track"></div>
     </div>
-
     <div class="open-actions">
       <div class="multi-open">
         <div class="multi-btn active" onclick="setMulti(this,1)">×1</div>
@@ -991,10 +627,9 @@
       <button class="btn-primary" id="open-btn" onclick="triggerOpen()">🎰 Открыть за ⭐ <span id="open-price">850</span></button>
       <div class="btn-secondary" onclick="goHome()">← Назад к кейсам</div>
     </div>
-
     <div class="case-contents">
       <div class="contents-title">Содержимое кейса</div>
-      <div class="contents-grid" id="contents-grid">
+      <div class="contents-grid">
         <div class="content-item c"><span class="ci-emoji">🔫</span><div class="ci-name">USP Cortex</div><div class="ci-chance">48%</div></div>
         <div class="content-item c"><span class="ci-emoji">🎯</span><div class="ci-name">P2000 Pulse</div><div class="ci-chance">22%</div></div>
         <div class="content-item u"><span class="ci-emoji">💣</span><div class="ci-name">M4A4 Spider</div><div class="ci-chance">14%</div></div>
@@ -1008,58 +643,133 @@
   </div>
 </div>
 
-<!-- ===== INVENTORY SCREEN ===== -->
+<!-- ════════════════════════════════════
+     UPGRADER SCREEN
+════════════════════════════════════ -->
+<div id="screen-upgrader" class="screen">
+  <div class="header">
+    <div class="logo" style="font-size:18px">⬆️ Апгрейдер</div>
+    <div class="balance-pill" onclick="showDeposit()">
+      <span>⭐</span><span class="amount" id="balance-upg">2,450</span>
+      <div class="plus-btn">+</div>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div class="upgrader-wrap">
+      <div class="upgrader-sub">Поставь свой скин → выбери цель → испытай удачу</div>
+
+      <div class="upgrade-arena">
+        <div class="upgrade-slots">
+          <!-- YOUR SKIN -->
+          <div style="flex:1">
+            <div class="slot-label">Твой скин</div>
+            <div class="upgrade-slot" id="slot-mine" onclick="openPicker('mine')">
+              <span class="slot-empty-icon">🎒</span>
+              <span class="slot-empty-text">Выбрать из инвентаря</span>
+            </div>
+          </div>
+
+          <div class="upgrade-arrow">→</div>
+
+          <!-- TARGET SKIN -->
+          <div style="flex:1">
+            <div class="slot-label">Цель</div>
+            <div class="upgrade-slot" id="slot-target" onclick="openPicker('target')">
+              <span class="slot-empty-icon">🏆</span>
+              <span class="slot-empty-text">Выбрать цель</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chance wheel -->
+        <div class="chance-display">
+          <div class="chance-wheel-wrap">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle class="chance-track" cx="60" cy="60" r="50"/>
+              <circle class="chance-fill" id="chance-circle" cx="60" cy="60" r="50"
+                stroke="#3ddc84"
+                stroke-dasharray="0 314"
+                stroke-dashoffset="0"/>
+            </svg>
+            <div class="chance-center">
+              <div class="chance-pct" id="chance-pct">—</div>
+              <div class="chance-lbl">шанс</div>
+            </div>
+          </div>
+          <div class="chance-info" id="chance-info">Выбери оба скина для расчёта шанса</div>
+        </div>
+
+        <div class="upgrade-btn-wrap">
+          <button class="upgrade-go" id="upgrade-go-btn" onclick="doUpgrade()" disabled>⬆️ Апгрейд</button>
+          <div class="upgrade-clear" onclick="clearUpgrade()">✕ Сброс</div>
+        </div>
+      </div>
+
+      <!-- How it works -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:0">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Как работает?</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--muted);line-height:1.5">
+          <div>📌 <span style="color:var(--text)">Шанс = цена твоего / цена цели × 100%</span></div>
+          <div>📌 Например: $20 → $100 = <span style="color:var(--green)">20% шанс</span></div>
+          <div>📌 При проигрыше твой скин <span style="color:var(--accent2)">сгорает</span></div>
+          <div>📌 При выигрыше получаешь <span style="color:var(--legendary)">скин цели</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="goHome()"><span class="nav-icon">🏠</span><span class="nav-label">Главная</span></div>
+    <div class="nav-item active"><span class="nav-icon">⬆️</span><span class="nav-label">Апгрейд</span></div>
+    <div class="nav-item" onclick="goInventory()"><span class="nav-icon">🎒</span><span class="nav-label">Инвентарь</span></div>
+    <div class="nav-item" onclick="goProfile()"><span class="nav-icon">👤</span><span class="nav-label">Профиль</span></div>
+  </nav>
+</div>
+
+<!-- ════════════════════════════════════
+     INVENTORY
+════════════════════════════════════ -->
 <div id="screen-inventory" class="screen">
   <div class="header">
     <div class="logo" style="font-size:18px">🎒 Инвентарь</div>
     <div class="balance-pill" onclick="showDeposit()">
-      <span class="icon">⭐</span>
-      <span class="amount" id="balance2">2,450</span>
+      <span>⭐</span><span class="amount" id="balance2">2,450</span>
       <div class="plus-btn">+</div>
     </div>
   </div>
   <div class="scroll-area">
     <div class="inv-header">
       <div class="inv-stats">
-        <div class="inv-stat">
-          <div class="inv-stat-val" id="inv-count">12</div>
-          <div class="inv-stat-key">предметов</div>
-        </div>
-        <div class="inv-stat">
-          <div class="inv-stat-val">$247</div>
-          <div class="inv-stat-key">стоимость</div>
-        </div>
-        <div class="inv-stat">
-          <div class="inv-stat-val">3</div>
-          <div class="inv-stat-key">редких</div>
-        </div>
+        <div class="inv-stat"><div class="inv-stat-val" id="inv-count">6</div><div class="inv-stat-key">предметов</div></div>
+        <div class="inv-stat"><div class="inv-stat-val" id="inv-total">$1,029</div><div class="inv-stat-key">стоимость</div></div>
+        <div class="inv-stat"><div class="inv-stat-val">2</div><div class="inv-stat-key">редких</div></div>
       </div>
-      <div class="sell-all-btn" onclick="toast('Все предметы проданы за $247! 💸')">💸 Продать всё за $247</div>
+      <div class="sell-all-btn" onclick="sellAll()">💸 Продать всё</div>
     </div>
     <div class="inventory-grid" id="inventory-grid">
-      <div class="inv-card il"><span class="inv-emoji">🔪</span><div class="inv-name">Karambit Tiger Tooth</div><div class="inv-price">$890</div></div>
-      <div class="inv-card ir"><span class="inv-emoji">🔥</span><div class="inv-name">AK-47 Fire Serpent</div><div class="inv-price">$85</div></div>
-      <div class="inv-card iu"><span class="inv-emoji">🌊</span><div class="inv-name">M4A1-S Hyper Beast</div><div class="inv-price">$22</div></div>
-      <div class="inv-card ic"><span class="inv-emoji">🎯</span><div class="inv-name">AWP Atheris FN</div><div class="inv-price">$8</div></div>
-      <div class="inv-card ic"><span class="inv-emoji">🔫</span><div class="inv-name">USP-S Cortex</div><div class="inv-price">$6</div></div>
-      <div class="inv-card iu"><span class="inv-emoji">⚡</span><div class="inv-name">P250 Asiimov</div><div class="inv-price">$18</div></div>
+      <div class="inv-card il" data-price="890" data-name="Karambit Tiger Tooth" data-emoji="🔪" data-r="l"><span class="inv-emoji">🔪</span><div class="inv-name">Karambit Tiger Tooth</div><div class="inv-price">$890</div></div>
+      <div class="inv-card ir" data-price="85" data-name="AK-47 Fire Serpent" data-emoji="🔥" data-r="r"><span class="inv-emoji">🔥</span><div class="inv-name">AK-47 Fire Serpent</div><div class="inv-price">$85</div></div>
+      <div class="inv-card iu" data-price="22" data-name="M4A1-S Hyper Beast" data-emoji="🌊" data-r="u"><span class="inv-emoji">🌊</span><div class="inv-name">M4A1-S Hyper Beast</div><div class="inv-price">$22</div></div>
+      <div class="inv-card ic" data-price="8" data-name="AWP Atheris FN" data-emoji="🎯" data-r="c"><span class="inv-emoji">🎯</span><div class="inv-name">AWP Atheris FN</div><div class="inv-price">$8</div></div>
+      <div class="inv-card ic" data-price="6" data-name="USP-S Cortex" data-emoji="🔫" data-r="c"><span class="inv-emoji">🔫</span><div class="inv-name">USP-S Cortex</div><div class="inv-price">$6</div></div>
+      <div class="inv-card iu" data-price="18" data-name="P250 Asiimov" data-emoji="⚡" data-r="u"><span class="inv-emoji">⚡</span><div class="inv-name">P250 Asiimov</div><div class="inv-price">$18</div></div>
     </div>
   </div>
   <nav class="bottom-nav">
     <div class="nav-item" onclick="goHome()"><span class="nav-icon">🏠</span><span class="nav-label">Главная</span></div>
-    <div class="nav-item" onclick="setNav(1)"><span class="nav-icon">⚔️</span><span class="nav-label">Батлы</span></div>
+    <div class="nav-item" onclick="goUpgrader()"><span class="nav-icon">⬆️</span><span class="nav-label">Апгрейд</span></div>
     <div class="nav-item active"><span class="nav-icon">🎒</span><span class="nav-label">Инвентарь</span></div>
     <div class="nav-item" onclick="goProfile()"><span class="nav-icon">👤</span><span class="nav-label">Профиль</span></div>
   </nav>
 </div>
 
-<!-- ===== PROFILE SCREEN ===== -->
+<!-- ════════════════════════════════════
+     PROFILE
+════════════════════════════════════ -->
 <div id="screen-profile" class="screen">
   <div class="header">
     <div class="logo" style="font-size:18px">👤 Профиль</div>
     <div class="balance-pill" onclick="showDeposit()">
-      <span class="icon">⭐</span>
-      <span class="amount">2,450</span>
+      <span>⭐</span><span class="amount">2,450</span>
       <div class="plus-btn">+</div>
     </div>
   </div>
@@ -1067,7 +777,7 @@
     <div class="profile-wrap">
       <div class="profile-top">
         <div class="avatar">🦊</div>
-        <div>
+        <div style="flex:1">
           <div class="profile-name">Vladislav K.</div>
           <div class="profile-level">
             <div class="level-badge">LVL 23</div>
@@ -1077,64 +787,44 @@
         </div>
       </div>
 
+      <!-- Steam connected badge -->
+      <div class="steam-connected">
+        <span class="sc-icon">🎮</span>
+        <div class="sc-text">
+          <strong>Steam подключён</strong>
+          <span>steamcommunity.com/id/vlad_k</span>
+        </div>
+        <span class="sc-check">✓</span>
+      </div>
+
       <div class="stat-grid">
-        <div class="stat-card highlight">
-          <div class="stat-card-val">247</div>
-          <div class="stat-card-key">Кейсов открыто</div>
-        </div>
-        <div class="stat-card highlight">
-          <div class="stat-card-val">$1,840</div>
-          <div class="stat-card-key">Всего выиграно</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-val">12</div>
-          <div class="stat-card-key">Рефералов</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-val">3</div>
-          <div class="stat-card-key">Легендарок</div>
-        </div>
+        <div class="stat-card highlight"><div class="stat-card-val">247</div><div class="stat-card-key">Кейсов открыто</div></div>
+        <div class="stat-card highlight"><div class="stat-card-val">$1,840</div><div class="stat-card-key">Всего выиграно</div></div>
+        <div class="stat-card"><div class="stat-card-val">12</div><div class="stat-card-key">Рефералов</div></div>
+        <div class="stat-card"><div class="stat-card-val">3</div><div class="stat-card-key">Легендарок</div></div>
       </div>
 
       <div class="menu-list">
-        <div class="menu-item" onclick="toast('📋 История открытий')">
-          <span class="menu-icon">📋</span>
-          <div class="menu-text"><strong>История открытий</strong><span>247 кейсов</span></div>
-          <span class="menu-arrow">›</span>
-        </div>
-        <div class="menu-item" onclick="toast('🔗 Ссылка скопирована!')">
-          <span class="menu-icon">🔗</span>
-          <div class="menu-text"><strong>Реферальная программа</strong><span>Зови друзей — получай Stars</span></div>
-          <span class="menu-badge">+200⭐</span>
-        </div>
-        <div class="menu-item" onclick="showDeposit()">
-          <span class="menu-icon">💳</span>
-          <div class="menu-text"><strong>Пополнить баланс</strong><span>Карта, Stars, Крипто</span></div>
-          <span class="menu-arrow">›</span>
-        </div>
-        <div class="menu-item" onclick="toast('📤 Вывод в Steam')">
-          <span class="menu-icon">📤</span>
-          <div class="menu-text"><strong>Вывести скины</strong><span>Отправить в Steam</span></div>
-          <span class="menu-arrow">›</span>
-        </div>
-        <div class="menu-item" onclick="toast('🛡️ Provably Fair — всё честно!')">
-          <span class="menu-icon">🛡️</span>
-          <div class="menu-text"><strong>Provably Fair</strong><span>Проверить честность</span></div>
-          <span class="menu-arrow">›</span>
-        </div>
+        <div class="menu-item" onclick="toast('📋 История открытий')"><span class="menu-icon">📋</span><div class="menu-text"><strong>История открытий</strong><span>247 кейсов</span></div><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="toast('🔗 Ссылка скопирована!')"><span class="menu-icon">🔗</span><div class="menu-text"><strong>Реферальная программа</strong><span>Зови друзей — получай Stars</span></div><span class="menu-badge">+200⭐</span></div>
+        <div class="menu-item" onclick="showDeposit()"><span class="menu-icon">💳</span><div class="menu-text"><strong>Пополнить баланс</strong><span>Stars, Крипто, Карта</span></div><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="toast('📤 Вывод в Steam')"><span class="menu-icon">📤</span><div class="menu-text"><strong>Вывести скины</strong><span>Отправить в Steam</span></div><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="toast('🛡️ Provably Fair — всё честно!')"><span class="menu-icon">🛡️</span><div class="menu-text"><strong>Provably Fair</strong><span>Проверить честность</span></div><span class="menu-arrow">›</span></div>
       </div>
       <div style="height:16px"></div>
     </div>
   </div>
   <nav class="bottom-nav">
     <div class="nav-item" onclick="goHome()"><span class="nav-icon">🏠</span><span class="nav-label">Главная</span></div>
-    <div class="nav-item" onclick="setNav(1)"><span class="nav-icon">⚔️</span><span class="nav-label">Батлы</span></div>
+    <div class="nav-item" onclick="goUpgrader()"><span class="nav-icon">⬆️</span><span class="nav-label">Апгрейд</span></div>
     <div class="nav-item" onclick="goInventory()"><span class="nav-icon">🎒</span><span class="nav-label">Инвентарь</span></div>
     <div class="nav-item active"><span class="nav-icon">👤</span><span class="nav-label">Профиль</span></div>
   </nav>
 </div>
 
-<!-- ===== DEPOSIT SCREEN ===== -->
+<!-- ════════════════════════════════════
+     DEPOSIT (Telegram Stars)
+════════════════════════════════════ -->
 <div id="screen-deposit" class="screen">
   <div class="open-header">
     <div class="back-btn" id="deposit-back">←</div>
@@ -1142,31 +832,73 @@
   </div>
   <div class="scroll-area">
     <div class="deposit-wrap">
-      <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Выбери сумму и способ оплаты</p>
-      
-      <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Сумма</div>
+      <!-- Stars highlight -->
+      <div class="stars-highlight">
+        <span class="sh-icon">⭐</span>
+        <h3>Telegram Stars</h3>
+        <p>Мгновенное пополнение прямо в Telegram.<br>Никаких комиссий за конвертацию.</p>
+        <div class="sh-badge">Рекомендуем</div>
+      </div>
+
+      <div class="section-label">Выбери количество Stars</div>
       <div class="amount-grid">
-        <div class="amount-pill" onclick="selectAmount(this,'100')"><div class="ap-amount">⭐ 100</div><div class="ap-bonus">≈ $1</div></div>
-        <div class="amount-pill selected" onclick="selectAmount(this,'500')"><div class="ap-amount">⭐ 500</div><div class="ap-bonus">≈ $5</div></div>
-        <div class="amount-pill" onclick="selectAmount(this,'1000')"><div class="ap-amount">⭐ 1000</div><div class="ap-bonus">+10% бонус</div></div>
-        <div class="amount-pill" onclick="selectAmount(this,'2500')"><div class="ap-amount">⭐ 2500</div><div class="ap-bonus">+15% бонус</div></div>
-        <div class="amount-pill" onclick="selectAmount(this,'5000')"><div class="ap-amount">⭐ 5000</div><div class="ap-bonus">+20% бонус</div></div>
-        <div class="amount-pill" onclick="selectAmount(this,'10000')"><div class="ap-amount">⭐ 10K</div><div class="ap-bonus">+25% бонус</div></div>
+        <div class="amount-pill" onclick="selectAmount(this,100)"><div class="ap-amount">⭐ 100</div><div class="ap-bonus">≈ $1</div></div>
+        <div class="amount-pill selected" onclick="selectAmount(this,500)"><div class="ap-amount">⭐ 500</div><div class="ap-bonus">≈ $5</div></div>
+        <div class="amount-pill" onclick="selectAmount(this,1000)"><div class="ap-amount">⭐ 1,000</div><div class="ap-bonus">+10% бонус</div></div>
+        <div class="amount-pill" onclick="selectAmount(this,2500)"><div class="ap-amount">⭐ 2,500</div><div class="ap-bonus">+15% бонус</div></div>
+        <div class="amount-pill" onclick="selectAmount(this,5000)"><div class="ap-amount">⭐ 5,000</div><div class="ap-bonus">+20% бонус</div></div>
+        <div class="amount-pill" onclick="selectAmount(this,10000)"><div class="ap-amount">⭐ 10K</div><div class="ap-bonus">+25% бонус</div></div>
       </div>
 
-      <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Способ оплаты</div>
+      <div class="section-label">Также доступно</div>
       <div class="method-grid">
-        <div class="method-pill selected" onclick="selectMethod(this)"><span class="method-icon">⭐</span><div class="method-name">Telegram Stars</div></div>
-        <div class="method-pill" onclick="selectMethod(this)"><span class="method-icon">₿</span><div class="method-name">Крипто</div></div>
-        <div class="method-pill" onclick="selectMethod(this)"><span class="method-icon">💳</span><div class="method-name">Карта</div></div>
+        <div class="method-pill" onclick="selectMethod(this,'crypto')"><span class="method-icon">₿</span><div class="method-name">Крипто</div></div>
+        <div class="method-pill" onclick="selectMethod(this,'card')"><span class="method-icon">💳</span><div class="method-name">Карта</div></div>
+        <div class="method-pill" onclick="selectMethod(this,'qiwi')"><span class="method-icon">💵</span><div class="method-name">СБП / Qiwi</div></div>
       </div>
 
-      <button class="btn-primary" onclick="doDeposit()">⚡ Пополнить ⭐ 500</button>
+      <button class="stars-pay-btn" id="stars-pay-btn" onclick="payWithStars()">
+        <span>⭐</span> Оплатить 500 Stars в Telegram
+      </button>
+      <div class="pay-note">Нажимая кнопку, откроется нативный<br>платёжный диалог Telegram</div>
     </div>
   </div>
 </div>
 
-<!-- WIN OVERLAY -->
+<!-- ════════════════════════════════════
+     MODALS / OVERLAYS
+════════════════════════════════════ -->
+
+<!-- Skin Picker -->
+<div class="modal-overlay" id="picker-modal" onclick="closePicker(event)">
+  <div class="modal-sheet" onclick="e=>e.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="picker-title">Выбери скин</div>
+    <div class="picker-grid" id="picker-grid"></div>
+  </div>
+</div>
+
+<!-- Upgrade Spinning -->
+<div class="upgrade-spin-overlay" id="upgrade-spin">
+  <div class="spin-ring">
+    <div class="spin-inner" id="spin-emoji">🎯</div>
+  </div>
+  <div class="spin-text">Определяем результат...</div>
+</div>
+
+<!-- Upgrade Result -->
+<div class="upgrade-result" id="upgrade-result">
+  <div class="result-label" id="result-label">WIN</div>
+  <div class="result-emoji" id="result-emoji">🔥</div>
+  <div class="result-name" id="result-name">AK-47 | Fire Serpent</div>
+  <div class="result-price" id="result-price">$420</div>
+  <div class="result-actions">
+    <div class="result-again" onclick="closeResult(true)">🔄 Ещё раз</div>
+    <div class="result-close" onclick="closeResult(false)">🎒 В инвентарь</div>
+  </div>
+</div>
+
+<!-- Case Win -->
 <div class="win-overlay" id="win-overlay">
   <div class="win-glow" id="win-glow"></div>
   <div class="win-emoji-big" id="win-emoji">🔥</div>
@@ -1179,209 +911,400 @@
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- ════════════════════════════════════  SCRIPT  ════════════════════════════════════ -->
 <script>
+// ── STATE ──
 let balance = 2450;
-let inventory = [];
 let currentCase = 'premier';
 let multiCount = 1;
-let casePrices = { premier: 850, gamma: 620, danger: 1200, clutch: 430, free: 0 };
-let currentScreen = 'home';
 let depositBack = 'home';
+let selectedDepositAmount = 500;
+let selectedMethod = 'stars';
 
+let upgradeMineSkin = null;
+let upgradeTargetSkin = null;
+let pickerFor = null; // 'mine' | 'target'
+
+const casePrices = { premier:850, gamma:620, danger:1200, clutch:430, free:0 };
+
+// Skin pool shared across inventory, case opening, upgrader
 const skinPool = [
-  { emoji: '🔫', name: 'USP-S | Cortex', price: '$6', rarity: 'common', r: 'c' },
-  { emoji: '🎯', name: 'P2000 | Pulse', price: '$5', rarity: 'common', r: 'c' },
-  { emoji: '💣', name: 'P250 | Asiimov', price: '$18', rarity: 'uncommon', r: 'u' },
-  { emoji: '⚡', name: 'AWP | Atheris', price: '$22', rarity: 'uncommon', r: 'u' },
-  { emoji: '🌊', name: 'M4A4 | Spider Lily', price: '$45', rarity: 'rare', r: 'r' },
-  { emoji: '🔧', name: 'M4A1-S | Hyper Beast', price: '$85', rarity: 'rare', r: 'r' },
-  { emoji: '🔥', name: 'AK-47 | Fire Serpent', price: '$420', rarity: 'legendary', r: 'l' },
-  { emoji: '🔪', name: 'Karambit | Tiger Tooth', price: '$890', rarity: 'legendary', r: 'l' },
+  { emoji:'🔫', name:'USP-S | Cortex',       price:6,   usd:'$6',   rarity:'common',    r:'c' },
+  { emoji:'🎯', name:'P2000 | Pulse',         price:5,   usd:'$5',   rarity:'common',    r:'c' },
+  { emoji:'💣', name:'P250 | Asiimov',        price:18,  usd:'$18',  rarity:'uncommon',  r:'u' },
+  { emoji:'⚡', name:'AWP | Atheris',         price:22,  usd:'$22',  rarity:'uncommon',  r:'u' },
+  { emoji:'🌊', name:'M4A4 | Spider Lily',    price:45,  usd:'$45',  rarity:'rare',      r:'r' },
+  { emoji:'🔧', name:'M4A1-S | Hyper Beast',  price:85,  usd:'$85',  rarity:'rare',      r:'r' },
+  { emoji:'🔥', name:'AK-47 | Fire Serpent',  price:420, usd:'$420', rarity:'legendary', r:'l' },
+  { emoji:'🔪', name:'Karambit | Tiger Tooth',price:890, usd:'$890', rarity:'legendary', r:'l' },
+];
+const targetPool = [
+  { emoji:'🌊', name:'M4A4 | Spider Lily',     price:45,  usd:'$45',   rarity:'rare',      r:'r' },
+  { emoji:'🔧', name:'M4A1-S | Hyper Beast',   price:85,  usd:'$85',   rarity:'rare',      r:'r' },
+  { emoji:'🔥', name:'AK-47 | Fire Serpent',   price:420, usd:'$420',  rarity:'legendary', r:'l' },
+  { emoji:'🔪', name:'Karambit | Tiger Tooth', price:890, usd:'$890',  rarity:'legendary', r:'l' },
+  { emoji:'💎', name:'Butterfly | Fade',        price:1200,usd:'$1,200',rarity:'legendary', r:'l' },
+  { emoji:'🗡️', name:'M9 Bayonet | Doppler',   price:650, usd:'$650',  rarity:'legendary', r:'l' },
 ];
 
-const rarityWeights = [48, 22, 14, 9, 4, 2, 0.7, 0.3];
-const rarityColors = { common: '#888', uncommon: '#4e9eff', rare: '#9d4edd', legendary: '#e8a630' };
+// Weighted random for case opens
+const rarityWeights = [48,22,14,9,4,2,0.7,0.3];
+const rarityColors  = { common:'#888', uncommon:'#4e9eff', rare:'#9d4edd', legendary:'#e8a630' };
 
 function weightedRandom() {
-  const total = rarityWeights.reduce((a, b) => a + b, 0);
-  let r = Math.random() * total;
-  for (let i = 0; i < rarityWeights.length; i++) {
-    r -= rarityWeights[i];
-    if (r <= 0) return skinPool[i];
-  }
+  const total = rarityWeights.reduce((a,b)=>a+b,0);
+  let r = Math.random()*total;
+  for(let i=0;i<rarityWeights.length;i++){r-=rarityWeights[i];if(r<=0)return skinPool[i];}
   return skinPool[0];
 }
 
+// ── SCREENS ──
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  // update nav active state
+  ['home','upgrade','inv','prof'].forEach(k => document.getElementById('nav-'+k)?.classList.remove('active'));
+  const map = {home:'nav-home',upgrader:'nav-upgrade',inventory:'nav-inv',profile:'nav-prof'};
+  if(map[id]) document.getElementById(map[id])?.classList.add('active');
 }
 
-function goHome() { showScreen('home'); currentScreen = 'home'; }
-function goInventory() { showScreen('inventory'); currentScreen = 'inventory'; }
-function goProfile() { showScreen('profile'); currentScreen = 'profile'; }
+function goHome()      { showScreen('home'); }
+function goUpgrader()  { showScreen('upgrader'); }
+function goInventory() { showScreen('inventory'); renderInventoryGrid(); }
+function goProfile()   { showScreen('profile'); }
 
+function doSteamAuth() {
+  // In production: window.location.href = '/auth/steam' (OpenID redirect)
+  // Here we simulate successful auth
+  toast('🎮 Выполняем вход через Steam...');
+  setTimeout(()=>{ toast('✅ Авторизован как Vladislav K.'); showScreen('home'); }, 1500);
+}
+
+// ── CASE OPENING ──
 function showCase(name) {
   currentCase = name;
-  const names = { premier: 'Premier Case', gamma: 'Gamma 2 Case', danger: 'Danger Zone', clutch: 'Clutch Case', free: '🎁 Бесплатный кейс' };
-  const emojis = { premier: '🎯', gamma: '🌊', danger: '💎', clutch: '⚔️', free: '🎁' };
-  const price = casePrices[name] || 850;
-  document.getElementById('open-case-name').textContent = names[name] || name;
-  document.getElementById('big-case-emoji').textContent = emojis[name] || '📦';
-  document.getElementById('big-case-title').textContent = names[name] || name;
-  document.getElementById('open-price').textContent = name === 'free' ? '0 (БЕСПЛАТНО)' : price;
+  const names  = {premier:'Premier Case', gamma:'Gamma 2 Case', danger:'Danger Zone', clutch:'Clutch Case', free:'🎁 Бесплатный кейс'};
+  const emojis = {premier:'🎯', gamma:'🌊', danger:'💎', clutch:'⚔️', free:'🎁'};
+  document.getElementById('open-case-name').textContent  = names[name]||name;
+  document.getElementById('big-case-emoji').textContent  = emojis[name]||'📦';
+  document.getElementById('big-case-title').textContent  = names[name]||name;
+  document.getElementById('open-price').textContent      = name==='free'?'0 (БЕСПЛАТНО)':casePrices[name];
   document.getElementById('roulette-wrap').style.display = 'none';
   showScreen('open');
 }
 
-function setMulti(el, count) {
+function setMulti(el,count) {
   multiCount = count;
-  document.querySelectorAll('.multi-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.multi-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
-  const price = casePrices[currentCase] || 850;
-  const total = price * count;
-  document.getElementById('open-price').textContent = currentCase === 'free' ? '0' : total;
+  const p = casePrices[currentCase]||850;
+  document.getElementById('open-price').textContent = currentCase==='free'?'0':(p*count);
 }
 
 function triggerOpen() {
-  const price = (casePrices[currentCase] || 850) * multiCount;
-  if (currentCase !== 'free' && balance < price) {
-    toast('❌ Недостаточно Stars! Пополни баланс');
-    return;
-  }
-  if (currentCase !== 'free') {
-    balance -= price;
-    updateBalance();
-  }
-
+  const price = (casePrices[currentCase]||850)*multiCount;
+  if(currentCase!=='free' && balance<price){ toast('❌ Недостаточно Stars! Пополни баланс'); return; }
+  if(currentCase!=='free'){ balance-=price; updateBalances(); }
   const btn = document.getElementById('open-btn');
   btn.disabled = true;
-
-  // Build roulette
   const wrap = document.getElementById('roulette-wrap');
   const track = document.getElementById('roulette-track');
-  wrap.style.display = 'block';
-  track.style.transition = 'none';
-  track.style.transform = 'translateX(0)';
-  track.innerHTML = '';
-
-  // 40 items, winning at index 30
-  const items = [];
-  for (let i = 0; i < 40; i++) {
-    items.push(weightedRandom());
-  }
-  const winner = weightedRandom();
-  items[30] = winner;
-
-  items.forEach(item => {
-    const el = document.createElement('div');
-    el.className = `roulette-item rarity-${item.rarity}`;
-    el.innerHTML = `${item.emoji}<span>${item.name.split('|')[0]}</span>`;
+  wrap.style.display='block'; track.style.transition='none'; track.style.transform='translateX(0)'; track.innerHTML='';
+  const items=[];
+  for(let i=0;i<40;i++) items.push(weightedRandom());
+  const winner=weightedRandom(); items[30]=winner;
+  items.forEach(item=>{
+    const el=document.createElement('div');
+    el.className=`roulette-item rarity-${item.rarity}`;
+    el.innerHTML=`${item.emoji}<span>${item.name.split('|')[0]}</span>`;
     track.appendChild(el);
   });
-
-  // Center offset: each item 110px, pointer at 50%
-  const containerWidth = wrap.offsetWidth;
-  const itemWidth = 110;
-  const targetOffset = 30 * itemWidth - (containerWidth / 2) + (itemWidth / 2);
-
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      track.style.transition = 'transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
-      track.style.transform = `translateX(-${targetOffset}px)`;
-    });
-  });
-
-  setTimeout(() => {
-    showWin(winner);
-    btn.disabled = false;
-    inventory.push(winner);
-    document.getElementById('inv-count').textContent = inventory.length + 6;
-  }, 5500);
+  const cw = wrap.offsetWidth;
+  const iw = 110;
+  const offset = 30*iw - (cw/2) + (iw/2);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    track.style.transition='transform 5s cubic-bezier(.17,.67,.12,.99)';
+    track.style.transform=`translateX(-${offset}px)`;
+  }));
+  setTimeout(()=>{
+    showWin(winner); btn.disabled=false;
+    addToInventory(winner);
+  },5500);
 }
 
 function showWin(item) {
-  const overlay = document.getElementById('win-overlay');
   document.getElementById('win-emoji').textContent = item.emoji;
-  document.getElementById('win-name').textContent = item.name;
-  document.getElementById('win-price').textContent = item.price;
-  
-  const rarityNames = { common: 'Обычный', uncommon: 'Необычный', rare: 'Редкий', legendary: '✨ Легендарный' };
+  document.getElementById('win-name').textContent  = item.name;
+  document.getElementById('win-price').textContent = item.usd;
+  const names = {common:'Обычный',uncommon:'Необычный',rare:'Редкий',legendary:'✨ Легендарный'};
   const rEl = document.getElementById('win-rarity');
-  rEl.textContent = rarityNames[item.rarity];
-  rEl.style.background = rarityColors[item.rarity] + '22';
-  rEl.style.color = rarityColors[item.rarity];
-  rEl.style.border = `1px solid ${rarityColors[item.rarity]}44`;
-
-  const glow = document.getElementById('win-glow');
-  glow.style.background = `radial-gradient(circle, ${rarityColors[item.rarity]}, transparent 70%)`;
-
-  overlay.classList.add('show');
+  rEl.textContent=names[item.rarity]; rEl.style.background=rarityColors[item.rarity]+'22';
+  rEl.style.color=rarityColors[item.rarity]; rEl.style.border=`1px solid ${rarityColors[item.rarity]}44`;
+  document.getElementById('win-glow').style.background=`radial-gradient(circle,${rarityColors[item.rarity]},transparent 70%)`;
+  document.getElementById('win-overlay').classList.add('show');
+  document.getElementById('win-overlay').dataset.item = JSON.stringify(item);
 }
-
 function sellItem() {
+  const item = JSON.parse(document.getElementById('win-overlay').dataset.item||'{}');
   document.getElementById('win-overlay').classList.remove('show');
-  const price = parseInt(document.getElementById('win-price').textContent.replace('$',''));
-  const stars = Math.round(price * 10);
-  balance += stars;
-  updateBalance();
-  toast(`💸 Продано! +⭐${stars} на баланс`);
+  const stars = Math.round((item.price||10)*10);
+  balance+=stars; updateBalances();
+  toast(`💸 Продано! +⭐${stars}`);
 }
-
 function keepItem() {
   document.getElementById('win-overlay').classList.remove('show');
-  toast('🎒 Скин добавлен в инвентарь!');
+  toast('🎒 Скин в инвентаре!');
 }
 
-function updateBalance() {
-  document.getElementById('balance').textContent = balance.toLocaleString('ru');
-  document.getElementById('balance2').textContent = balance.toLocaleString('ru');
+// ── INVENTORY ──
+let inventory = [
+  {emoji:'🔪',name:'Karambit Tiger Tooth',price:890,usd:'$890',r:'l',rarity:'legendary'},
+  {emoji:'🔥',name:'AK-47 Fire Serpent',  price:85, usd:'$85', r:'r',rarity:'rare'},
+  {emoji:'🌊',name:'M4A1-S Hyper Beast',  price:22, usd:'$22', r:'u',rarity:'uncommon'},
+  {emoji:'🎯',name:'AWP Atheris FN',      price:8,  usd:'$8',  r:'c',rarity:'common'},
+  {emoji:'🔫',name:'USP-S Cortex',        price:6,  usd:'$6',  r:'c',rarity:'common'},
+  {emoji:'⚡',name:'P250 Asiimov',        price:18, usd:'$18', r:'u',rarity:'uncommon'},
+];
+
+function addToInventory(item) {
+  inventory.push(item);
+  renderInventoryGrid();
 }
 
+function renderInventoryGrid() {
+  const grid = document.getElementById('inventory-grid');
+  grid.innerHTML = inventory.map((item,i)=>`
+    <div class="inv-card i${item.r}" data-idx="${i}">
+      <span class="inv-emoji">${item.emoji}</span>
+      <div class="inv-name">${item.name}</div>
+      <div class="inv-price">${item.usd||'$'+item.price}</div>
+    </div>`).join('');
+  document.getElementById('inv-count').textContent = inventory.length;
+  const total = inventory.reduce((s,i)=>s+i.price,0);
+  document.getElementById('inv-total').textContent = '$'+total.toLocaleString('en');
+}
+
+function sellAll() {
+  const total = inventory.reduce((s,i)=>s+i.price,0);
+  const stars  = Math.round(total*10);
+  balance+=stars; updateBalances();
+  inventory = []; renderInventoryGrid();
+  toast(`💸 Всё продано! +⭐${stars.toLocaleString('en')}`);
+}
+
+// ── UPGRADER ──
+function openPicker(forSlot) {
+  pickerFor = forSlot;
+  const modal = document.getElementById('picker-modal');
+  const grid  = document.getElementById('picker-grid');
+  const title = document.getElementById('picker-title');
+  const pool  = forSlot==='mine' ? inventory : targetPool;
+  title.textContent = forSlot==='mine' ? 'Выбери свой скин' : 'Выбери цель апгрейда';
+  if(forSlot==='mine' && pool.length===0){ toast('🎒 Инвентарь пуст! Открой кейс'); return; }
+  grid.innerHTML = pool.map((item,i)=>`
+    <div class="picker-item ${item.r}" onclick="selectSkin(${i})">
+      <span class="picker-emoji">${item.emoji}</span>
+      <div class="picker-name">${item.name}</div>
+      <div class="picker-price">${item.usd||'$'+item.price}</div>
+    </div>`).join('');
+  modal.classList.add('show');
+}
+
+function selectSkin(idx) {
+  const pool = pickerFor==='mine' ? inventory : targetPool;
+  const skin = pool[idx];
+  if(pickerFor==='mine') upgradeMineSkin=skin;
+  else upgradeTargetSkin=skin;
+  closePicker();
+  renderUpgradeSlots();
+  calcChance();
+}
+
+function closePicker(e) {
+  if(e && e.target!==document.getElementById('picker-modal')) return;
+  document.getElementById('picker-modal').classList.remove('show');
+}
+
+function renderUpgradeSlots() {
+  const slotMine   = document.getElementById('slot-mine');
+  const slotTarget = document.getElementById('slot-target');
+  if(upgradeMineSkin) {
+    const s=upgradeMineSkin;
+    slotMine.className=`upgrade-slot filled ${s.r}`;
+    slotMine.innerHTML=`<div class="slot-emoji">${s.emoji}</div><div class="slot-name">${s.name}</div><div class="slot-price" style="color:${rarityColors[s.rarity||'common']}">${s.usd||'$'+s.price}</div>`;
+    slotMine.onclick=()=>openPicker('mine');
+  } else {
+    slotMine.className='upgrade-slot';
+    slotMine.innerHTML='<span class="slot-empty-icon">🎒</span><span class="slot-empty-text">Выбрать из инвентаря</span>';
+    slotMine.onclick=()=>openPicker('mine');
+  }
+  if(upgradeTargetSkin) {
+    const s=upgradeTargetSkin;
+    slotTarget.className=`upgrade-slot filled ${s.r}`;
+    slotTarget.innerHTML=`<div class="slot-emoji">${s.emoji}</div><div class="slot-name">${s.name}</div><div class="slot-price" style="color:${rarityColors[s.rarity||'legendary']}">${s.usd||'$'+s.price}</div>`;
+    slotTarget.onclick=()=>openPicker('target');
+  } else {
+    slotTarget.className='upgrade-slot';
+    slotTarget.innerHTML='<span class="slot-empty-icon">🏆</span><span class="slot-empty-text">Выбрать цель</span>';
+    slotTarget.onclick=()=>openPicker('target');
+  }
+}
+
+function calcChance() {
+  const btn = document.getElementById('upgrade-go-btn');
+  const circle = document.getElementById('chance-circle');
+  const pct = document.getElementById('chance-pct');
+  const info = document.getElementById('chance-info');
+  const r = 50;
+  const circ = 2*Math.PI*r; // ≈314
+
+  if(!upgradeMineSkin||!upgradeTargetSkin){
+    btn.disabled=true;
+    pct.textContent='—'; pct.style.color='var(--muted)';
+    circle.style.strokeDasharray=`0 ${circ}`;
+    info.innerHTML='Выбери оба скина для расчёта шанса';
+    return;
+  }
+  if(upgradeTargetSkin.price<=upgradeMineSkin.price){
+    toast('⚠️ Цель должна стоить дороже твоего скина!');
+    upgradeTargetSkin=null; renderUpgradeSlots();
+    return;
+  }
+  const chance = Math.min(95, (upgradeMineSkin.price/upgradeTargetSkin.price)*100);
+  const dash   = (chance/100)*circ;
+  pct.textContent = chance.toFixed(1)+'%';
+  const color = chance>=50?'var(--green)':chance>=20?'var(--accent)':'var(--accent2)';
+  pct.style.color = color;
+  circle.style.stroke = color;
+  circle.style.strokeDasharray = `${dash} ${circ}`;
+  info.innerHTML = `<span>${upgradeMineSkin.usd||'$'+upgradeMineSkin.price}</span> → <span>${upgradeTargetSkin.usd||'$'+upgradeTargetSkin.price}</span> · шанс <span>${chance.toFixed(1)}%</span>`;
+  btn.disabled=false;
+}
+
+function clearUpgrade() {
+  upgradeMineSkin=null; upgradeTargetSkin=null;
+  renderUpgradeSlots(); calcChance();
+}
+
+function doUpgrade() {
+  if(!upgradeMineSkin||!upgradeTargetSkin) return;
+  const chance=(upgradeMineSkin.price/upgradeTargetSkin.price)*100;
+  document.getElementById('spin-emoji').textContent=upgradeTargetSkin.emoji;
+  document.getElementById('upgrade-spin').classList.add('show');
+  setTimeout(()=>{
+    document.getElementById('upgrade-spin').classList.remove('show');
+    const won = Math.random()*100<chance;
+    showUpgradeResult(won);
+  },2200);
+}
+
+function showUpgradeResult(won) {
+  const res = document.getElementById('upgrade-result');
+  const label = document.getElementById('result-label');
+  const emoji = document.getElementById('result-emoji');
+  const name  = document.getElementById('result-name');
+  const price = document.getElementById('result-price');
+  if(won){
+    label.textContent='✅ ВЫИГРЫШ!'; label.className='result-label win';
+    emoji.textContent=upgradeTargetSkin.emoji;
+    name.textContent=upgradeTargetSkin.name;
+    price.textContent=upgradeTargetSkin.usd||'$'+upgradeTargetSkin.price;
+    price.style.color='var(--green)';
+    addToInventory(upgradeTargetSkin);
+    // remove mine from inventory
+    inventory=inventory.filter(s=>s!==upgradeMineSkin);
+    renderInventoryGrid();
+  } else {
+    label.textContent='❌ ПРОИГРЫШ'; label.className='result-label lose';
+    emoji.textContent=upgradeMineSkin.emoji;
+    name.textContent=upgradeMineSkin.name+' сгорел';
+    price.textContent=upgradeMineSkin.usd||'$'+upgradeMineSkin.price;
+    price.style.color='var(--accent2)';
+    inventory=inventory.filter(s=>s!==upgradeMineSkin);
+    renderInventoryGrid();
+  }
+  res.classList.add('show');
+}
+
+function closeResult(again) {
+  document.getElementById('upgrade-result').classList.remove('show');
+  upgradeMineSkin=null; upgradeTargetSkin=null;
+  renderUpgradeSlots(); calcChance();
+  if(again) setTimeout(()=>goUpgrader(),100);
+}
+
+// ── DEPOSIT / TELEGRAM STARS ──
 function showDeposit() {
-  depositBack = currentScreen;
-  document.getElementById('deposit-back').onclick = () => {
-    showScreen(depositBack);
-  };
+  depositBack = document.querySelector('.screen.active')?.id.replace('screen-','')||'home';
+  document.getElementById('deposit-back').onclick=()=>showScreen(depositBack);
   showScreen('deposit');
 }
 
-function selectAmount(el, amount) {
-  document.querySelectorAll('.amount-pill').forEach(p => p.classList.remove('selected'));
+function selectAmount(el,amount) {
+  document.querySelectorAll('.amount-pill').forEach(p=>p.classList.remove('selected'));
   el.classList.add('selected');
-  document.querySelector('#screen-deposit .btn-primary').textContent = `⚡ Пополнить ⭐ ${amount}`;
+  selectedDepositAmount=amount;
+  document.getElementById('stars-pay-btn').innerHTML=`<span>⭐</span> Оплатить ${amount.toLocaleString('en')} Stars в Telegram`;
 }
 
-function selectMethod(el) {
-  document.querySelectorAll('.method-pill').forEach(p => p.classList.remove('selected'));
+function selectMethod(el,method) {
+  document.querySelectorAll('.method-pill').forEach(p=>p.classList.remove('selected'));
   el.classList.add('selected');
+  selectedMethod=method;
+  const labels={crypto:'Крипто',card:'Карту',qiwi:'СБП / Qiwi'};
+  document.getElementById('stars-pay-btn').innerHTML=`<span>💳</span> Оплатить через ${labels[method]}`;
 }
 
-function doDeposit() {
-  const selected = document.querySelector('.amount-pill.selected .ap-amount');
-  const amountText = selected ? selected.textContent : '⭐ 500';
-  const amount = parseInt(amountText.replace(/[^\d]/g, '')) || 500;
-  balance += amount;
-  updateBalance();
-  toast(`✅ Баланс пополнен на ${amountText}!`);
-  setTimeout(() => showScreen(depositBack), 500);
+function payWithStars() {
+  // ── REAL TELEGRAM STARS INTEGRATION ──
+  // In production with Telegram Mini App SDK:
+  //
+  // const tg = window.Telegram?.WebApp;
+  // if(tg) {
+  //   tg.openInvoice(invoiceLink, (status) => {
+  //     if(status === 'paid') { balance += selectedDepositAmount; updateBalances(); toast('✅ Баланс пополнен!'); }
+  //   });
+  // }
+  //
+  // invoiceLink is generated by your backend:
+  // POST /api/create-invoice { stars: selectedDepositAmount, userId: tg.initDataUnsafe.user.id }
+  // → returns Telegram invoice link via Bot API createInvoiceLink
+
+  // DEMO simulation:
+  if(selectedMethod==='stars'){
+    toast('⭐ Открываем платёжный диалог Telegram...');
+    setTimeout(()=>{
+      balance+=selectedDepositAmount; updateBalances();
+      toast(`✅ Пополнено ⭐${selectedDepositAmount.toLocaleString('en')}!`);
+      showScreen(depositBack);
+    },1800);
+  } else {
+    toast('🔗 Переход на страницу оплаты...');
+    setTimeout(()=>{
+      balance+=selectedDepositAmount; updateBalances();
+      toast(`✅ Пополнено ⭐${selectedDepositAmount.toLocaleString('en')}!`);
+      showScreen(depositBack);
+    },1800);
+  }
 }
 
-function setNav(i) {
-  const labels = ['', 'battles', '', ''];
-  if (i === 1) toast('⚔️ Case Battles — скоро!');
+// ── UTILS ──
+function updateBalances() {
+  const fmt = n=>n.toLocaleString('en');
+  document.getElementById('balance')?.innerText && (document.getElementById('balance').textContent=fmt(balance));
+  document.getElementById('balance2')?.innerText && (document.getElementById('balance2').textContent=fmt(balance));
+  document.getElementById('balance-upg')?.innerText && (document.getElementById('balance-upg').textContent=fmt(balance));
+  document.querySelectorAll('.amount').forEach(el=>el.textContent=fmt(balance));
 }
 
 let toastTimer;
 function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2500);
 }
 </script>
 </body>
