@@ -4,10 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>VAULT</title>
-  <meta http-equiv="refresh" content="0; url=./cs2-miniapp.html">
-  <script>location.replace('./cs2-miniapp.html');</script>
+  <script>
+    (function () {
+      var target = './cs2-miniapp.html' + (location.search || '') + (location.hash || '');
+      location.replace(target);
+    })();
+  </script>
 </head>
 <body>
-  <a href="./cs2-miniapp.html">Открыть VAULT</a>
+  <a id="open-link" href="./cs2-miniapp.html">Открыть VAULT</a>
+  <script>
+    (function () {
+      var a = document.getElementById('open-link');
+      if (a) a.href = './cs2-miniapp.html' + (location.search || '') + (location.hash || '');
+    })();
+  </script>
 </body>
 </html>
