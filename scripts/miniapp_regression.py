@@ -73,6 +73,19 @@ with sync_playwright() as p:
         balance_after = parse_balance(page.locator('#balance').inner_text())
     checks.append(('Balance increases after deposit', balance_after > start_balance))
 
+    # Upgrades screen and action
+    page.locator('.screen.active .bottom-nav .nav-item').nth(1).click()
+    page.wait_for_timeout(350)
+    checks.append(('Upgrades screen active', page.locator('#screen-upgrades.active').count() == 1))
+    has_cards = page.locator('#upgrade-list .up-card').count()
+    checks.append(('Upgrade cards rendered', has_cards >= 3))
+    up_before = parse_balance(page.locator('#balance4').inner_text())
+    page.locator('#upgrade-list .up-card .up-try').first.click()
+    page.wait_for_timeout(350)
+    up_after = parse_balance(page.locator('#balance4').inner_text())
+    checks.append(('Upgrade action updates balance', up_before != up_after))
+    page.screenshot(path=str(OUT / '03-upgrades.png'), full_page=True)
+
     # Profile navigation and Steam button should not hard fail
     page.locator('.screen.active .bottom-nav .nav-item').nth(3).click()
     page.wait_for_timeout(350)
@@ -83,7 +96,7 @@ with sync_playwright() as p:
     # Ensure toast is multiline friendly by checking computed style
     toast_ws = page.evaluate("getComputedStyle(document.getElementById('toast')).whiteSpace")
     checks.append(('Toast wraps text', toast_ws != 'nowrap'))
-    page.screenshot(path=str(OUT / '03-profile-toast.png'), full_page=True)
+    page.screenshot(path=str(OUT / '04-profile-toast.png'), full_page=True)
 
     browser.close()
 
