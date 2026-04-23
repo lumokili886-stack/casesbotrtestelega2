@@ -867,83 +867,43 @@
     border-radius: 10px;
   }
 
-  .history-wrap { margin-top: 14px; }
-  .history-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-  .history-list { display: flex; flex-direction: column; gap: 8px; }
-  .history-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .history-thumb {
-    width: 46px;
-    height: 30px;
-    object-fit: contain;
-    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
-  }
-  .history-main { flex: 1; min-width: 0; }
-  .history-main strong { display: block; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .history-main span { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .history-price { font-size: 13px; font-weight: 800; color: var(--accent); }
-
   /* ===== DEPOSIT SCREEN ===== */
   .deposit-wrap { padding: 20px; }
-  .deposit-field-label {
-    font-family:'Rajdhani',sans-serif;
-    font-size:13px;
-    font-weight:700;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    color:var(--muted);
-    margin-bottom:10px;
+  .amount-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px; margin-bottom: 20px;
   }
-  .deposit-input-wrap {
+  .amount-pill {
+    padding: 14px 10px;
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-  .deposit-input-star { font-size: 18px; }
-  .deposit-input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-size: 20px;
-    font-weight: 800;
-    outline: none;
-  }
-  .deposit-hint {
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 16px;
-  }
-  .stars-only {
-    background: rgba(78,158,255,0.08);
-    border: 1px solid rgba(78,158,255,0.3);
-    color: var(--blue);
     border-radius: 12px;
-    padding: 10px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    margin-bottom: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
   }
+  .amount-pill:active { transform: scale(0.96); }
+  .amount-pill.selected { border-color: var(--accent); background: rgba(232,166,48,0.08); }
+  .amount-pill .ap-amount { font-size: 16px; font-weight: 800; color: var(--accent); }
+  .amount-pill .ap-bonus { font-size: 11px; color: var(--green); font-weight: 600; margin-top: 2px; }
+
+  .method-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px; margin-bottom: 24px;
+  }
+  .method-pill {
+    padding: 14px 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .method-pill:active { transform: scale(0.96); }
+  .method-pill.selected { border-color: var(--blue); background: rgba(78,158,255,0.08); }
+  .method-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+  .method-name { font-size: 11px; font-weight: 700; color: var(--muted); }
 
   /* Animations */
   @keyframes fadeUp {
@@ -1077,35 +1037,35 @@
       <div class="drops-scroll" id="drops-feed">
         <div class="drop-card">
           <div class="drop-bar bar-legendary"></div>
-          <img class="drop-skin-emoji img" src="/assets/skins/usp-cortex.png" alt="USP-S | Cortex">
+          <img class="drop-skin-emoji img" src="assets/skins/usp-cortex.png" alt="USP-S | Cortex">
           <div class="drop-name">AK-47 | Fire Serpent</div>
           <div class="drop-price legendary">$420</div>
           <div class="drop-user">@vlad_k</div>
         </div>
         <div class="drop-card">
           <div class="drop-bar bar-rare"></div>
-          <img class="drop-skin-emoji img" src="/assets/skins/m4a1s-hyper-beast.png" alt="M4A1-S | Hyper Beast">
+          <img class="drop-skin-emoji img" src="assets/skins/m4a1s-hyper-beast.png" alt="M4A1-S | Hyper Beast">
           <div class="drop-name">M4A1-S Hyper Beast</div>
           <div class="drop-price rare">$85</div>
           <div class="drop-user">@pro_1337</div>
         </div>
         <div class="drop-card">
           <div class="drop-bar bar-uncommon"></div>
-          <img class="drop-skin-emoji img" src="/assets/skins/awp-atheris.png" alt="AWP | Atheris">
+          <img class="drop-skin-emoji img" src="assets/skins/awp-atheris.png" alt="AWP | Atheris">
           <div class="drop-name">AWP | Atheris</div>
           <div class="drop-price uncommon">$22</div>
           <div class="drop-user">@ksusha</div>
         </div>
         <div class="drop-card">
           <div class="drop-bar bar-legendary"></div>
-          <img class="drop-skin-emoji img" src="/assets/skins/karambit-tiger-tooth.png" alt="Karambit | Tiger Tooth">
+          <img class="drop-skin-emoji img" src="assets/skins/karambit-tiger-tooth.png" alt="Karambit | Tiger Tooth">
           <div class="drop-name">Karambit | Tiger</div>
           <div class="drop-price legendary">$890</div>
           <div class="drop-user">@max_cs</div>
         </div>
         <div class="drop-card">
           <div class="drop-bar bar-common"></div>
-          <img class="drop-skin-emoji img" src="/assets/skins/p250-asiimov.png" alt="P250 | Asiimov">
+          <img class="drop-skin-emoji img" src="assets/skins/p250-asiimov.png" alt="P250 | Asiimov">
           <div class="drop-name">USP-S | Cortex</div>
           <div class="drop-price common">$8</div>
           <div class="drop-user">@n00b</div>
@@ -1205,14 +1165,14 @@
     <div class="case-contents">
       <div class="contents-title">Содержимое кейса</div>
       <div class="contents-grid" id="contents-grid">
-        <div class="content-item c"><img class="ci-emoji img" src="/assets/skins/usp-cortex.png" alt="USP Cortex"><div class="ci-name">USP Cortex</div><div class="ci-chance">48%</div></div>
-        <div class="content-item c"><img class="ci-emoji img" src="/assets/skins/p2000-pulse.png" alt="P2000 Pulse"><div class="ci-name">P2000 Pulse</div><div class="ci-chance">22%</div></div>
-        <div class="content-item u"><img class="ci-emoji img" src="/assets/skins/p250-asiimov.png" alt="P250 Asiimov"><div class="ci-name">P250 Asiimov</div><div class="ci-chance">14%</div></div>
-        <div class="content-item u"><img class="ci-emoji img" src="/assets/skins/awp-atheris.png" alt="AWP Atheris"><div class="ci-name">AWP Atheris</div><div class="ci-chance">9%</div></div>
-        <div class="content-item r"><img class="ci-emoji img" src="/assets/skins/m4a4-spider-lily.png" alt="M4A4 Spider Lily"><div class="ci-name">M4A4 Spider</div><div class="ci-chance">4%</div></div>
-        <div class="content-item r"><img class="ci-emoji img" src="/assets/skins/m4a1s-hyper-beast.png" alt="M4A1-S Hyper Beast"><div class="ci-name">M4A1-S Hyper</div><div class="ci-chance">2%</div></div>
-        <div class="content-item l"><img class="ci-emoji img" src="/assets/skins/ak-fire-serpent.png" alt="AK Fire Serpent"><div class="ci-name">AK Fire Serpent</div><div class="ci-chance">0.7%</div></div>
-        <div class="content-item l"><img class="ci-emoji img" src="/assets/skins/karambit-tiger-tooth.png" alt="Karambit Tiger"><div class="ci-name">Karambit Tiger</div><div class="ci-chance">0.3%</div></div>
+        <div class="content-item c"><img class="ci-emoji img" src="assets/skins/usp-cortex.png" alt="USP Cortex"><div class="ci-name">USP Cortex</div><div class="ci-chance">48%</div></div>
+        <div class="content-item c"><img class="ci-emoji img" src="assets/skins/p2000-pulse.png" alt="P2000 Pulse"><div class="ci-name">P2000 Pulse</div><div class="ci-chance">22%</div></div>
+        <div class="content-item u"><img class="ci-emoji img" src="assets/skins/p250-asiimov.png" alt="P250 Asiimov"><div class="ci-name">P250 Asiimov</div><div class="ci-chance">14%</div></div>
+        <div class="content-item u"><img class="ci-emoji img" src="assets/skins/awp-atheris.png" alt="AWP Atheris"><div class="ci-name">AWP Atheris</div><div class="ci-chance">9%</div></div>
+        <div class="content-item r"><img class="ci-emoji img" src="assets/skins/m4a4-spider-lily.png" alt="M4A4 Spider Lily"><div class="ci-name">M4A4 Spider</div><div class="ci-chance">4%</div></div>
+        <div class="content-item r"><img class="ci-emoji img" src="assets/skins/m4a1s-hyper-beast.png" alt="M4A1-S Hyper Beast"><div class="ci-name">M4A1-S Hyper</div><div class="ci-chance">2%</div></div>
+        <div class="content-item l"><img class="ci-emoji img" src="assets/skins/ak-fire-serpent.png" alt="AK Fire Serpent"><div class="ci-name">AK Fire Serpent</div><div class="ci-chance">0.7%</div></div>
+        <div class="content-item l"><img class="ci-emoji img" src="assets/skins/karambit-tiger-tooth.png" alt="Karambit Tiger"><div class="ci-name">Karambit Tiger</div><div class="ci-chance">0.3%</div></div>
       </div>
     </div>
   </div>
@@ -1247,12 +1207,12 @@
       <div class="sell-all-btn" id="sell-all-btn" onclick="sellAllInventory()">💸 Продать всё</div>
     </div>
     <div class="inventory-grid" id="inventory-grid">
-      <div class="inv-card il"><img class="inv-emoji img" src="/assets/skins/karambit-tiger-tooth.png" alt="Karambit Tiger Tooth"><div class="inv-name">Karambit Tiger Tooth</div><div class="inv-price">$890</div></div>
-      <div class="inv-card ir"><img class="inv-emoji img" src="/assets/skins/ak-fire-serpent.png" alt="AK-47 Fire Serpent"><div class="inv-name">AK-47 Fire Serpent</div><div class="inv-price">$85</div></div>
-      <div class="inv-card iu"><img class="inv-emoji img" src="/assets/skins/m4a1s-hyper-beast.png" alt="M4A1-S Hyper Beast"><div class="inv-name">M4A1-S Hyper Beast</div><div class="inv-price">$22</div></div>
-      <div class="inv-card ic"><img class="inv-emoji img" src="/assets/skins/awp-atheris.png" alt="AWP Atheris FN"><div class="inv-name">AWP Atheris FN</div><div class="inv-price">$8</div></div>
-      <div class="inv-card ic"><img class="inv-emoji img" src="/assets/skins/usp-cortex.png" alt="USP-S Cortex"><div class="inv-name">USP-S Cortex</div><div class="inv-price">$6</div></div>
-      <div class="inv-card iu"><img class="inv-emoji img" src="/assets/skins/p250-asiimov.png" alt="P250 Asiimov"><div class="inv-name">P250 Asiimov</div><div class="inv-price">$18</div></div>
+      <div class="inv-card il"><img class="inv-emoji img" src="assets/skins/karambit-tiger-tooth.png" alt="Karambit Tiger Tooth"><div class="inv-name">Karambit Tiger Tooth</div><div class="inv-price">$890</div></div>
+      <div class="inv-card ir"><img class="inv-emoji img" src="assets/skins/ak-fire-serpent.png" alt="AK-47 Fire Serpent"><div class="inv-name">AK-47 Fire Serpent</div><div class="inv-price">$85</div></div>
+      <div class="inv-card iu"><img class="inv-emoji img" src="assets/skins/m4a1s-hyper-beast.png" alt="M4A1-S Hyper Beast"><div class="inv-name">M4A1-S Hyper Beast</div><div class="inv-price">$22</div></div>
+      <div class="inv-card ic"><img class="inv-emoji img" src="assets/skins/awp-atheris.png" alt="AWP Atheris FN"><div class="inv-name">AWP Atheris FN</div><div class="inv-price">$8</div></div>
+      <div class="inv-card ic"><img class="inv-emoji img" src="assets/skins/usp-cortex.png" alt="USP-S Cortex"><div class="inv-name">USP-S Cortex</div><div class="inv-price">$6</div></div>
+      <div class="inv-card iu"><img class="inv-emoji img" src="assets/skins/p250-asiimov.png" alt="P250 Asiimov"><div class="inv-name">P250 Asiimov</div><div class="inv-price">$18</div></div>
     </div>
   </div>
   <nav class="bottom-nav">
@@ -1308,9 +1268,9 @@
       </div>
 
       <div class="menu-list">
-        <div class="menu-item" onclick="showHistoryScreen()">
+        <div class="menu-item" onclick="toast('📋 История открытий')">
           <span class="menu-icon">📋</span>
-          <div class="menu-text"><strong>История открытий</strong><span id="history-open-count">0 кейсов</span></div>
+          <div class="menu-text"><strong>История открытий</strong><span>247 кейсов</span></div>
           <span class="menu-arrow">›</span>
         </div>
         <div class="menu-item" onclick="toast('🔗 Ссылка скопирована!')">
@@ -1320,7 +1280,7 @@
         </div>
         <div class="menu-item" onclick="showDeposit()">
           <span class="menu-icon">💳</span>
-          <div class="menu-text"><strong>Пополнить баланс</strong><span>Оплата только Telegram Stars</span></div>
+          <div class="menu-text"><strong>Пополнить баланс</strong><span>Карта, Stars, Крипто</span></div>
           <span class="menu-arrow">›</span>
         </div>
         <div class="menu-item" onclick="startSteamLink()">
@@ -1350,19 +1310,6 @@
   </nav>
 </div>
 
-<!-- ===== HISTORY SCREEN ===== -->
-<div id="screen-history" class="screen">
-  <div class="open-header">
-    <div class="back-btn" onclick="goBackFromHistory()">←</div>
-    <h2>История выигрышей</h2>
-  </div>
-  <div class="scroll-area" style="padding:14px 14px 90px">
-    <div class="history-list" id="history-list">
-      <div class="history-item"><div class="history-main"><strong>История пока пустая</strong><span>Открой кейс, чтобы увидеть выигрыши</span></div></div>
-    </div>
-  </div>
-</div>
-
 <!-- ===== DEPOSIT SCREEN ===== -->
 <div id="screen-deposit" class="screen">
   <div class="open-header">
@@ -1371,14 +1318,24 @@
   </div>
   <div class="scroll-area">
     <div class="deposit-wrap">
-      <p style="color:var(--muted);font-size:13px;margin-bottom:14px">Введи сумму пополнения вручную</p>
-      <div class="deposit-field-label">Сумма (Stars)</div>
-      <div class="deposit-input-wrap">
-        <span class="deposit-input-star">⭐</span>
-        <input id="deposit-input" class="deposit-input" type="number" min="1" max="5000" step="1" value="500" inputmode="numeric" oninput="syncDepositInput()">
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Выбери сумму и способ оплаты</p>
+      
+      <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Сумма</div>
+      <div class="amount-grid">
+        <div class="amount-pill" onclick="selectAmount(this,'100')"><div class="ap-amount">⭐ 100</div><div class="ap-bonus">≈ $1</div></div>
+        <div class="amount-pill selected" onclick="selectAmount(this,'500')"><div class="ap-amount">⭐ 500</div><div class="ap-bonus">≈ $5</div></div>
+        <div class="amount-pill" onclick="selectAmount(this,'1000')"><div class="ap-amount">⭐ 1000</div><div class="ap-bonus">+10% бонус</div></div>
+        <div class="amount-pill" onclick="selectAmount(this,'2500')"><div class="ap-amount">⭐ 2500</div><div class="ap-bonus">+15% бонус</div></div>
+        <div class="amount-pill" onclick="selectAmount(this,'5000')"><div class="ap-amount">⭐ 5000</div><div class="ap-bonus">+20% бонус</div></div>
+        <div class="amount-pill" onclick="selectAmount(this,'10000')"><div class="ap-amount">⭐ 10K</div><div class="ap-bonus">+25% бонус</div></div>
       </div>
-      <div class="deposit-hint" id="deposit-hint">Минимум: 1 ⭐ · Максимум: 5000 ⭐</div>
-      <div class="stars-only">Доступен только способ оплаты: Telegram Stars</div>
+
+      <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Способ оплаты</div>
+      <div class="method-grid">
+        <div class="method-pill selected" data-method="stars" onclick="selectMethod(this,'stars')"><span class="method-icon">⭐</span><div class="method-name">Telegram Stars</div></div>
+        <div class="method-pill" data-method="crypto" onclick="selectMethod(this,'crypto')"><span class="method-icon">₿</span><div class="method-name">Крипто</div></div>
+        <div class="method-pill" data-method="card" onclick="selectMethod(this,'card')"><span class="method-icon">💳</span><div class="method-name">Карта</div></div>
+      </div>
 
       <button class="btn-primary" id="deposit-btn" onclick="doDeposit()">⚡ Пополнить ⭐ 500</button>
     </div>
@@ -1388,7 +1345,7 @@
 <!-- WIN OVERLAY -->
 <div class="win-overlay" id="win-overlay">
   <div class="win-glow" id="win-glow"></div>
-  <div class="win-emoji-big" id="win-emoji"><img src="/assets/skins/ak-fire-serpent.png" class="skin-img-big" alt="AK-47 | Fire Serpent"></div>
+  <div class="win-emoji-big" id="win-emoji"><img src="assets/skins/ak-fire-serpent.png" class="skin-img-big" alt="AK-47 | Fire Serpent"></div>
   <div class="win-rarity" id="win-rarity">Legendary</div>
   <div class="win-name" id="win-name">AK-47 | Fire Serpent</div>
   <div class="win-price" id="win-price">$420</div>
@@ -1404,12 +1361,12 @@
 <script>
 let balance = 0;
 let inventory = [];
-let openHistory = [];
 let currentCase = 'premier';
 let multiCount = 1;
 let casePrices = { premier: 850, gamma: 620, danger: 1200, clutch: 430, free: 0 };
 let currentScreen = 'home';
 let depositBack = 'home';
+let selectedMethod = 'stars';
 let lastWonItemId = null;
 let authState = { initData: '', user: null };
 let runtimeState = { mode: 'unknown', backendReachable: false, lastError: '' };
@@ -1418,14 +1375,14 @@ let demoNoticeShown = false;
 const rarityColors = { common: '#888', uncommon: '#4e9eff', rare: '#9d4edd', legendary: '#e8a630' };
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 const clientRoulettePool = [
-  { emoji: '🔫', image: '/assets/skins/usp-cortex.png', name: 'USP-S | Cortex', rarity: 'common', priceUsd: 6, r: 'c' },
-  { emoji: '🎯', image: '/assets/skins/p2000-pulse.png', name: 'P2000 | Pulse', rarity: 'common', priceUsd: 5, r: 'c' },
-  { emoji: '💣', image: '/assets/skins/p250-asiimov.png', name: 'P250 | Asiimov', rarity: 'uncommon', priceUsd: 18, r: 'u' },
-  { emoji: '⚡', image: '/assets/skins/awp-atheris.png', name: 'AWP | Atheris', rarity: 'uncommon', priceUsd: 22, r: 'u' },
-  { emoji: '🌊', image: '/assets/skins/m4a4-spider-lily.png', name: 'M4A4 | Spider Lily', rarity: 'rare', priceUsd: 45, r: 'r' },
-  { emoji: '🔧', image: '/assets/skins/m4a1s-hyper-beast.png', name: 'M4A1-S | Hyper Beast', rarity: 'rare', priceUsd: 85, r: 'r' },
-  { emoji: '🔥', image: '/assets/skins/ak-fire-serpent.png', name: 'AK-47 | Fire Serpent', rarity: 'legendary', priceUsd: 420, r: 'l' },
-  { emoji: '🔪', image: '/assets/skins/karambit-tiger-tooth.png', name: 'Karambit | Tiger Tooth', rarity: 'legendary', priceUsd: 890, r: 'l' }
+  { emoji: '🔫', image: 'assets/skins/usp-cortex.png', name: 'USP-S | Cortex', rarity: 'common', priceUsd: 6, r: 'c' },
+  { emoji: '🎯', image: 'assets/skins/p2000-pulse.png', name: 'P2000 | Pulse', rarity: 'common', priceUsd: 5, r: 'c' },
+  { emoji: '💣', image: 'assets/skins/p250-asiimov.png', name: 'P250 | Asiimov', rarity: 'uncommon', priceUsd: 18, r: 'u' },
+  { emoji: '⚡', image: 'assets/skins/awp-atheris.png', name: 'AWP | Atheris', rarity: 'uncommon', priceUsd: 22, r: 'u' },
+  { emoji: '🌊', image: 'assets/skins/m4a4-spider-lily.png', name: 'M4A4 | Spider Lily', rarity: 'rare', priceUsd: 45, r: 'r' },
+  { emoji: '🔧', image: 'assets/skins/m4a1s-hyper-beast.png', name: 'M4A1-S | Hyper Beast', rarity: 'rare', priceUsd: 85, r: 'r' },
+  { emoji: '🔥', image: 'assets/skins/ak-fire-serpent.png', name: 'AK-47 | Fire Serpent', rarity: 'legendary', priceUsd: 420, r: 'l' },
+  { emoji: '🔪', image: 'assets/skins/karambit-tiger-tooth.png', name: 'Karambit | Tiger Tooth', rarity: 'legendary', priceUsd: 890, r: 'l' }
 ];
 const quickUpgrades = [
   { from: 'USP-S | Cortex', to: 'AWP | Atheris', stake: 120, chance: 64, multiplier: 2.1 },
@@ -1482,8 +1439,6 @@ function enterDemoMode(reason) {
   updateBalance();
   renderAuthState();
   renderInventory();
-  renderOpenHistory();
-  renderDropsFeed();
   renderUpgrades();
 
   if (!demoNoticeShown && !tg) {
@@ -1513,21 +1468,12 @@ function pushDemoInventoryItem(item) {
 }
 
 function skinVisual(item, imgClass, emojiClass) {
-  const imagePath = normalizeImagePath(item?.image);
-  if (item && imagePath) {
+  if (item && item.image) {
     const safeName = item.name || 'skin';
-    return `<img src="${imagePath}" class="${imgClass}" alt="${safeName}">`;
+    return `<img src="${item.image}" class="${imgClass}" alt="${safeName}">`;
   }
   const cls = emojiClass ? ` class="${emojiClass}"` : '';
   return `<span${cls}>${item?.emoji || '🎯'}</span>`;
-}
-
-function normalizeImagePath(pathValue) {
-  const raw = String(pathValue || '').trim();
-  if (!raw) return '';
-  if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
-  if (raw.startsWith('/')) return raw;
-  return `/${raw}`;
 }
 
 function shortenErrorMessage(message) {
@@ -1691,86 +1637,11 @@ function renderInventory() {
   if (sellAllBtn) sellAllBtn.textContent = `💸 Продать всё (${inventory.length})`;
 }
 
-function formatTimeAgo(iso) {
-  const t = new Date(iso || 0).getTime();
-  if (!t) return '';
-  const diffSec = Math.max(1, Math.floor((Date.now() - t) / 1000));
-  if (diffSec < 60) return `${diffSec}с назад`;
-  const m = Math.floor(diffSec / 60);
-  if (m < 60) return `${m}м назад`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}ч назад`;
-  const d = Math.floor(h / 24);
-  return `${d}д назад`;
-}
-
-function renderOpenHistory() {
-  const root = document.getElementById('history-list');
-  if (!root) return;
-  const list = Array.isArray(openHistory) ? openHistory.slice(0, 20) : [];
-  const openCountEl = document.getElementById('history-open-count');
-  if (openCountEl) {
-    openCountEl.textContent = `${openHistory.length} кейсов`;
-  }
-  if (!list.length) {
-    root.innerHTML = '<div class="history-item"><div class="history-main"><strong>История пока пустая</strong><span>Открой кейс, чтобы увидеть выигрыши</span></div></div>';
-    return;
-  }
-  root.innerHTML = list.map((entry) => {
-    const item = entry.item || entry;
-    const caseName = entry.caseName || 'Кейс';
-    const whenText = formatTimeAgo(entry.openedAt);
-    return (
-      `<div class="history-item">` +
-      skinVisual(item, 'history-thumb', '') +
-      `<div class="history-main"><strong>${item.name || 'Предмет'}</strong><span>${caseName}${whenText ? ` · ${whenText}` : ''}</span></div>` +
-      `<div class="history-price">$${Number(item.priceUsd || 0)}</div>` +
-      `</div>`
-    );
-  }).join('');
-}
-
-function renderDropsFeed() {
-  const root = document.getElementById('drops-feed');
-  if (!root) return;
-  const list = Array.isArray(openHistory) ? openHistory.slice(0, 12) : [];
-  if (!list.length) return;
-  root.innerHTML = list.map((entry) => {
-    const item = entry.item || entry;
-    const rarity = item.rarity || 'common';
-    const caseName = entry.caseName || 'VAULT';
-    const userLabel = authState?.user?.username ? `@${authState.user.username}` : 'you';
-    return (
-      `<div class="drop-card">` +
-      `<div class="drop-bar bar-${rarity}"></div>` +
-      skinVisual(item, 'drop-skin-emoji img', 'drop-skin-emoji') +
-      `<div class="drop-name">${item.name || 'Предмет'}</div>` +
-      `<div class="drop-price ${rarity}">$${Number(item.priceUsd || 0)}</div>` +
-      `<div class="drop-user">${userLabel} · ${caseName}</div>` +
-      `</div>`
-    );
-  }).join('');
-}
-
-function appendHistoryFromWinner(caseName, item) {
-  openHistory.unshift({
-    id: `local-win-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-    caseName,
-    openedAt: new Date().toISOString(),
-    item: { ...item, image: normalizeImagePath(item?.image) },
-  });
-  openHistory = openHistory.slice(0, 100);
-  renderOpenHistory();
-  renderDropsFeed();
-}
-
 async function refreshState() {
   if (isDemoMode()) {
     updateBalance();
     renderAuthState();
     renderInventory();
-    renderOpenHistory();
-    renderDropsFeed();
     renderUpgrades();
     return;
   }
@@ -1782,13 +1653,10 @@ async function refreshState() {
   authState.user = state.user;
   balance = Number(state.user.balance || 0);
   inventory = Array.isArray(state.inventory) ? state.inventory : [];
-  openHistory = Array.isArray(state.openHistory) ? state.openHistory : [];
   casePrices = state.casePrices || casePrices;
   updateBalance();
   renderAuthState();
   renderInventory();
-  renderOpenHistory();
-  renderDropsFeed();
   renderUpgrades();
 }
 
@@ -1830,8 +1698,6 @@ function goHome() { showScreen('home'); currentScreen = 'home'; }
 function goInventory() { showScreen('inventory'); currentScreen = 'inventory'; }
 function goProfile() { showScreen('profile'); currentScreen = 'profile'; }
 function goUpgrades() { showScreen('upgrades'); currentScreen = 'upgrades'; renderUpgrades(); }
-function showHistoryScreen() { showScreen('history'); currentScreen = 'history'; renderOpenHistory(); }
-function goBackFromHistory() { showScreen('profile'); currentScreen = 'profile'; }
 
 function showCase(name) {
   currentCase = name;
@@ -1899,7 +1765,6 @@ async function triggerOpen() {
     }
     const demoWinner = pushDemoInventoryItem(makeDemoWinner());
     lastWonItemId = demoWinner.id;
-    appendHistoryFromWinner(currentCase, demoWinner);
     renderRouletteWithWinner(demoWinner);
     setTimeout(() => {
       showWin(demoWinner);
@@ -2052,37 +1917,19 @@ async function sellAllInventory() {
 function showDeposit() {
   depositBack = currentScreen;
   document.getElementById('deposit-back').onclick = () => showScreen(depositBack);
-  syncDepositInput();
   showScreen('deposit');
 }
 
-function getDepositAmount() {
-  const input = document.getElementById('deposit-input');
-  const raw = Number((input?.value || '').trim());
-  if (!Number.isFinite(raw)) return 0;
-  return Math.floor(raw);
+function selectAmount(el, amount) {
+  document.querySelectorAll('.amount-pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  document.querySelector('#screen-deposit .btn-primary').textContent = `⚡ Пополнить ⭐ ${amount}`;
 }
 
-function syncDepositInput() {
-  const input = document.getElementById('deposit-input');
-  const hint = document.getElementById('deposit-hint');
-  const btn = document.getElementById('deposit-btn');
-  if (!input || !hint || !btn) return;
-
-  let amount = getDepositAmount();
-  if (!amount) amount = 0;
-  if (amount < 1) {
-    hint.textContent = 'Минимум: 1 ⭐ · Максимум: 5000 ⭐';
-    btn.textContent = '⚡ Введи сумму от 1 до 5000';
-    return;
-  }
-  if (amount > 5000) {
-    hint.textContent = 'Слишком много. Максимальная сумма: 5000 ⭐';
-    btn.textContent = '⚡ Пополнить ⭐ 5000';
-    return;
-  }
-  hint.textContent = `Будет списано: ⭐ ${amount}`;
-  btn.textContent = `⚡ Пополнить ⭐ ${amount}`;
+function selectMethod(el, method) {
+  document.querySelectorAll('.method-pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMethod = method || el.getAttribute('data-method') || 'stars';
 }
 
 async function waitOrderPaid(orderId, attempts = 12, delayMs = 2000) {
@@ -2098,26 +1945,17 @@ async function waitOrderPaid(orderId, attempts = 12, delayMs = 2000) {
 }
 
 async function doDeposit() {
-  const amount = getDepositAmount();
-  if (amount < 1 || amount > 5000) {
-    toast('❌ Укажи сумму от 1 до 5000 Stars');
+  if (selectedMethod !== 'stars') {
+    toast('ℹ️ Сейчас подключена только Telegram Stars');
     return;
   }
-
   if (isDemoMode()) {
-    const amountText = `⭐ ${amount}`;
+    const selected = document.querySelector('.amount-pill.selected .ap-amount');
+    const amountText = selected ? selected.textContent : '⭐ 500';
+    const amount = parseInt(amountText.replace(/[^\d]/g, '')) || 500;
     balance += amount;
     updateBalance();
     renderInventory();
-    openHistory.unshift({
-      id: `demo-deposit-${Date.now()}`,
-      caseName: 'Top Up',
-      openedAt: new Date().toISOString(),
-      item: { name: 'Пополнение баланса', image: '', emoji: '⭐', rarity: 'uncommon', priceUsd: Math.max(1, Math.round(amount / 10)), r: 'u' },
-    });
-    openHistory = openHistory.slice(0, 100);
-    renderOpenHistory();
-    renderDropsFeed();
     toast(`✅ Demo: баланс пополнен на ${amountText}`);
     setTimeout(() => showScreen(depositBack), 250);
     return;
@@ -2127,7 +1965,9 @@ async function doDeposit() {
     return;
   }
 
-  const amountText = `⭐ ${amount}`;
+  const selected = document.querySelector('.amount-pill.selected .ap-amount');
+  const amountText = selected ? selected.textContent : '⭐ 500';
+  const amount = parseInt(amountText.replace(/[^\d]/g, '')) || 500;
   const btn = document.getElementById('deposit-btn');
   const oldLabel = btn.textContent;
   btn.disabled = true;
@@ -2201,7 +2041,6 @@ function toast(msg) {
 
 bootstrapAuth();
 renderUpgrades();
-syncDepositInput();
 window.addEventListener('focus', () => {
   refreshState().catch(() => {});
 });

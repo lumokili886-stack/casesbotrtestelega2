@@ -1,4 +1,6 @@
 node_modules/
 .env
 data/db.json
+artifacts/
+scripts/__pycache__/
 .DS_Store

@@ -1,8 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "assets/**"
+    }
+  },
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/index" },
     { "source": "/auth/:path*", "destination": "/api/index" },
-    { "source": "/telegram/webhook", "destination": "/api/index" }
+    { "source": "/telegram/webhook", "destination": "/api/index" },
+    { "source": "/assets/:path*", "destination": "/api/index" }
   ]
 }

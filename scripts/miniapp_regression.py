@@ -53,11 +53,11 @@ with sync_playwright() as p:
     checks.append(('Selling inventory item decreases count', inv_after_sell <= inv_count - 1))
     page.screenshot(path=str(OUT / '02-inventory-after-sell.png'), full_page=True)
 
-    # Deposit demo top-up
+    # Deposit demo top-up (manual input mode)
     page.locator('#screen-inventory .header .balance-pill').click()
     page.wait_for_timeout(350)
     checks.append(('Deposit screen active', page.locator('#screen-deposit.active').count() == 1))
-    page.locator('#screen-deposit .amount-pill').nth(2).click()  # 1000
+    page.locator('#deposit-input').fill('1000')
     page.wait_for_timeout(200)
     page.locator('#deposit-btn').click()
     page.wait_for_timeout(450)
