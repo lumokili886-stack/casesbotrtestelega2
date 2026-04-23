@@ -50,7 +50,7 @@ with sync_playwright() as p:
     page.locator("#screen-home .bottom-nav .nav-item").nth(3).click()
     page.wait_for_timeout(400)
     checks.append(("Profile screen active", page.locator("#screen-profile.active").count() == 1))
-    page.locator("#screen-profile .menu-item", has_text="История открытий").click()
+    page.locator("#screen-profile .menu-item").first.click()
     page.wait_for_timeout(350)
     checks.append(("History screen active", page.locator("#screen-history.active").count() == 1))
     history_count = page.locator("#history-list .history-item").count()
@@ -65,7 +65,7 @@ with sync_playwright() as p:
     checks.append(("Back from history returns to profile", page.locator("#screen-profile.active").count() == 1))
 
     # 3) Only Stars method on deposit screen
-    page.locator("#screen-profile .menu-item", has_text="Пополнить баланс").click()
+    page.locator("#screen-profile .menu-item").nth(3).click()
     page.wait_for_timeout(350)
     checks.append(("Deposit screen active", page.locator("#screen-deposit.active").count() == 1))
     checks.append(("No crypto/card methods in deposit", page.locator("#screen-deposit .method-pill").count() == 0))

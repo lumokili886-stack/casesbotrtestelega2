@@ -93,7 +93,7 @@ with sync_playwright() as p:
     page.locator('.screen.active .bottom-nav .nav-item').nth(3).click()
     page.wait_for_timeout(350)
     checks.append(('Profile screen active', page.locator('#screen-profile.active').count() == 1))
-    page.locator('#screen-profile .menu-item', has_text='Привязать Steam').first.click()
+    page.locator('#screen-profile .menu-item').nth(4).click()
     page.wait_for_timeout(250)
 
     # Ensure toast is multiline friendly by checking computed style
