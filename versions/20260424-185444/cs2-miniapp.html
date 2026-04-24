@@ -1,0 +1,4031 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>VAULT — CS2 Cases</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: #0a0b0f;
+    --surface: #111318;
+    --surface2: #181b23;
+    --surface3: #1e2230;
+    --border: rgba(255,255,255,0.07);
+    --accent: #e8a630;
+    --accent2: #ff4e4e;
+    --blue: #4e9eff;
+    --green: #3ddc84;
+    --text: #f0f2f8;
+    --muted: #6b7280;
+    --rare: #9d4edd;
+    --legendary: #e8a630;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    max-width: 430px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* BG texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(78,158,255,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(232,166,48,0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .screen { display: none; flex-direction: column; min-height: 100vh; position: relative; z-index: 1; }
+  .screen.active { display: flex; }
+
+  /* ===== HEADER ===== */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    position: sticky;
+    top: 0;
+    background: rgba(10,11,15,0.9);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-shadow: 0 0 20px rgba(232,166,48,0.4);
+  }
+
+  .balance-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px 6px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .balance-pill:active { transform: scale(0.96); }
+  .balance-pill .icon { font-size: 14px; }
+  .balance-pill .amount { font-size: 15px; font-weight: 700; color: var(--accent); }
+  .plus-btn {
+    width: 20px; height: 20px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #000;
+    line-height: 1;
+  }
+
+  /* ===== NAV ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    background: rgba(17,19,24,0.96);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 0 20px;
+    z-index: 200;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 0;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-icon { font-size: 22px; transition: transform 0.2s; }
+  .nav-label { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
+  .nav-item.active .nav-label { color: var(--accent); }
+  .nav-item.active .nav-icon { filter: drop-shadow(0 0 6px rgba(232,166,48,0.6)); transform: translateY(-1px); }
+
+  /* ===== MAIN SCROLL ===== */
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 90px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* ===== HERO BANNER ===== */
+  .hero {
+    margin: 16px 16px 0;
+    background: linear-gradient(135deg, #111829 0%, #1a1020 100%);
+    border: 1px solid rgba(232,166,48,0.2);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(232,166,48,0.15), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(232,166,48,0.12);
+    border: 1px solid rgba(232,166,48,0.3);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .hero h2 { font-size: 22px; font-weight: 800; line-height: 1.2; margin-bottom: 6px; }
+  .hero h2 span { color: var(--accent); }
+  .hero p { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .hero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #000;
+    font-weight: 800;
+    font-size: 14px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .hero-btn:active { transform: scale(0.96); }
+  .hero-btn.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    filter: grayscale(0.45);
+  }
+  .hero-countdown {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 130px;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--accent);
+    background: rgba(232,166,48,0.08);
+    border: 1px solid rgba(232,166,48,0.35);
+    border-radius: 12px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+  }
+
+  /* ===== SECTION ===== */
+  .section {
+    padding: 20px 16px 0;
+  }
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .see-all { font-size: 13px; color: var(--blue); font-weight: 600; cursor: pointer; }
+
+  /* ===== CASE GRID ===== */
+  .case-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .case-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+  }
+  .case-card:active { transform: scale(0.97); }
+  .case-card.case-card-disabled {
+    opacity: 0.45;
+    filter: grayscale(0.35);
+    pointer-events: none;
+  }
+  .case-card.featured {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+  }
+  .case-card.featured .case-img-wrap { width: 120px; flex-shrink: 0; }
+  .case-card.featured .case-info { flex: 1; padding: 16px; }
+
+  .case-badge {
+    position: absolute;
+    top: 8px; left: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    z-index: 2;
+  }
+  .badge-hot { background: var(--accent2); color: #fff; }
+  .badge-new { background: var(--green); color: #000; }
+  .badge-top { background: var(--rare); color: #fff; }
+
+  .case-img-wrap {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 20px;
+  }
+  .case-img-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.15;
+  }
+  .case-card:nth-child(1) .case-img-wrap::before { background: radial-gradient(circle, var(--accent), transparent 70%); }
+  .case-card:nth-child(2) .case-img-wrap::before { background: radial-gradient(circle, var(--blue), transparent 70%); }
+  .case-card:nth-child(3) .case-img-wrap::before { background: radial-gradient(circle, var(--rare), transparent 70%); }
+  .case-card:nth-child(4) .case-img-wrap::before { background: radial-gradient(circle, var(--accent2), transparent 70%); }
+  .case-card.featured .case-img-wrap::before { background: radial-gradient(circle, var(--legendary), transparent 70%); opacity: 0.2; }
+
+  .case-emoji { font-size: 52px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5)); }
+  .case-card.featured .case-emoji { font-size: 64px; }
+
+  .case-info { padding: 0 12px 14px; }
+  .case-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
+  .case-sub { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+  .case-price-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .case-price {
+    font-size: 16px; font-weight: 800; color: var(--accent);
+  }
+  .open-btn {
+    background: rgba(232,166,48,0.12);
+    border: 1px solid rgba(232,166,48,0.25);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .open-btn:active { background: rgba(232,166,48,0.25); transform: scale(0.96); }
+
+  /* Stars small row */
+  .stars-row {
+    display: flex; gap: 4px; margin-top: 6px;
+  }
+  .star-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+
+  /* ===== RECENT DROPS ===== */
+  .drops-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .drops-scroll::-webkit-scrollbar { display: none; }
+
+  .drop-card {
+    flex-shrink: 0;
+    width: 90px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .drop-skin-emoji { font-size: 32px; margin-bottom: 6px; display: block; }
+  .drop-skin-emoji.img {
+    width: 52px;
+    height: 34px;
+    object-fit: contain;
+    margin: 0 auto 6px;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+  }
+  .img,
+  .skin-img,
+  .skin-img-big,
+  .history-thumb {
+    image-rendering: auto;
+    -webkit-image-rendering: auto;
+  }
+  .drop-name { font-size: 10px; font-weight: 600; line-height: 1.3; margin-bottom: 3px; }
+  .drop-price { font-size: 12px; font-weight: 800; }
+  .drop-price.common { color: #aaa; }
+  .drop-price.uncommon { color: var(--blue); }
+  .drop-price.rare { color: var(--rare); }
+  .drop-price.legendary { color: var(--legendary); }
+  .drop-user { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .drop-bar {
+    height: 2px;
+    border-radius: 1px;
+    margin: -10px -8px 10px;
+  }
+  .bar-common { background: #444; }
+  .bar-uncommon { background: var(--blue); }
+  .bar-rare { background: var(--rare); }
+  .bar-legendary { background: var(--legendary); box-shadow: 0 0 8px rgba(232,166,48,0.5); }
+
+  /* ===== CASE OPEN SCREEN ===== */
+  #screen-open {
+    background: var(--bg);
+  }
+
+  .open-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .back-btn {
+    width: 36px; height: 36px;
+    background: var(--surface2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 18px;
+    transition: all 0.2s;
+  }
+  .back-btn:active { transform: scale(0.9); }
+  .open-header h2 { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+
+  .case-showcase {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 20px 24px;
+    gap: 8px;
+  }
+  .case-big-emoji {
+    font-size: 110px;
+    filter: drop-shadow(0 0 40px rgba(232,166,48,0.3));
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .case-big-name { font-size: 20px; font-weight: 800; text-align: center; }
+  .case-big-sub { font-size: 13px; color: var(--muted); }
+
+  /* Roulette spinner */
+  .roulette-wrap {
+    width: 100%;
+    padding: 0 0 24px;
+    position: relative;
+    overflow: hidden;
+    display: none;
+  }
+  .roulette-pointer {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    background: var(--accent);
+    z-index: 10;
+    box-shadow: 0 0 12px rgba(232,166,48,0.8);
+  }
+  .roulette-pointer::before,
+  .roulette-pointer::after {
+    content: '';
+    position: absolute;
+    left: 50%; transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+  }
+  .roulette-pointer::before { top: 0; border-top: 10px solid var(--accent); }
+  .roulette-pointer::after { bottom: 0; border-bottom: 10px solid var(--accent); }
+
+  .roulette-track {
+    display: flex;
+    align-items: center;
+    height: 110px;
+    transition: transform 6s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+    will-change: transform;
+  }
+
+  .roulette-item {
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    margin: 0 5px;
+    font-size: 36px;
+    gap: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .roulette-item span { font-size: 11px; font-weight: 700; color: var(--muted); }
+  .roulette-item .skin-img {
+    width: 68px;
+    height: 44px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.45));
+  }
+  .roulette-item.rarity-common { border-color: #555; }
+  .roulette-item.rarity-uncommon { border-color: var(--blue); background: rgba(78,158,255,0.05); }
+  .roulette-item.rarity-rare { border-color: var(--rare); background: rgba(157,78,221,0.05); }
+  .roulette-item.rarity-legendary { border-color: var(--legendary); background: rgba(232,166,48,0.08); }
+
+  .open-actions {
+    padding: 0 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    color: #000;
+    font-size: 17px;
+    font-weight: 800;
+    border-radius: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+    border: none;
+  }
+  .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    width: 100%;
+    padding: 14px;
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:active { transform: scale(0.98); }
+
+  .multi-open {
+    display: flex; gap: 8px;
+  }
+  .multi-btn {
+    flex: 1;
+    padding: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .multi-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(232,166,48,0.08);
+  }
+  .multi-btn:active { transform: scale(0.96); }
+
+  .case-contents {
+    padding: 0 20px 20px;
+  }
+  .contents-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .contents-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .content-item {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 10px 6px 8px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .content-item::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .content-item.c { border-top: 2px solid #555; }
+  .content-item.u { border-top: 2px solid var(--blue); }
+  .content-item.r { border-top: 2px solid var(--rare); }
+  .content-item.l { border-top: 2px solid var(--legendary); }
+  .content-item .ci-emoji { font-size: 26px; display: block; margin-bottom: 3px; }
+  .content-item .ci-emoji.img {
+    width: 42px;
+    height: 28px;
+    object-fit: contain;
+    margin: 0 auto 4px;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+  }
+  .content-item .ci-name { font-size: 9px; font-weight: 600; color: var(--muted); line-height: 1.3; }
+  .content-item .ci-chance { font-size: 10px; font-weight: 800; margin-top: 3px; }
+  .content-item.c .ci-chance { color: #888; }
+  .content-item.u .ci-chance { color: var(--blue); }
+  .content-item.r .ci-chance { color: var(--rare); }
+  .content-item.l .ci-chance { color: var(--legendary); }
+
+  /* ===== WIN OVERLAY ===== */
+  .win-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 500;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    text-align: center;
+  }
+  .win-overlay.show { display: flex; }
+
+  .win-glow {
+    position: absolute;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: pulse-glow 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { transform: scale(0.9); opacity: 0.2; }
+    50% { transform: scale(1.1); opacity: 0.4; }
+  }
+
+  .win-emoji-big { font-size: 90px; position: relative; z-index: 2; margin-bottom: 16px; animation: win-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .win-emoji-big .skin-img-big {
+    width: 180px;
+    height: 110px;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 28px rgba(0,0,0,0.6));
+  }
+  @keyframes win-pop { from { transform: scale(0); } to { transform: scale(1); } }
+
+  .win-rarity {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    position: relative; z-index: 2;
+  }
+  .win-name { font-size: 24px; font-weight: 800; margin-bottom: 4px; position: relative; z-index: 2; }
+  .win-price { font-size: 36px; font-weight: 800; color: var(--accent); margin-bottom: 8px; position: relative; z-index: 2; }
+
+  .win-actions { display: flex; gap: 10px; width: 100%; margin-top: 16px; position: relative; z-index: 2; }
+  .win-sell { flex: 1; padding: 14px; background: var(--green); color: #000; font-weight: 800; border-radius: 12px; cursor: pointer; font-size: 15px; transition: 0.2s; }
+  .win-sell:active { transform: scale(0.97); }
+  .win-keep { flex: 1; padding: 14px; background: var(--surface2); border: 1px solid var(--border); font-weight: 700; border-radius: 12px; cursor: pointer; font-size: 15px; transition: 0.2s; }
+  .win-keep:active { transform: scale(0.97); }
+
+  /* ===== INVENTORY SCREEN ===== */
+  .inventory-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    padding: 16px;
+  }
+  .inv-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 8px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .inv-card:active { transform: scale(0.95); }
+  .inv-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0; height: 2px;
+  }
+  .inv-card.ic { border-bottom: 2px solid #555; }
+  .inv-card.iu { border-bottom: 2px solid var(--blue); }
+  .inv-card.ir { border-bottom: 2px solid var(--rare); }
+  .inv-card.il { border-bottom: 2px solid var(--legendary); }
+  .inv-emoji { font-size: 36px; display: block; margin-bottom: 6px; }
+  .inv-emoji.img {
+    width: 62px;
+    height: 38px;
+    object-fit: contain;
+    margin: 0 auto 8px;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.42));
+  }
+  .inv-name { font-size: 10px; font-weight: 600; color: var(--muted); line-height: 1.3; margin-bottom: 4px; }
+  .inv-price { font-size: 14px; font-weight: 800; }
+  .ic .inv-price { color: #888; }
+  .iu .inv-price { color: var(--blue); }
+  .ir .inv-price { color: var(--rare); }
+  .il .inv-price { color: var(--legendary); }
+
+  .inv-header {
+    padding: 16px 20px 0;
+    display: flex; gap: 10px; flex-direction: column;
+  }
+  .inv-stats {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .inv-stat {
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+  .inv-stat-val { font-size: 18px; font-weight: 800; color: var(--accent); }
+  .inv-stat-key { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .sell-all-btn {
+    width: 100%;
+    padding: 13px;
+    background: rgba(61,220,132,0.1);
+    border: 1px solid rgba(61,220,132,0.3);
+    color: var(--green);
+    font-weight: 800;
+    font-size: 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .sell-all-btn:active { transform: scale(0.98); }
+
+  /* ===== UPGRADES ===== */
+  .upgrade-wrap {
+    --up-scroll-y: 0px;
+    --up-scroll-glow: 0;
+    position: relative;
+    padding: 16px;
+  }
+  .upgrade-wrap::before,
+  .upgrade-wrap::after {
+    content: '';
+    position: absolute;
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(0.2px);
+    opacity: calc(0.34 + (var(--up-scroll-glow) * 0.22));
+    transform: translateY(calc(var(--up-scroll-y) * -0.04));
+  }
+  .upgrade-wrap::before {
+    top: 8px;
+    left: -70px;
+    background: radial-gradient(circle, rgba(78,158,255,0.34), transparent 68%);
+  }
+  .upgrade-wrap::after {
+    top: 56px;
+    right: -76px;
+    background: radial-gradient(circle, rgba(232,166,48,0.28), transparent 70%);
+  }
+  .upgrade-hero {
+    background: linear-gradient(140deg, #101a2f 0%, #241329 55%, #1f2d12 100%);
+    border: 1px solid rgba(78,158,255,0.3);
+    border-radius: 18px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+    transform: translateY(calc(var(--up-scroll-y) * -0.035));
+    transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease;
+  }
+  .upgrade-wrap.scrolled .upgrade-hero {
+    border-color: rgba(78,158,255,0.52);
+    box-shadow: 0 0 0 1px rgba(78,158,255,0.2), 0 8px 28px rgba(0,0,0,0.35);
+  }
+  .upgrade-hero-title { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: 1px; }
+  .upgrade-hero-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .upgrade-board {
+    background: radial-gradient(circle at center, rgba(232,166,48,0.1), rgba(10,11,15,0.95) 58%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: 1fr 120px 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    transform: translateY(calc(var(--up-scroll-y) * -0.06));
+    transition: transform .26s ease, border-color .22s ease, box-shadow .22s ease;
+  }
+  .upgrade-board::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(78,158,255,0.16), transparent 38%),
+      radial-gradient(circle at 80% 78%, rgba(232,166,48,0.17), transparent 42%);
+    opacity: calc(0.45 + (var(--up-scroll-glow) * 0.25));
+    pointer-events: none;
+  }
+  .upgrade-wrap.scrolled .upgrade-board {
+    border-color: rgba(232,166,48,0.4);
+    box-shadow: 0 0 0 1px rgba(232,166,48,0.2), 0 12px 30px rgba(0,0,0,0.34);
+  }
+  .upgrade-board.spinning {
+    border-color: rgba(232,166,48,0.5);
+    box-shadow: 0 0 0 1px rgba(232,166,48,0.25), 0 0 30px rgba(232,166,48,0.22);
+  }
+  .up-slot {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    min-height: 120px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+  .up-slot::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 15%, rgba(255,255,255,0.1), transparent 62%);
+    pointer-events: none;
+  }
+  .up-slot.rarity-common { border-color: rgba(136,136,136,0.35); }
+  .up-slot.rarity-uncommon { border-color: rgba(78,158,255,0.45); box-shadow: 0 0 16px rgba(78,158,255,0.15); }
+  .up-slot.rarity-rare { border-color: rgba(157,78,221,0.45); box-shadow: 0 0 16px rgba(157,78,221,0.16); }
+  .up-slot.rarity-legendary { border-color: rgba(232,166,48,0.58); box-shadow: 0 0 24px rgba(232,166,48,0.25); }
+  .up-slot.is-source { transform: translateY(-1px); }
+  .up-slot.is-target { transform: translateY(-1px); }
+  .up-slot.is-target.rarity-legendary::after {
+    content: '';
+    position: absolute;
+    inset: -40% -15%;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.24) 48%, transparent 68%);
+    animation: up-shine 2.6s linear infinite;
+    pointer-events: none;
+  }
+  .up-slot-item { width: 100%; }
+  .up-slot-item .up-slot-name { margin-top: 6px; font-size: 12px; color: var(--text); font-weight: 700; }
+  .up-slot-item .up-slot-price { font-size: 12px; color: var(--accent); font-weight: 800; margin-top: 2px; }
+  .upgrade-wheel-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+  .upgrade-wheel {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid rgba(232,166,48,0.6);
+    position: relative;
+    background: conic-gradient(from 0deg, rgba(61,220,132,0.95) var(--chance-angle, 120deg), rgba(255,255,255,0.08) var(--chance-angle, 120deg));
+    box-shadow: 0 0 28px rgba(232,166,48,0.26), inset 0 0 26px rgba(0,0,0,0.52);
+    isolation: isolate;
+  }
+  .upgrade-wheel::after {
+    content: '';
+    position: absolute;
+    inset: -9px;
+    border-radius: 50%;
+    border: 1px dashed rgba(255,255,255,0.13);
+    animation: wheel-orbit 9s linear infinite;
+    pointer-events: none;
+  }
+  .upgrade-wheel.spinning {
+    animation: wheel-pulse 0.8s ease-in-out infinite;
+  }
+  .upgrade-wheel::before {
+    content: '';
+    position: absolute;
+    inset: 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 35%, rgba(24,30,46,0.98), rgba(10,11,15,0.98) 66%);
+    border: 1px solid rgba(255,255,255,0.11);
+    box-shadow: inset 0 0 18px rgba(0,0,0,0.55);
+    z-index: 2;
+  }
+  .upgrade-wheel-glow {
+    position: absolute;
+    inset: -22px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,166,48,0.21), rgba(78,158,255,0.11) 55%, transparent 72%);
+    filter: blur(2px);
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: 0;
+    animation: halo-breathe 2.6s ease-in-out infinite;
+  }
+  .upgrade-wheel-spokes {
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    background: repeating-conic-gradient(
+      from 0deg,
+      rgba(255,255,255,0.09) 0deg 4deg,
+      transparent 4deg 12deg
+    );
+    mask: radial-gradient(circle, transparent 52%, #000 55%, #000 72%, transparent 75%);
+    opacity: 0.45;
+    z-index: 1;
+  }
+  .upgrade-wheel-arrow {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    width: 3px;
+    height: 39%;
+    background: linear-gradient(180deg, var(--accent), #fff);
+    transform-origin: 50% calc(100% - 4px);
+    transform: translateX(-50%) rotate(var(--arrow-rotation, 0deg));
+    transition: transform var(--arrow-duration, 2.4s) var(--arrow-ease, cubic-bezier(0.12, 0.7, 0.2, 1));
+    border-radius: 2px;
+    z-index: 2;
+    filter: drop-shadow(0 0 4px rgba(232,166,48,0.45));
+  }
+  .upgrade-wheel-arrow::after {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 11px solid var(--accent);
+  }
+  .upgrade-wheel-dot {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff 18%, #ffd98c 65%, #c78c22 100%);
+    border: 1px solid rgba(255,255,255,0.36);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    box-shadow: 0 0 10px rgba(232,166,48,0.5);
+  }
+  .upgrade-wheel-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    font-weight: 900;
+    color: var(--text);
+    z-index: 3;
+    transition: color .2s ease, text-shadow .2s ease;
+    letter-spacing: 0.4px;
+  }
+  .upgrade-wheel-meta {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 26px;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    color: rgba(189,199,219,0.85);
+    z-index: 3;
+  }
+  .upgrade-wheel-label.win {
+    color: #5dff9b;
+    text-shadow: 0 0 12px rgba(93,255,155,0.6);
+  }
+  .upgrade-wheel-label.lose {
+    color: #ff8c8c;
+    text-shadow: 0 0 10px rgba(255,107,107,0.48);
+  }
+  .upgrade-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .upgrade-action-sticky {
+    position: sticky;
+    top: 10px;
+    z-index: 20;
+    margin-bottom: 12px;
+    padding: 6px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(10,11,15,0.92), rgba(10,11,15,0.75));
+    border: 1px solid rgba(255,255,255,0.04);
+    backdrop-filter: blur(6px);
+    position: sticky;
+    transform: translateY(calc(var(--up-scroll-y) * -0.02));
+  }
+  .upgrade-select-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .upgrade-select-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .up-pick {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px;
+    cursor: pointer;
+    transition: .2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .up-pick::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% -30%, rgba(255,255,255,0.14), transparent 56%);
+    opacity: 0;
+    transition: opacity .2s ease;
+    pointer-events: none;
+  }
+  .up-pick.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(232,166,48,0.3), inset 0 0 0 1px rgba(232,166,48,0.22);
+    transform: translateY(-1px);
+  }
+  .up-pick.active::after {
+    opacity: 1;
+  }
+  .up-pick.up-common.active { border-color: rgba(136,136,136,0.7); box-shadow: 0 0 0 1px rgba(136,136,136,0.28), inset 0 0 0 1px rgba(136,136,136,0.2); }
+  .up-pick.up-uncommon.active { border-color: rgba(78,158,255,0.75); box-shadow: 0 0 0 1px rgba(78,158,255,0.35), 0 0 18px rgba(78,158,255,0.2); }
+  .up-pick.up-rare.active { border-color: rgba(157,78,221,0.75); box-shadow: 0 0 0 1px rgba(157,78,221,0.35), 0 0 18px rgba(157,78,221,0.2); }
+  .up-pick.up-legendary.active {
+    border-color: rgba(232,166,48,0.88);
+    box-shadow: 0 0 0 1px rgba(232,166,48,0.4), 0 0 22px rgba(232,166,48,0.26);
+  }
+  .up-pick.up-legendary.active::before {
+    content: '';
+    position: absolute;
+    inset: -70% -15%;
+    background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,0.38) 50%, transparent 65%);
+    animation: up-shine 2.2s linear infinite;
+    pointer-events: none;
+  }
+  .up-pick-name { font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 5px; }
+  .up-pick-price { font-size: 12px; color: var(--muted); }
+  .up-pick-price b { color: var(--accent); }
+  .upgrade-run-btn {
+    width: 100%;
+    border: 1px solid rgba(232,166,48,0.45);
+    background: linear-gradient(90deg, rgba(232,166,48,0.2), rgba(61,220,132,0.2));
+    color: #f5f7ff;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 15px;
+    padding: 13px;
+    cursor: pointer;
+  }
+  .upgrade-run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .upgrade-run-btn:active { transform: scale(.98); }
+  .upgrade-spin-status {
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    min-height: 18px;
+    transition: color .2s ease, text-shadow .2s ease, transform .2s ease;
+  }
+  .upgrade-wrap.intro .upgrade-hero,
+  .upgrade-wrap.intro .upgrade-board,
+  .upgrade-wrap.intro .upgrade-action-sticky,
+  .upgrade-wrap.intro .upgrade-spin-status {
+    animation: upgrade-intro .42s ease-out;
+  }
+  .upgrade-spin-status.state-ready { color: var(--accent); }
+  .upgrade-spin-status.state-spinning {
+    color: #f7d27f;
+    text-shadow: 0 0 10px rgba(232,166,48,0.42);
+    animation: status-pulse .9s ease-in-out infinite;
+  }
+  .upgrade-spin-status.state-win {
+    color: #5dff9b;
+    text-shadow: 0 0 12px rgba(93,255,155,0.55);
+    transform: translateY(-1px);
+  }
+  .upgrade-spin-status.state-lose {
+    color: #ff8c8c;
+    text-shadow: 0 0 12px rgba(255,107,107,0.48);
+    transform: translateY(-1px);
+  }
+  @keyframes status-pulse {
+    0%, 100% { opacity: .74; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-1px); }
+  }
+  @keyframes wheel-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+  @keyframes wheel-orbit {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes halo-breathe {
+    0%, 100% { opacity: 0.52; transform: scale(1); }
+    50% { opacity: 0.76; transform: scale(1.05); }
+  }
+  @keyframes up-shine {
+    0% { transform: translateX(-42%); }
+    100% { transform: translateX(42%); }
+  }
+  @keyframes upgrade-intro {
+    from { opacity: 0; transform: translateY(8px) scale(0.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @media (max-width: 410px) {
+    .upgrade-board {
+      grid-template-columns: 1fr 104px 1fr;
+      gap: 8px;
+      padding: 11px;
+    }
+    .upgrade-wheel {
+      width: 104px;
+      height: 104px;
+    }
+    .upgrade-wheel-meta {
+      bottom: 22px;
+      font-size: 9px;
+    }
+    .up-slot {
+      min-height: 104px;
+      padding: 8px;
+    }
+  }
+
+  /* ===== PROFILE SCREEN ===== */
+  .profile-wrap { padding: 20px 20px 0; }
+  .profile-top {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .avatar {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; flex-shrink: 0;
+    overflow: hidden;
+  }
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .profile-name { font-size: 18px; font-weight: 800; }
+  .profile-level { display: none; }
+  .level-badge {
+    background: var(--accent);
+    color: #000;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .profile-exp { font-size: 12px; color: var(--muted); }
+
+  .exp-bar-wrap { display: none; }
+  .exp-bar-bg { height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+  .exp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--blue)); border-radius: 2px; width: 68%; }
+
+  .stat-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .stat-card-val { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .stat-card-key { font-size: 12px; color: var(--muted); }
+  .stat-card-sub { font-size: 11px; color: #8b93a8; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stat-card.highlight { border-color: rgba(232,166,48,0.3); background: rgba(232,166,48,0.05); }
+  .stat-card.highlight .stat-card-val { color: var(--accent); }
+
+  .menu-list { display: flex; flex-direction: column; gap: 8px; }
+  .menu-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; transition: 0.2s;
+  }
+  .menu-item:active { transform: scale(0.98); }
+  .menu-item.active-lang {
+    border-color: rgba(232,166,48,0.55);
+    background: rgba(232,166,48,0.1);
+  }
+  .menu-icon { font-size: 22px; }
+  .menu-text { flex: 1; }
+  .menu-text strong { display: block; font-size: 15px; font-weight: 700; }
+  .menu-text span { font-size: 12px; color: var(--muted); }
+  .menu-arrow { font-size: 16px; color: var(--muted); }
+  .menu-badge {
+    background: var(--accent2);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .history-wrap { margin-top: 14px; }
+  .history-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+  .history-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .history-thumb {
+    width: 46px;
+    height: 30px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+  }
+  .history-main { flex: 1; min-width: 0; }
+  .history-main strong { display: block; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-main span { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .history-price { font-size: 13px; font-weight: 800; color: var(--accent); }
+
+  /* ===== DEPOSIT SCREEN ===== */
+  .deposit-wrap { padding: 20px; }
+  .deposit-field-label {
+    font-family:'Rajdhani',sans-serif;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .deposit-input-wrap {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .deposit-input-star { font-size: 18px; }
+  .deposit-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 800;
+    outline: none;
+  }
+  .deposit-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .stars-only {
+    background: rgba(78,158,255,0.08);
+    border: 1px solid rgba(78,158,255,0.3);
+    color: var(--blue);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .case-card { animation: fadeUp 0.3s ease backwards; }
+  .case-card:nth-child(1) { animation-delay: 0.05s; }
+  .case-card:nth-child(2) { animation-delay: 0.1s; }
+  .case-card:nth-child(3) { animation-delay: 0.15s; }
+  .case-card:nth-child(4) { animation-delay: 0.2s; }
+  .case-card:nth-child(5) { animation-delay: 0.25s; }
+
+  .toast {
+    position: fixed;
+    bottom: 100px; left: 50%; transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    width: calc(100% - 28px);
+    max-width: 402px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ===== HOME SCREEN ===== -->
+<div id="screen-home" class="screen active">
+  <div class="header">
+    <div class="logo">VAULT</div>
+    <div class="balance-pill" onclick="showDeposit()">
+      <span class="icon">⭐</span>
+      <span class="amount" id="balance">2,450</span>
+      <div class="plus-btn">+</div>
+    </div>
+  </div>
+
+  <div class="scroll-area">
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-tag" id="hero-tag">⚡ Горячее предложение</div>
+      <h2 id="hero-title">Промокод: <span>VAULT</span></h2>
+      <p id="hero-subtitle">Успей активировать до окончания акции</p>
+      <div class="hero-countdown" id="hero-promo-timer">00:00:00</div>
+      <div class="hero-btn" id="hero-promo-btn" onclick="copyActivePromoCode()">📋 Скопировать промокод</div>
+    </div>
+
+    <!-- Cases -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title" id="popular-title">🔥 Популярные</div>
+        <div class="see-all" id="see-all-label">Все →</div>
+      </div>
+      <div class="case-grid">
+        <div class="case-card featured" data-case="premier" onclick="showCase('premier')">
+          <div class="case-badge badge-hot">HOT</div>
+          <div class="case-img-wrap"><div class="case-emoji">🎯</div></div>
+          <div class="case-info">
+            <div class="case-name" id="case-name-premier">Premier Case</div>
+            <div class="case-sub" id="case-sub-premier">14 скинов · до AK-47 Asiimov</div>
+            <div class="stars-row">
+              <div class="star-dot" style="background:#555"></div>
+              <div class="star-dot" style="background:#555"></div>
+              <div class="star-dot" style="background:var(--blue)"></div>
+              <div class="star-dot" style="background:var(--rare)"></div>
+              <div class="star-dot" style="background:var(--legendary)"></div>
+            </div>
+            <div class="case-price-row" style="margin-top:10px">
+              <div class="case-price">⭐ 850</div>
+              <div class="open-btn" id="case-open-cta">Открыть</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="case-card" data-case="gamma" onclick="showCase('gamma')">
+          <div class="case-badge badge-new">NEW</div>
+          <div class="case-img-wrap"><div class="case-emoji">🌊</div></div>
+          <div class="case-info">
+            <div class="case-name" id="case-name-gamma">Gamma 2 Case</div>
+            <div class="case-sub" id="case-sub-gamma">12 скинов</div>
+            <div class="case-price-row">
+              <div class="case-price">⭐ 620</div>
+              <div class="open-btn">↗</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="case-card" data-case="danger" onclick="showCase('danger')">
+          <div class="case-badge badge-top">TOP</div>
+          <div class="case-img-wrap"><div class="case-emoji">💎</div></div>
+          <div class="case-info">
+            <div class="case-name" id="case-name-danger">Danger Zone</div>
+            <div class="case-sub" id="case-sub-danger">16 скинов</div>
+            <div class="case-price-row">
+              <div class="case-price">⭐ 1,200</div>
+              <div class="open-btn">↗</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="case-card" data-case="clutch" onclick="showCase('clutch')">
+          <div class="case-img-wrap"><div class="case-emoji">⚔️</div></div>
+          <div class="case-info">
+            <div class="case-name" id="case-name-clutch">Clutch Case</div>
+            <div class="case-sub" id="case-sub-clutch">18 скинов</div>
+            <div class="case-price-row">
+              <div class="case-price">⭐ 430</div>
+              <div class="open-btn">↗</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="case-card" data-case="mirage" onclick="showCase('mirage')">
+          <div class="case-badge badge-hot">HOT</div>
+          <div class="case-img-wrap"><div class="case-emoji">🏜️</div></div>
+          <div class="case-info">
+            <div class="case-name" id="case-name-mirage">Mirage Pulse</div>
+            <div class="case-sub" id="case-sub-mirage">15 скинов</div>
+            <div class="case-price-row">
+              <div class="case-price">⭐ 990</div>
+              <div class="open-btn">↗</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="case-card" data-case="anubis" onclick="showCase('anubis')">
+          <div class="case-badge badge-new">NEW</div>
+          <div class="case-img-wrap"><div class="case-emoji">🦂</div></div>
+          <div class="case-info">
+            <div class="case-name" id="case-name-anubis">Anubis Relic</div>
+            <div class="case-sub" id="case-sub-anubis">14 скинов</div>
+            <div class="case-price-row">
+              <div class="case-price">⭐ 760</div>
+              <div class="open-btn">↗</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="case-card" data-case="inferno" onclick="showCase('inferno')">
+          <div class="case-badge badge-top">TOP</div>
+          <div class="case-img-wrap"><div class="case-emoji">🔥</div></div>
+          <div class="case-info">
+            <div class="case-name" id="case-name-inferno">Inferno Ember</div>
+            <div class="case-sub" id="case-sub-inferno">17 скинов</div>
+            <div class="case-price-row">
+              <div class="case-price">⭐ 1,350</div>
+              <div class="open-btn">↗</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="case-card" data-case="overpass" onclick="showCase('overpass')">
+          <div class="case-img-wrap"><div class="case-emoji">🌉</div></div>
+          <div class="case-info">
+            <div class="case-name" id="case-name-overpass">Overpass Rush</div>
+            <div class="case-sub" id="case-sub-overpass">13 скинов</div>
+            <div class="case-price-row">
+              <div class="case-price">⭐ 510</div>
+              <div class="open-btn">↗</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="case-card" data-case="free" onclick="showCase('free')">
+          <div class="case-badge badge-new">FREE</div>
+          <div class="case-img-wrap"><div class="case-emoji">🎁</div></div>
+          <div class="case-info">
+            <div class="case-name" id="case-name-free">🎁 Бесплатный кейс</div>
+            <div class="case-sub" id="case-sub-free">1 открытие · каждый день</div>
+            <div class="case-price-row">
+              <div class="case-price">⭐ 0</div>
+              <div class="open-btn">↗</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent drops -->
+    <div class="section" style="margin-top:4px">
+      <div class="section-head">
+        <div class="section-title" id="recent-drops-title">🏆 Последние дропы</div>
+      </div>
+      <div class="drops-scroll" id="drops-feed">
+        <div class="drop-card">
+          <div class="drop-bar bar-legendary"></div>
+          <img class="drop-skin-emoji img" src="/assets/skins/usp-cortex.png" alt="USP-S | Cortex">
+          <div class="drop-name">AK-47 | Fire Serpent</div>
+          <div class="drop-price legendary">$420</div>
+          <div class="drop-user">@vlad_k</div>
+        </div>
+        <div class="drop-card">
+          <div class="drop-bar bar-rare"></div>
+          <img class="drop-skin-emoji img" src="/assets/skins/m4a1s-hyper-beast.png" alt="M4A1-S | Hyper Beast">
+          <div class="drop-name">M4A1-S Hyper Beast</div>
+          <div class="drop-price rare">$85</div>
+          <div class="drop-user">@pro_1337</div>
+        </div>
+        <div class="drop-card">
+          <div class="drop-bar bar-uncommon"></div>
+          <img class="drop-skin-emoji img" src="/assets/skins/awp-atheris.png" alt="AWP | Atheris">
+          <div class="drop-name">AWP | Atheris</div>
+          <div class="drop-price uncommon">$22</div>
+          <div class="drop-user">@ksusha</div>
+        </div>
+        <div class="drop-card">
+          <div class="drop-bar bar-legendary"></div>
+          <img class="drop-skin-emoji img" src="/assets/skins/karambit-tiger-tooth.png" alt="Karambit | Tiger Tooth">
+          <div class="drop-name">Karambit | Tiger</div>
+          <div class="drop-price legendary">$890</div>
+          <div class="drop-user">@max_cs</div>
+        </div>
+        <div class="drop-card">
+          <div class="drop-bar bar-common"></div>
+          <img class="drop-skin-emoji img" src="/assets/skins/p250-asiimov.png" alt="P250 | Asiimov">
+          <div class="drop-name">USP-S | Cortex</div>
+          <div class="drop-price common">$8</div>
+          <div class="drop-user">@n00b</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:16px"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="setNav(0)">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Главная</span>
+    </div>
+    <div class="nav-item" onclick="goUpgrades()">
+      <span class="nav-icon">🚀</span>
+      <span class="nav-label">Апгрейд</span>
+    </div>
+    <div class="nav-item" onclick="goInventory()">
+      <span class="nav-icon">🎒</span>
+      <span class="nav-label">Инвентарь</span>
+    </div>
+    <div class="nav-item" onclick="goProfile()">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Профиль</span>
+    </div>
+  </nav>
+</div>
+
+<!-- ===== UPGRADES SCREEN ===== -->
+<div id="screen-upgrades" class="screen">
+  <div class="header">
+    <div class="logo" style="font-size:18px" id="upgrades-header-title">🚀 Апгрейды</div>
+    <div class="balance-pill" onclick="showDeposit()">
+      <span class="icon">⭐</span>
+      <span class="amount" id="balance4">0</span>
+      <div class="plus-btn">+</div>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div class="upgrade-wrap">
+      <div class="upgrade-hero">
+        <div class="upgrade-hero-title">Upgrade Lab</div>
+        <div class="upgrade-hero-sub" id="upgrade-hero-sub">Выбери исходный предмет, цель и крути апгрейд.</div>
+      </div>
+
+      <div class="upgrade-board">
+        <div class="up-slot" id="upgrade-source-slot">Выбери скин из инвентаря</div>
+        <div class="upgrade-wheel-wrap">
+          <div class="upgrade-wheel" id="upgrade-wheel">
+            <div class="upgrade-wheel-glow"></div>
+            <div class="upgrade-wheel-spokes"></div>
+            <div class="upgrade-wheel-arrow" id="upgrade-wheel-arrow"></div>
+            <div class="upgrade-wheel-label" id="upgrade-wheel-label">0%</div>
+            <div class="upgrade-wheel-meta" id="upgrade-wheel-meta">chance</div>
+            <div class="upgrade-wheel-dot"></div>
+          </div>
+        </div>
+        <div class="up-slot" id="upgrade-target-slot">Выбери цель апгрейда</div>
+      </div>
+
+      <div class="upgrade-action-sticky">
+        <button class="upgrade-run-btn" id="upgrade-run-btn" onclick="runUpgradeSpin()">🎯 Запустить апгрейд</button>
+      </div>
+      <div class="upgrade-spin-status" id="upgrade-spin-status">Выбери предмет и цель</div>
+
+      <div class="upgrade-controls">
+        <div>
+          <div class="upgrade-select-title" id="upgrade-source-title">Твой инвентарь</div>
+          <div class="upgrade-select-grid" id="upgrade-source-list"></div>
+        </div>
+        <div>
+          <div class="upgrade-select-title" id="upgrade-target-title">Доступные цели</div>
+          <div class="upgrade-select-grid" id="upgrade-target-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="goHome()"><span class="nav-icon">🏠</span><span class="nav-label">Главная</span></div>
+    <div class="nav-item active"><span class="nav-icon">🚀</span><span class="nav-label">Апгрейд</span></div>
+    <div class="nav-item" onclick="goInventory()"><span class="nav-icon">🎒</span><span class="nav-label">Инвентарь</span></div>
+    <div class="nav-item" onclick="goProfile()"><span class="nav-icon">👤</span><span class="nav-label">Профиль</span></div>
+  </nav>
+</div>
+
+<!-- ===== CASE OPEN SCREEN ===== -->
+<div id="screen-open" class="screen">
+  <div class="open-header">
+    <div class="back-btn" onclick="goHome()">←</div>
+    <h2 id="open-case-name">Premier Case</h2>
+  </div>
+
+  <div class="scroll-area" style="padding-bottom: 0">
+    <div class="case-showcase">
+      <div class="case-big-emoji" id="big-case-emoji" onclick="triggerOpen()">🎯</div>
+      <div class="case-big-name" id="big-case-title">Premier Case</div>
+      <div class="case-big-sub" id="open-case-sub">Нажми, чтобы открыть</div>
+    </div>
+
+    <!-- Roulette -->
+    <div class="roulette-wrap" id="roulette-wrap">
+      <div class="roulette-pointer"></div>
+      <div class="roulette-track" id="roulette-track"></div>
+    </div>
+
+    <div class="open-actions">
+      <div class="multi-open">
+        <div class="multi-btn active" onclick="setMulti(this,1)">×1</div>
+        <div class="multi-btn" onclick="setMulti(this,3)">×3</div>
+        <div class="multi-btn" onclick="setMulti(this,5)">×5</div>
+        <div class="multi-btn" onclick="setMulti(this,10)">×10</div>
+      </div>
+      <button class="btn-primary" id="open-btn" onclick="triggerOpen()">🎰 Открыть за ⭐ <span id="open-price">850</span></button>
+      <div class="btn-secondary" id="open-back-btn" onclick="goHome()">← Назад к кейсам</div>
+    </div>
+
+    <div class="case-contents">
+      <div class="contents-title" id="case-contents-title">Содержимое кейса</div>
+      <div class="contents-grid" id="contents-grid">
+        <div class="content-item c"><img class="ci-emoji img" src="/assets/skins/usp-cortex.png" alt="USP Cortex"><div class="ci-name">USP Cortex</div><div class="ci-chance">48%</div></div>
+        <div class="content-item c"><img class="ci-emoji img" src="/assets/skins/p2000-pulse.png" alt="P2000 Pulse"><div class="ci-name">P2000 Pulse</div><div class="ci-chance">22%</div></div>
+        <div class="content-item u"><img class="ci-emoji img" src="/assets/skins/p250-asiimov.png" alt="P250 Asiimov"><div class="ci-name">P250 Asiimov</div><div class="ci-chance">14%</div></div>
+        <div class="content-item u"><img class="ci-emoji img" src="/assets/skins/awp-atheris.png" alt="AWP Atheris"><div class="ci-name">AWP Atheris</div><div class="ci-chance">9%</div></div>
+        <div class="content-item r"><img class="ci-emoji img" src="/assets/skins/m4a4-spider-lily.png" alt="M4A4 Spider Lily"><div class="ci-name">M4A4 Spider</div><div class="ci-chance">4%</div></div>
+        <div class="content-item r"><img class="ci-emoji img" src="/assets/skins/m4a1s-hyper-beast.png" alt="M4A1-S Hyper Beast"><div class="ci-name">M4A1-S Hyper</div><div class="ci-chance">2%</div></div>
+        <div class="content-item l"><img class="ci-emoji img" src="/assets/skins/ak-fire-serpent.png" alt="AK Fire Serpent"><div class="ci-name">AK Fire Serpent</div><div class="ci-chance">0.7%</div></div>
+        <div class="content-item l"><img class="ci-emoji img" src="/assets/skins/karambit-tiger-tooth.png" alt="Karambit Tiger"><div class="ci-name">Karambit Tiger</div><div class="ci-chance">0.3%</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== INVENTORY SCREEN ===== -->
+<div id="screen-inventory" class="screen">
+  <div class="header">
+    <div class="logo" style="font-size:18px" id="inventory-header-title">🎒 Инвентарь</div>
+    <div class="balance-pill" onclick="showDeposit()">
+      <span class="icon">⭐</span>
+      <span class="amount" id="balance2">2,450</span>
+      <div class="plus-btn">+</div>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div class="inv-header">
+      <div class="inv-stats">
+        <div class="inv-stat">
+          <div class="inv-stat-val" id="inv-count">12</div>
+          <div class="inv-stat-key" id="inv-stat-items-label">предметов</div>
+        </div>
+        <div class="inv-stat">
+          <div class="inv-stat-val" id="inv-value">$0</div>
+          <div class="inv-stat-key" id="inv-stat-value-label">стоимость</div>
+        </div>
+        <div class="inv-stat">
+          <div class="inv-stat-val" id="inv-legendary">0</div>
+          <div class="inv-stat-key" id="inv-stat-rare-label">редких</div>
+        </div>
+      </div>
+      <div class="sell-all-btn" id="sell-all-btn" onclick="sellAllInventory()">💸 Продать всё</div>
+    </div>
+    <div class="inventory-grid" id="inventory-grid">
+      <div class="inv-card il"><img class="inv-emoji img" src="/assets/skins/karambit-tiger-tooth.png" alt="Karambit Tiger Tooth"><div class="inv-name">Karambit Tiger Tooth</div><div class="inv-price">$890</div></div>
+      <div class="inv-card ir"><img class="inv-emoji img" src="/assets/skins/ak-fire-serpent.png" alt="AK-47 Fire Serpent"><div class="inv-name">AK-47 Fire Serpent</div><div class="inv-price">$85</div></div>
+      <div class="inv-card iu"><img class="inv-emoji img" src="/assets/skins/m4a1s-hyper-beast.png" alt="M4A1-S Hyper Beast"><div class="inv-name">M4A1-S Hyper Beast</div><div class="inv-price">$22</div></div>
+      <div class="inv-card ic"><img class="inv-emoji img" src="/assets/skins/awp-atheris.png" alt="AWP Atheris FN"><div class="inv-name">AWP Atheris FN</div><div class="inv-price">$8</div></div>
+      <div class="inv-card ic"><img class="inv-emoji img" src="/assets/skins/usp-cortex.png" alt="USP-S Cortex"><div class="inv-name">USP-S Cortex</div><div class="inv-price">$6</div></div>
+      <div class="inv-card iu"><img class="inv-emoji img" src="/assets/skins/p250-asiimov.png" alt="P250 Asiimov"><div class="inv-name">P250 Asiimov</div><div class="inv-price">$18</div></div>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="goHome()"><span class="nav-icon">🏠</span><span class="nav-label">Главная</span></div>
+    <div class="nav-item" onclick="goUpgrades()"><span class="nav-icon">🚀</span><span class="nav-label">Апгрейд</span></div>
+    <div class="nav-item active"><span class="nav-icon">🎒</span><span class="nav-label">Инвентарь</span></div>
+    <div class="nav-item" onclick="goProfile()"><span class="nav-icon">👤</span><span class="nav-label">Профиль</span></div>
+  </nav>
+</div>
+
+<!-- ===== PROFILE SCREEN ===== -->
+<div id="screen-profile" class="screen">
+  <div class="header">
+    <div class="logo" style="font-size:18px" id="profile-header-title">👤 Профиль</div>
+    <div class="balance-pill" onclick="showDeposit()">
+      <span class="icon">⭐</span>
+      <span class="amount" id="balance3">0</span>
+      <div class="plus-btn">+</div>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div class="profile-wrap">
+      <div class="profile-top">
+        <div class="avatar" id="profile-avatar">🦊</div>
+        <div>
+          <div class="profile-name" id="profile-name">Пользователь Telegram</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px" id="steam-status">Steam не привязан</div>
+          <div class="profile-level">
+            <div class="level-badge">LVL 23</div>
+            <div class="profile-exp">4,820 / 7,000 XP</div>
+          </div>
+          <div class="exp-bar-wrap"><div class="exp-bar-bg"><div class="exp-bar-fill"></div></div></div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card highlight">
+          <div class="stat-card-val" id="stat-cases-opened">0</div>
+      <div class="stat-card-key" id="stat-cases-opened-label">Кейсов открыто</div>
+        </div>
+        <div class="stat-card highlight">
+          <div class="stat-card-val" id="stat-total-won">$0</div>
+      <div class="stat-card-key" id="stat-total-won-label">Всего выиграно</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-val" id="stat-top-drop">$0</div>
+      <div class="stat-card-key" id="stat-top-drop-label">Самый дорогой дроп</div>
+          <div class="stat-card-sub" id="stat-top-drop-name">Пока нет данных</div>
+        </div>
+      </div>
+
+      <div class="menu-list">
+        <div class="menu-item" onclick="showHistoryScreen()">
+          <span class="menu-icon">📋</span>
+          <div class="menu-text"><strong id="history-menu-title">История открытий</strong><span id="history-open-count">0 кейсов</span></div>
+          <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="showLanguageScreen()">
+          <span class="menu-icon">🌐</span>
+          <div class="menu-text"><strong id="language-menu-title">Язык интерфейса</strong><span id="language-current-label">Русский</span></div>
+          <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="toastRefCopied()">
+          <span class="menu-icon">🔗</span>
+          <div class="menu-text"><strong id="ref-program-title">Реферальная программа</strong><span id="ref-program-sub">Зови друзей — получай Stars</span></div>
+          <span class="menu-badge">+200⭐</span>
+        </div>
+        <div class="menu-item" onclick="showDeposit()">
+          <span class="menu-icon">💳</span>
+          <div class="menu-text"><strong id="topup-menu-title">Пополнить баланс</strong><span id="topup-menu-sub">Оплата только Telegram Stars</span></div>
+          <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="startSteamLink()">
+          <span class="menu-icon">🎮</span>
+          <div class="menu-text"><strong id="steam-link-title">Привязать Steam</strong><span id="steam-link-sub">Нужно для вывода скинов</span></div>
+          <span class="menu-arrow" id="steam-link-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="toastWithdrawInSteam()">
+          <span class="menu-icon">📤</span>
+          <div class="menu-text"><strong id="withdraw-title">Вывести скины</strong><span id="withdraw-sub">Отправить в Steam</span></div>
+          <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="toastProvablyFair()">
+          <span class="menu-icon">🛡️</span>
+          <div class="menu-text"><strong id="fair-title">Provably Fair</strong><span id="fair-sub">Проверить честность</span></div>
+          <span class="menu-arrow">›</span>
+        </div>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="goHome()"><span class="nav-icon">🏠</span><span class="nav-label">Главная</span></div>
+    <div class="nav-item" onclick="goUpgrades()"><span class="nav-icon">🚀</span><span class="nav-label">Апгрейд</span></div>
+    <div class="nav-item" onclick="goInventory()"><span class="nav-icon">🎒</span><span class="nav-label">Инвентарь</span></div>
+    <div class="nav-item active"><span class="nav-icon">👤</span><span class="nav-label">Профиль</span></div>
+  </nav>
+</div>
+
+<!-- ===== HISTORY SCREEN ===== -->
+<div id="screen-history" class="screen">
+  <div class="open-header">
+    <div class="back-btn" onclick="goBackFromHistory()">←</div>
+    <h2 id="history-screen-title">История выигрышей</h2>
+  </div>
+  <div class="scroll-area" style="padding:14px 14px 90px">
+    <div class="history-list" id="history-list">
+      <div class="history-item"><div class="history-main"><strong>История пока пустая</strong><span>Открой кейс, чтобы увидеть выигрыши</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LANGUAGE SCREEN ===== -->
+<div id="screen-language" class="screen">
+  <div class="open-header">
+    <div class="back-btn" onclick="goBackFromLanguage()">←</div>
+    <h2 id="language-screen-title">Язык интерфейса</h2>
+  </div>
+  <div class="scroll-area">
+    <div class="deposit-wrap">
+      <div class="menu-list" id="language-list">
+        <div class="menu-item" data-lang="ru" onclick="setLanguage('ru')">
+          <span class="menu-icon">🇷🇺</span>
+          <div class="menu-text"><strong>Русский</strong><span>Основной язык</span></div>
+          <span class="menu-arrow">✓</span>
+        </div>
+        <div class="menu-item" data-lang="uz" onclick="setLanguage('uz')">
+          <span class="menu-icon">🇺🇿</span>
+          <div class="menu-text"><strong>O'zbek</strong><span>Uzbek</span></div>
+          <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" data-lang="kk" onclick="setLanguage('kk')">
+          <span class="menu-icon">🇰🇿</span>
+          <div class="menu-text"><strong>Қазақша</strong><span>Kazakh</span></div>
+          <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" data-lang="en" onclick="setLanguage('en')">
+          <span class="menu-icon">🇬🇧</span>
+          <div class="menu-text"><strong>English</strong><span>International</span></div>
+          <span class="menu-arrow">›</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DEPOSIT SCREEN ===== -->
+<div id="screen-deposit" class="screen">
+  <div class="open-header">
+    <div class="back-btn" id="deposit-back">←</div>
+    <h2 id="deposit-screen-title">Пополнение</h2>
+  </div>
+  <div class="scroll-area">
+    <div class="deposit-wrap">
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px" id="deposit-manual-sub">Введи сумму пополнения вручную</p>
+      <div class="deposit-field-label" id="deposit-sum-label">Сумма (Stars)</div>
+      <div class="deposit-input-wrap">
+        <span class="deposit-input-star">⭐</span>
+        <input id="deposit-input" class="deposit-input" type="number" min="1" max="5000" step="1" value="500" inputmode="numeric" oninput="syncDepositInput()">
+      </div>
+      <div class="deposit-hint" id="deposit-hint">Минимум: 1 ⭐ · Максимум: 5000 ⭐</div>
+      <div class="stars-only" id="deposit-stars-only">Доступен только способ оплаты: Telegram Stars</div>
+
+      <button class="btn-primary" id="deposit-btn" onclick="doDeposit()">⚡ Пополнить ⭐ 500</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIN OVERLAY -->
+<div class="win-overlay" id="win-overlay">
+  <div class="win-glow" id="win-glow"></div>
+  <div class="win-emoji-big" id="win-emoji"><img src="/assets/skins/ak-fire-serpent.png" class="skin-img-big" alt="AK-47 | Fire Serpent"></div>
+  <div class="win-rarity" id="win-rarity">Legendary</div>
+  <div class="win-name" id="win-name">AK-47 | Fire Serpent</div>
+  <div class="win-price" id="win-price">$420</div>
+  <div class="win-actions">
+    <div class="win-sell" id="win-sell-btn" onclick="sellItem()">💸 Продать</div>
+    <div class="win-keep" id="win-keep-btn" onclick="keepItem()">🎒 Сохранить</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+let balance = 0;
+let inventory = [];
+let openHistory = [];
+let currentCase = 'premier';
+let multiCount = 1;
+let casePrices = { premier: 850, gamma: 620, danger: 1200, clutch: 430, mirage: 990, anubis: 760, inferno: 1350, overpass: 510, free: 0 };
+let caseEnabled = { premier: true, gamma: true, danger: true, clutch: true, mirage: true, anubis: true, inferno: true, overpass: true, free: true };
+let paymentMethods = { telegram_stars: { title: 'Telegram Stars', enabled: true, minAmount: 1, maxAmount: 5000 } };
+let activePromo = null;
+let promoClockOffsetMs = 0;
+let promoCountdownTimer = null;
+let currentScreen = 'home';
+let depositBack = 'home';
+let languageBack = 'profile';
+let lastWonItemId = null;
+let authState = { initData: '', user: null };
+let runtimeState = { mode: 'unknown', backendReachable: false, lastError: '' };
+let demoNoticeShown = false;
+let upgradeSourceItemId = null;
+let upgradeTargetKey = null;
+let upgradeAnimating = false;
+let upgradeArrowRotation = 0;
+let upgradeLabelTicker = null;
+let upgradeScrollBound = false;
+let currentLang = 'ru';
+
+const rarityColors = { common: '#888', uncommon: '#4e9eff', rare: '#9d4edd', legendary: '#e8a630' };
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+const supportedLanguages = ['ru', 'uz', 'kk', 'en'];
+const languageNames = { ru: 'Русский', uz: "O'zbek", kk: 'Қазақша', en: 'English' };
+const i18n = {
+  ru: {
+    hero_tag: '🎁 Промокод дня',
+    hero_title_html: 'Промокод: <span>{code}</span>',
+    hero_subtitle: 'Успей активировать до окончания акции',
+    hero_subtitle_empty: 'Сейчас активных промокодов нет',
+    hero_promo_copy_btn: '📋 Скопировать промокод',
+    hero_promo_unavailable_btn: '⏳ Промокодов пока нет',
+    promo_no_code: 'СКОРО',
+    popular_title: '🔥 Популярные',
+    see_all: 'Все →',
+    open_cta: 'Открыть',
+    case_sub_with_count: '{count} скинов',
+    case_sub_premier: '14 скинов · до AK-47 Asiimov',
+    case_premier: 'Premier Case',
+    case_gamma: 'Gamma 2 Case',
+    case_danger: 'Danger Zone',
+    case_clutch: 'Clutch Case',
+    case_mirage: 'Mirage Pulse',
+    case_anubis: 'Anubis Relic',
+    case_inferno: 'Inferno Ember',
+    case_overpass: 'Overpass Rush',
+    case_free: '🎁 Бесплатный кейс',
+    case_sub_free: '1 открытие · каждый день',
+    recent_drops: '🏆 Последние дропы',
+    upgrade_hero_sub: 'Выбери исходный предмет, цель и крути апгрейд.',
+    upgrade_source_placeholder: 'Выбери скин из инвентаря',
+    upgrade_target_placeholder: 'Выбери цель апгрейда',
+    upgrade_source_title: 'Твой инвентарь',
+    upgrade_target_title: 'Доступные цели',
+    upgrade_run: '🎯 Запустить апгрейд',
+    upgrade_wheel_meta: 'шанс',
+    upgrade_status_pick: 'Выбери предмет и цель',
+    upgrade_status_ready: 'Шанс апгрейда: {chance}%',
+    upgrade_status_spinning: 'Крутим апгрейд...',
+    upgrade_status_win: 'Апгрейд прошёл',
+    upgrade_status_lose: 'Апгрейд не прошёл',
+    open_case_sub: 'Нажми, чтобы открыть',
+    open_for: '🎰 Открыть за ⭐ {price}',
+    open_back: '← Назад к кейсам',
+    case_contents_title: 'Содержимое кейса',
+    inventory_header: '🎒 Инвентарь',
+    inv_items_label: 'предметов',
+    inv_value_label: 'стоимость',
+    inv_rare_label: 'редких',
+    sell_all: '💸 Продать всё ({count})',
+    profile_name_fallback: 'Пользователь Telegram',
+    profile_open_in_tg: 'Открой Mini App в Telegram',
+    stat_cases_opened_label: 'Кейсов открыто',
+    stat_total_won_label: 'Всего выиграно',
+    stat_top_drop_label: 'Самый дорогой дроп',
+    stat_no_data: 'Пока нет данных',
+    history_empty_title: 'История пока пустая',
+    history_empty_sub: 'Открой кейс, чтобы увидеть выигрыши',
+    history_count: '{count} кейсов',
+    history_case_fallback: 'Кейс',
+    history_item_fallback: 'Предмет',
+    menu_ref_title: 'Реферальная программа',
+    menu_ref_sub: 'Зови друзей — получай Stars',
+    menu_topup_title: 'Пополнить баланс',
+    menu_topup_sub: 'Оплата только Telegram Stars',
+    menu_withdraw_title: 'Вывести скины',
+    menu_withdraw_sub: 'Отправить в Steam',
+    menu_fair_title: 'Provably Fair',
+    menu_fair_sub: 'Проверить честность',
+    lang_ru_sub: 'Основной язык',
+    lang_uz_sub: 'Узбекский',
+    lang_kk_sub: 'Казахский',
+    lang_en_sub: 'Английский',
+    nav_home: 'Главная',
+    nav_upgrade: 'Апгрейд',
+    nav_inventory: 'Инвентарь',
+    nav_profile: 'Профиль',
+    profile_header: '👤 Профиль',
+    upgrades_header: '🚀 Апгрейды',
+    history_title: 'История выигрышей',
+    history_menu: 'История открытий',
+    language_menu: 'Язык интерфейса',
+    language_title: 'Язык интерфейса',
+    deposit_title: 'Пополнение',
+    deposit_manual_sub: 'Введи сумму пополнения вручную',
+    deposit_sum_label: 'Сумма (Stars)',
+    deposit_hint_default: 'Минимум: {min} ⭐ · Максимум: {max} ⭐',
+    deposit_hint_too_much: 'Слишком много. Максимальная сумма: {max} ⭐',
+    deposit_hint_will_charge: 'Будет списано: ⭐ {amount}',
+    deposit_btn_enter_amount: '⚡ Введи сумму от {min} до {max}',
+    deposit_btn_topup: '⚡ Пополнить ⭐ {amount}',
+    deposit_stars_only: 'Доступен только способ оплаты: Telegram Stars',
+    win_sell_btn: '💸 Продать',
+    win_keep_btn: '🎒 Сохранить',
+    steam_status_not_linked: 'Steam не привязан',
+    steam_status_no_tg: 'Авторизация Telegram не найдена',
+    steam_link_title: 'Привязать Steam',
+    steam_link_sub: 'Нужно для вывода скинов',
+    steam_link_sub_no_tg: 'Откройте приложение внутри Telegram',
+    steam_linked_title: 'Steam привязан',
+    steam_linked_sub: 'Нажми, чтобы перепривязать',
+    rarity_common: 'Обычный',
+    rarity_uncommon: 'Необычный',
+    rarity_rare: 'Редкий',
+    rarity_legendary: '✨ Легендарный',
+    time_s: '{n}с назад',
+    time_m: '{n}м назад',
+    time_h: '{n}ч назад',
+    time_d: '{n}д назад',
+    msg_unknown_error: 'Неизвестная ошибка',
+    msg_demo_mode: 'ℹ️ Сервер недоступен: включён demo-режим',
+    msg_open_in_tg: '⚠️ Для реального режима открой VAULT внутри Telegram',
+    msg_tg_data_fail: '⚠️ Не удалось получить данные Telegram. Переоткрой Mini App через кнопку бота.',
+    msg_demo_prefix: '⚠️ Demo-режим: {error}',
+    msg_not_enough_stars: '❌ Недостаточно Stars! Пополни баланс',
+    msg_case_disabled: '⛔ Этот кейс сейчас отключён',
+    msg_demo_case_opened: '🎁 Demo-режим: кейс открыт',
+    msg_multi_opened: '🎉 Открыто {count} кейсов',
+    msg_sell_item_missing: '❌ Не удалось определить предмет для продажи',
+    msg_sold_amount: '💸 Продано! +⭐{stars}',
+    msg_item_saved: '🎒 Скин добавлен в инвентарь!',
+    msg_item_not_found: '❌ Предмет не найден',
+    msg_inventory_empty: 'Инвентарь пуст',
+    msg_inventory_already_empty: 'Инвентарь уже пуст',
+    msg_sold_many: '💸 Продано {count} предметов (+⭐{stars})',
+    msg_enter_amount_range: '❌ Укажи сумму от {min} до {max} Stars',
+    msg_payment_method_disabled: '❌ Этот способ оплаты временно отключён',
+    msg_demo_balance_topped: '✅ Demo: баланс пополнен на ⭐ {amount}',
+    msg_topup_tg_only: '❌ Пополнение Stars работает только в Telegram Mini App',
+    msg_creating_invoice: '⏳ Создаём счёт...',
+    msg_topped_up: '✅ Баланс пополнен на ⭐ {amount}',
+    msg_wait_webhook: '⌛ Платёж принят, ждём подтверждение webhook',
+    msg_payment_cancelled: 'Платёж отменён',
+    msg_payment_failed: '❌ Ошибка оплаты',
+    msg_payment_status: 'Статус оплаты: {status}',
+    msg_create_invoice_fail: '❌ Не удалось создать счёт: {error}',
+    msg_steam_link_backend_only: 'ℹ️ Привязка Steam доступна после запуска backend',
+    msg_steam_link_tg_only: '❌ Привязка Steam доступна только в Telegram Mini App',
+    msg_steam_open: '🔐 Открой Steam и подтверди вход',
+    msg_steam_link_fail: '❌ Ошибка привязки Steam: {error}',
+    msg_ref_copied: '🔗 Ссылка скопирована!',
+    msg_promo_copied: '🎁 Промокод скопирован',
+    msg_promo_none: '⏳ Сейчас нет активного промокода',
+    msg_withdraw_steam: '📤 Вывод в Steam',
+    msg_fair: '🛡️ Provably Fair — всё честно!',
+    topup_item_name: 'Пополнение баланса',
+    toast_lang_saved: '🌐 Язык переключён',
+    toast_select_upgrade: '❌ Выбери исходный предмет и цель апгрейда',
+    toast_upgrade_win: '✅ Апгрейд успешен',
+    toast_upgrade_lose: '❌ Апгрейд не зашёл'
+  },
+  uz: {
+    hero_tag: '🎁 Promo kod',
+    hero_title_html: 'Promo kod: <span>{code}</span>',
+    hero_subtitle: 'Aksiya tugashidan oldin ulgurib oling',
+    hero_subtitle_empty: 'Hozircha faol promo kod yo‘q',
+    hero_promo_copy_btn: '📋 Promo kodni nusxalash',
+    hero_promo_unavailable_btn: '⏳ Promo kod hali yo‘q',
+    promo_no_code: 'TEZ ORADA',
+    popular_title: '🔥 Ommabop',
+    see_all: "Barchasi →",
+    open_cta: 'Ochish',
+    case_sub_with_count: '{count} ta skin',
+    case_sub_premier: '14 ta skin · AK-47 Asiimov gacha',
+    case_premier: 'Premier Case',
+    case_gamma: 'Gamma 2 Case',
+    case_danger: 'Danger Zone',
+    case_clutch: 'Clutch Case',
+    case_mirage: 'Mirage Pulse',
+    case_anubis: 'Anubis Relic',
+    case_inferno: 'Inferno Ember',
+    case_overpass: 'Overpass Rush',
+    case_free: '🎁 Bepul keys',
+    case_sub_free: '1 ochish · har kuni',
+    recent_drops: '🏆 So\'nggi drop',
+    upgrade_hero_sub: 'Inventardan skin tanlang, maqsadni belgilang va aylantiring.',
+    upgrade_source_placeholder: 'Inventardan skin tanlang',
+    upgrade_target_placeholder: 'Apgreyd maqsadini tanlang',
+    upgrade_source_title: 'Sening inventaring',
+    upgrade_target_title: 'Mavjud maqsadlar',
+    upgrade_run: '🎯 Apgreydni boshlash',
+    upgrade_wheel_meta: 'imkon',
+    upgrade_status_pick: 'Predmet va maqsadni tanlang',
+    upgrade_status_ready: 'Apgreyd ehtimoli: {chance}%',
+    upgrade_status_spinning: 'Apgreyd aylantirilmoqda...',
+    upgrade_status_win: 'Apgreyd o‘tdi',
+    upgrade_status_lose: 'Apgreyd o‘tmadi',
+    open_case_sub: 'Ochish uchun bosing',
+    open_for: '🎰 Ochish ⭐ {price}',
+    open_back: '← Кейslarga qaytish',
+    case_contents_title: 'Keys tarkibi',
+    inventory_header: '🎒 Inventar',
+    inv_items_label: 'predmet',
+    inv_value_label: 'qiymat',
+    inv_rare_label: 'qimmat',
+    sell_all: '💸 Hammasini sotish ({count})',
+    profile_name_fallback: 'Telegram foydalanuvchisi',
+    profile_open_in_tg: 'Mini Appni Telegram ichida oching',
+    stat_cases_opened_label: 'Ochilgan кейslar',
+    stat_total_won_label: 'Jami yutuq',
+    stat_top_drop_label: 'Eng qimmat drop',
+    stat_no_data: 'Hali maʼlumot yoʻq',
+    history_empty_title: 'Tarix hozircha bo\'sh',
+    history_empty_sub: 'Yutuqlarni ko\'rish uchun keys oching',
+    history_count: '{count} ta keys',
+    history_case_fallback: 'Keys',
+    history_item_fallback: 'Predmet',
+    menu_ref_title: 'Referal dasturi',
+    menu_ref_sub: 'Do\'stlarni taklif qiling — Stars oling',
+    menu_topup_title: 'Balansni to\'ldirish',
+    menu_topup_sub: 'Faqat Telegram Stars',
+    menu_withdraw_title: 'Skinlarni chiqarish',
+    menu_withdraw_sub: 'Steamga yuborish',
+    menu_fair_title: 'Provably Fair',
+    menu_fair_sub: 'Halollikni tekshirish',
+    lang_ru_sub: 'Asosiy til',
+    lang_uz_sub: 'O\'zbek tili',
+    lang_kk_sub: 'Qozoq tili',
+    lang_en_sub: 'Ingliz tili',
+    nav_home: 'Bosh sahifa',
+    nav_upgrade: 'Apgreyd',
+    nav_inventory: 'Inventar',
+    nav_profile: 'Profil',
+    profile_header: '👤 Profil',
+    upgrades_header: '🚀 Apgreydlar',
+    history_title: "Yutuqlar tarixi",
+    history_menu: 'Ochishlar tarixi',
+    language_menu: 'Interfeys tili',
+    language_title: 'Interfeys tili',
+    deposit_title: "To'ldirish",
+    deposit_manual_sub: 'To\'ldirish summasini qo\'lda kiriting',
+    deposit_sum_label: 'Summa (Stars)',
+    deposit_hint_default: 'Minimum: {min} ⭐ · Maksimum: {max} ⭐',
+    deposit_hint_too_much: 'Juda ko\'p. Maksimal summa: {max} ⭐',
+    deposit_hint_will_charge: 'Hisobdan yechiladi: ⭐ {amount}',
+    deposit_btn_enter_amount: '⚡ {min} dan {max} gacha kiriting',
+    deposit_btn_topup: '⚡ To\'ldirish ⭐ {amount}',
+    deposit_stars_only: 'Faqat Telegram Stars to\'lovi mavjud',
+    win_sell_btn: '💸 Sotish',
+    win_keep_btn: '🎒 Saqlash',
+    steam_status_not_linked: 'Steam ulanmagan',
+    steam_status_no_tg: 'Telegram avtorizatsiyasi topilmadi',
+    steam_link_title: 'Steam ulash',
+    steam_link_sub: 'Skin chiqarish uchun kerak',
+    steam_link_sub_no_tg: 'Ilovani Telegram ichida oching',
+    steam_linked_title: 'Steam ulangan',
+    steam_linked_sub: 'Qayta ulash uchun bosing',
+    rarity_common: 'Oddiy',
+    rarity_uncommon: 'Noodatiy',
+    rarity_rare: 'Noyob',
+    rarity_legendary: '✨ Legendarka',
+    time_s: '{n}s oldin',
+    time_m: '{n}m oldin',
+    time_h: '{n}soat oldin',
+    time_d: '{n}kun oldin',
+    msg_unknown_error: 'Nomaʼlum xato',
+    msg_demo_mode: 'ℹ️ Server yoʻq: demo rejim yoqildi',
+    msg_open_in_tg: '⚠️ Real rejim uchun VAULTni Telegram ichida oching',
+    msg_tg_data_fail: '⚠️ Telegram maʼlumotlari olinmadi. Bot tugmasi orqali qayta oching.',
+    msg_demo_prefix: '⚠️ Demo rejim: {error}',
+    msg_not_enough_stars: '❌ Stars yetarli emas! Balansni to\'ldiring',
+    msg_case_disabled: '⛔ Bu keys hozir o‘chirilgan',
+    msg_demo_case_opened: '🎁 Demo rejim: keys ochildi',
+    msg_multi_opened: '🎉 {count} ta keys ochildi',
+    msg_sell_item_missing: '❌ Sotish uchun predmet topilmadi',
+    msg_sold_amount: '💸 Sotildi! +⭐{stars}',
+    msg_item_saved: '🎒 Skin inventarga qo\'shildi!',
+    msg_item_not_found: '❌ Predmet topilmadi',
+    msg_inventory_empty: 'Inventar bo\'sh',
+    msg_inventory_already_empty: 'Inventar allaqachon bo\'sh',
+    msg_sold_many: '💸 {count} ta predmet sotildi (+⭐{stars})',
+    msg_enter_amount_range: '❌ {min} dan {max} gacha kiriting',
+    msg_payment_method_disabled: '❌ Bu to\'lov usuli vaqtincha o\'chirilgan',
+    msg_demo_balance_topped: '✅ Demo: balans ⭐ {amount} ga to\'ldirildi',
+    msg_topup_tg_only: '❌ Stars to\'lovi faqat Telegram Mini Appda ishlaydi',
+    msg_creating_invoice: '⏳ Hisob yaratilmoqda...',
+    msg_topped_up: '✅ Balans ⭐ {amount} ga to\'ldirildi',
+    msg_wait_webhook: '⌛ To\'lov qabul qilindi, webhook tasdiqlanishi kutilmoqda',
+    msg_payment_cancelled: 'To\'lov bekor qilindi',
+    msg_payment_failed: '❌ To\'lov xatosi',
+    msg_payment_status: 'To\'lov holati: {status}',
+    msg_create_invoice_fail: '❌ Hisob yaratib bo\'lmadi: {error}',
+    msg_steam_link_backend_only: 'ℹ️ Steam ulash backend ishga tushgandan so\'ng mavjud',
+    msg_steam_link_tg_only: '❌ Steam ulash faqat Telegram Mini Appda mavjud',
+    msg_steam_open: '🔐 Steamni oching va kirishni tasdiqlang',
+    msg_steam_link_fail: '❌ Steam ulash xatosi: {error}',
+    msg_ref_copied: '🔗 Havola nusxalandi!',
+    msg_promo_copied: '🎁 Promo kod nusxalandi',
+    msg_promo_none: '⏳ Hozir faol promo kod yo‘q',
+    msg_withdraw_steam: '📤 Steamga chiqarish',
+    msg_fair: '🛡️ Provably Fair — hammasi halol!',
+    topup_item_name: 'Balansni to\'ldirish',
+    toast_lang_saved: '🌐 Til almashtirildi',
+    toast_select_upgrade: '❌ Boshlang\'ich predmet va maqsadni tanlang',
+    toast_upgrade_win: '✅ Apgreyd muvaffaqiyatli',
+    toast_upgrade_lose: '❌ Apgreyd muvaffaqiyatsiz'
+  },
+  kk: {
+    hero_tag: '🎁 Промокод',
+    hero_title_html: 'Промокод: <span>{code}</span>',
+    hero_subtitle: 'Акция біткенше үлгеріп алыңыз',
+    hero_subtitle_empty: 'Қазір белсенді промокод жоқ',
+    hero_promo_copy_btn: '📋 Промокодты көшіру',
+    hero_promo_unavailable_btn: '⏳ Промокод әзірге жоқ',
+    promo_no_code: 'ЖАҚЫНДА',
+    popular_title: '🔥 Танымал',
+    see_all: 'Барлығы →',
+    open_cta: 'Ашу',
+    case_sub_with_count: '{count} скин',
+    case_sub_premier: '14 скин · AK-47 Asiimov дейін',
+    case_premier: 'Premier Case',
+    case_gamma: 'Gamma 2 Case',
+    case_danger: 'Danger Zone',
+    case_clutch: 'Clutch Case',
+    case_mirage: 'Mirage Pulse',
+    case_anubis: 'Anubis Relic',
+    case_inferno: 'Inferno Ember',
+    case_overpass: 'Overpass Rush',
+    case_free: '🎁 Тегін кейс',
+    case_sub_free: '1 ашу · күн сайын',
+    recent_drops: '🏆 Соңғы дроптар',
+    upgrade_hero_sub: 'Инвентарьдан скин таңдап, мақсат қойып айналдыр.',
+    upgrade_source_placeholder: 'Инвентарьдан скин таңда',
+    upgrade_target_placeholder: 'Апгрейд мақсатын таңда',
+    upgrade_source_title: 'Сенің инвентарың',
+    upgrade_target_title: 'Қолжетімді мақсаттар',
+    upgrade_run: '🎯 Апгрейдті бастау',
+    upgrade_wheel_meta: 'мүмкіндік',
+    upgrade_status_pick: 'Зат пен мақсатты таңда',
+    upgrade_status_ready: 'Апгрейд мүмкіндігі: {chance}%',
+    upgrade_status_spinning: 'Апгрейд айналуда...',
+    upgrade_status_win: 'Апгрейд өтті',
+    upgrade_status_lose: 'Апгрейд өтпеді',
+    open_case_sub: 'Ашу үшін бас',
+    open_for: '🎰 Ашу ⭐ {price}',
+    open_back: '← Кейстерге оралу',
+    case_contents_title: 'Кейс ішіндегісі',
+    inventory_header: '🎒 Инвентарь',
+    inv_items_label: 'зат',
+    inv_value_label: 'құны',
+    inv_rare_label: 'сирек',
+    sell_all: '💸 Барлығын сату ({count})',
+    profile_name_fallback: 'Telegram қолданушысы',
+    profile_open_in_tg: 'Mini App-ты Telegram ішінде ашыңыз',
+    stat_cases_opened_label: 'Ашылған кейс',
+    stat_total_won_label: 'Жалпы ұтыс',
+    stat_top_drop_label: 'Ең қымбат дроп',
+    stat_no_data: 'Әзірге дерек жоқ',
+    history_empty_title: 'Тарих әзірге бос',
+    history_empty_sub: 'Ұтыстарды көру үшін кейс аш',
+    history_count: '{count} кейс',
+    history_case_fallback: 'Кейс',
+    history_item_fallback: 'Зат',
+    menu_ref_title: 'Рефералдық бағдарлама',
+    menu_ref_sub: 'Достарды шақыр — Stars ал',
+    menu_topup_title: 'Балансты толтыру',
+    menu_topup_sub: 'Тек Telegram Stars',
+    menu_withdraw_title: 'Скиндерді шығару',
+    menu_withdraw_sub: 'Steam-ге жіберу',
+    menu_fair_title: 'Provably Fair',
+    menu_fair_sub: 'Адалдықты тексеру',
+    lang_ru_sub: 'Негізгі тіл',
+    lang_uz_sub: 'Өзбек тілі',
+    lang_kk_sub: 'Қазақ тілі',
+    lang_en_sub: 'Ағылшын тілі',
+    nav_home: 'Басты бет',
+    nav_upgrade: 'Апгрейд',
+    nav_inventory: 'Инвентарь',
+    nav_profile: 'Профиль',
+    profile_header: '👤 Профиль',
+    upgrades_header: '🚀 Апгрейдтер',
+    history_title: 'Ұтыстар тарихы',
+    history_menu: 'Ашу тарихы',
+    language_menu: 'Интерфейс тілі',
+    language_title: 'Интерфейс тілі',
+    deposit_title: 'Толықтыру',
+    deposit_manual_sub: 'Толықтыру сомасын қолмен енгіз',
+    deposit_sum_label: 'Сома (Stars)',
+    deposit_hint_default: 'Минимум: {min} ⭐ · Максимум: {max} ⭐',
+    deposit_hint_too_much: 'Тым көп. Ең көбі: {max} ⭐',
+    deposit_hint_will_charge: 'Шегеріледі: ⭐ {amount}',
+    deposit_btn_enter_amount: '⚡ {min}-ден {max}-ға дейін енгіз',
+    deposit_btn_topup: '⚡ Толықтыру ⭐ {amount}',
+    deposit_stars_only: 'Тек Telegram Stars төлемі қолжетімді',
+    win_sell_btn: '💸 Сату',
+    win_keep_btn: '🎒 Сақтау',
+    steam_status_not_linked: 'Steam байланыспаған',
+    steam_status_no_tg: 'Telegram авторизациясы табылмады',
+    steam_link_title: 'Steam байланыстыру',
+    steam_link_sub: 'Скин шығару үшін қажет',
+    steam_link_sub_no_tg: 'Қосымшаны Telegram ішінде ашыңыз',
+    steam_linked_title: 'Steam байланысқан',
+    steam_linked_sub: 'Қайта байланыстыру үшін бас',
+    rarity_common: 'Қарапайым',
+    rarity_uncommon: 'Ерекше',
+    rarity_rare: 'Сирек',
+    rarity_legendary: '✨ Аңыз',
+    time_s: '{n}с бұрын',
+    time_m: '{n}м бұрын',
+    time_h: '{n}сағ бұрын',
+    time_d: '{n}к бұрын',
+    msg_unknown_error: 'Белгісіз қате',
+    msg_demo_mode: 'ℹ️ Сервер жоқ: demo режимі қосылды',
+    msg_open_in_tg: '⚠️ Нақты режим үшін VAULT-ты Telegram ішінде ашыңыз',
+    msg_tg_data_fail: '⚠️ Telegram деректері алынбады. Бот батырмасынан қайта ашыңыз.',
+    msg_demo_prefix: '⚠️ Demo режим: {error}',
+    msg_not_enough_stars: '❌ Stars жеткіліксіз! Балансты толтыр',
+    msg_case_disabled: '⛔ Бұл кейс қазір өшірілген',
+    msg_demo_case_opened: '🎁 Demo режим: кейс ашылды',
+    msg_multi_opened: '🎉 {count} кейс ашылды',
+    msg_sell_item_missing: '❌ Сатуға зат табылмады',
+    msg_sold_amount: '💸 Сатылды! +⭐{stars}',
+    msg_item_saved: '🎒 Скин инвентарьға қосылды!',
+    msg_item_not_found: '❌ Зат табылмады',
+    msg_inventory_empty: 'Инвентарь бос',
+    msg_inventory_already_empty: 'Инвентарь қазірдің өзінде бос',
+    msg_sold_many: '💸 {count} зат сатылды (+⭐{stars})',
+    msg_enter_amount_range: '❌ {min}-ден {max}-ға дейін енгіз',
+    msg_payment_method_disabled: '❌ Бұл төлем тәсілі уақытша өшірілген',
+    msg_demo_balance_topped: '✅ Demo: баланс ⭐ {amount} толтырылды',
+    msg_topup_tg_only: '❌ Stars төлемі тек Telegram Mini App ішінде жұмыс істейді',
+    msg_creating_invoice: '⏳ Шот жасалуда...',
+    msg_topped_up: '✅ Баланс ⭐ {amount} толтырылды',
+    msg_wait_webhook: '⌛ Төлем қабылданды, webhook растауын күтеміз',
+    msg_payment_cancelled: 'Төлем тоқтатылды',
+    msg_payment_failed: '❌ Төлем қатесі',
+    msg_payment_status: 'Төлем күйі: {status}',
+    msg_create_invoice_fail: '❌ Шот құру сәтсіз: {error}',
+    msg_steam_link_backend_only: 'ℹ️ Steam байланыстыру backend іске қосылғаннан кейін қолжетімді',
+    msg_steam_link_tg_only: '❌ Steam байланыстыру тек Telegram Mini App ішінде қолжетімді',
+    msg_steam_open: '🔐 Steam-ді ашып, кіруді раста',
+    msg_steam_link_fail: '❌ Steam байланыс қателігі: {error}',
+    msg_ref_copied: '🔗 Сілтеме көшірілді!',
+    msg_promo_copied: '🎁 Промокод көшірілді',
+    msg_promo_none: '⏳ Қазір белсенді промокод жоқ',
+    msg_withdraw_steam: '📤 Steam-ге шығару',
+    msg_fair: '🛡️ Provably Fair — бәрі адал!',
+    topup_item_name: 'Балансты толықтыру',
+    toast_lang_saved: '🌐 Тіл ауыстырылды',
+    toast_select_upgrade: '❌ Бастапқы скин мен мақсатты таңдаңыз',
+    toast_upgrade_win: '✅ Апгрейд сәтті',
+    toast_upgrade_lose: '❌ Апгрейд өтпеді'
+  },
+  en: {
+    hero_tag: '🎁 Promo Code',
+    hero_title_html: 'Promo code: <span>{code}</span>',
+    hero_subtitle: 'Use it before the promo expires',
+    hero_subtitle_empty: 'No active promo codes right now',
+    hero_promo_copy_btn: '📋 Copy promo code',
+    hero_promo_unavailable_btn: '⏳ No promo code yet',
+    promo_no_code: 'SOON',
+    popular_title: '🔥 Popular',
+    see_all: 'All →',
+    open_cta: 'Open',
+    case_sub_with_count: '{count} skins',
+    case_sub_premier: '14 skins · up to AK-47 Asiimov',
+    case_premier: 'Premier Case',
+    case_gamma: 'Gamma 2 Case',
+    case_danger: 'Danger Zone',
+    case_clutch: 'Clutch Case',
+    case_mirage: 'Mirage Pulse',
+    case_anubis: 'Anubis Relic',
+    case_inferno: 'Inferno Ember',
+    case_overpass: 'Overpass Rush',
+    case_free: '🎁 Free Case',
+    case_sub_free: '1 open · every day',
+    recent_drops: '🏆 Recent Drops',
+    upgrade_hero_sub: 'Choose source skin, pick target, spin the upgrade.',
+    upgrade_source_placeholder: 'Choose skin from inventory',
+    upgrade_target_placeholder: 'Choose upgrade target',
+    upgrade_source_title: 'Your Inventory',
+    upgrade_target_title: 'Available Targets',
+    upgrade_run: '🎯 Run Upgrade',
+    upgrade_wheel_meta: 'chance',
+    upgrade_status_pick: 'Select source and target',
+    upgrade_status_ready: 'Upgrade chance: {chance}%',
+    upgrade_status_spinning: 'Spinning upgrade...',
+    upgrade_status_win: 'Upgrade landed',
+    upgrade_status_lose: 'Upgrade missed',
+    open_case_sub: 'Tap to open',
+    open_for: '🎰 Open for ⭐ {price}',
+    open_back: '← Back to cases',
+    case_contents_title: 'Case Contents',
+    inventory_header: '🎒 Inventory',
+    inv_items_label: 'items',
+    inv_value_label: 'value',
+    inv_rare_label: 'rare',
+    sell_all: '💸 Sell all ({count})',
+    profile_name_fallback: 'Telegram User',
+    profile_open_in_tg: 'Open Mini App in Telegram',
+    stat_cases_opened_label: 'Cases Opened',
+    stat_total_won_label: 'Total Won',
+    stat_top_drop_label: 'Most Expensive Drop',
+    stat_no_data: 'No data yet',
+    history_empty_title: 'History is empty',
+    history_empty_sub: 'Open a case to see your wins',
+    history_count: '{count} cases',
+    history_case_fallback: 'Case',
+    history_item_fallback: 'Item',
+    menu_ref_title: 'Referral Program',
+    menu_ref_sub: 'Invite friends — earn Stars',
+    menu_topup_title: 'Top Up Balance',
+    menu_topup_sub: 'Telegram Stars only',
+    menu_withdraw_title: 'Withdraw skins',
+    menu_withdraw_sub: 'Send to Steam',
+    menu_fair_title: 'Provably Fair',
+    menu_fair_sub: 'Check fairness',
+    lang_ru_sub: 'Main language',
+    lang_uz_sub: 'Uzbek',
+    lang_kk_sub: 'Kazakh',
+    lang_en_sub: 'English',
+    nav_home: 'Home',
+    nav_upgrade: 'Upgrade',
+    nav_inventory: 'Inventory',
+    nav_profile: 'Profile',
+    profile_header: '👤 Profile',
+    upgrades_header: '🚀 Upgrades',
+    history_title: 'Win History',
+    history_menu: 'Open History',
+    language_menu: 'Interface Language',
+    language_title: 'Interface Language',
+    deposit_title: 'Top Up',
+    deposit_manual_sub: 'Enter top-up amount manually',
+    deposit_sum_label: 'Amount (Stars)',
+    deposit_hint_default: 'Minimum: {min} ⭐ · Maximum: {max} ⭐',
+    deposit_hint_too_much: 'Too high. Maximum amount: {max} ⭐',
+    deposit_hint_will_charge: 'Will be charged: ⭐ {amount}',
+    deposit_btn_enter_amount: '⚡ Enter amount from {min} to {max}',
+    deposit_btn_topup: '⚡ Top up ⭐ {amount}',
+    deposit_stars_only: 'Only Telegram Stars payment is available',
+    win_sell_btn: '💸 Sell',
+    win_keep_btn: '🎒 Keep',
+    steam_status_not_linked: 'Steam not linked',
+    steam_status_no_tg: 'Telegram authorization not found',
+    steam_link_title: 'Link Steam',
+    steam_link_sub: 'Required for skin withdrawals',
+    steam_link_sub_no_tg: 'Open the app inside Telegram',
+    steam_linked_title: 'Steam linked',
+    steam_linked_sub: 'Tap to relink',
+    rarity_common: 'Common',
+    rarity_uncommon: 'Uncommon',
+    rarity_rare: 'Rare',
+    rarity_legendary: '✨ Legendary',
+    time_s: '{n}s ago',
+    time_m: '{n}m ago',
+    time_h: '{n}h ago',
+    time_d: '{n}d ago',
+    msg_unknown_error: 'Unknown error',
+    msg_demo_mode: 'ℹ️ Server unavailable: demo mode enabled',
+    msg_open_in_tg: '⚠️ Open VAULT inside Telegram for live mode',
+    msg_tg_data_fail: '⚠️ Failed to get Telegram data. Reopen from bot button.',
+    msg_demo_prefix: '⚠️ Demo mode: {error}',
+    msg_not_enough_stars: '❌ Not enough Stars! Top up balance',
+    msg_case_disabled: '⛔ This case is disabled right now',
+    msg_demo_case_opened: '🎁 Demo mode: case opened',
+    msg_multi_opened: '🎉 Opened {count} cases',
+    msg_sell_item_missing: '❌ Failed to detect item for sale',
+    msg_sold_amount: '💸 Sold! +⭐{stars}',
+    msg_item_saved: '🎒 Skin saved to inventory!',
+    msg_item_not_found: '❌ Item not found',
+    msg_inventory_empty: 'Inventory is empty',
+    msg_inventory_already_empty: 'Inventory is already empty',
+    msg_sold_many: '💸 Sold {count} items (+⭐{stars})',
+    msg_enter_amount_range: '❌ Enter amount from {min} to {max} Stars',
+    msg_payment_method_disabled: '❌ This payment method is temporarily disabled',
+    msg_demo_balance_topped: '✅ Demo: balance topped up by ⭐ {amount}',
+    msg_topup_tg_only: '❌ Stars top-up works only in Telegram Mini App',
+    msg_creating_invoice: '⏳ Creating invoice...',
+    msg_topped_up: '✅ Balance topped up by ⭐ {amount}',
+    msg_wait_webhook: '⌛ Payment accepted, waiting for webhook confirmation',
+    msg_payment_cancelled: 'Payment cancelled',
+    msg_payment_failed: '❌ Payment failed',
+    msg_payment_status: 'Payment status: {status}',
+    msg_create_invoice_fail: '❌ Failed to create invoice: {error}',
+    msg_steam_link_backend_only: 'ℹ️ Steam linking is available after backend start',
+    msg_steam_link_tg_only: '❌ Steam linking is available only in Telegram Mini App',
+    msg_steam_open: '🔐 Open Steam and confirm sign-in',
+    msg_steam_link_fail: '❌ Steam link error: {error}',
+    msg_ref_copied: '🔗 Link copied!',
+    msg_promo_copied: '🎁 Promo code copied',
+    msg_promo_none: '⏳ No active promo code right now',
+    msg_withdraw_steam: '📤 Withdraw to Steam',
+    msg_fair: '🛡️ Provably Fair — all fair!',
+    topup_item_name: 'Balance top-up',
+    toast_lang_saved: '🌐 Language switched',
+    toast_select_upgrade: '❌ Select source item and target',
+    toast_upgrade_win: '✅ Upgrade succeeded',
+    toast_upgrade_lose: '❌ Upgrade failed'
+  }
+};
+const caseMeta = {
+  premier: { key: 'case_premier', emoji: '🎯' },
+  gamma: { key: 'case_gamma', emoji: '🌊' },
+  danger: { key: 'case_danger', emoji: '💎' },
+  clutch: { key: 'case_clutch', emoji: '⚔️' },
+  mirage: { key: 'case_mirage', emoji: '🏜️' },
+  anubis: { key: 'case_anubis', emoji: '🦂' },
+  inferno: { key: 'case_inferno', emoji: '🔥' },
+  overpass: { key: 'case_overpass', emoji: '🌉' },
+  free: { key: 'case_free', emoji: '🎁' }
+};
+const clientRoulettePool = [
+  { key: 'usp-cortex', emoji: '🔫', image: '/assets/skins/usp-cortex.png', name: 'USP-S | Cortex', rarity: 'common', priceUsd: 6, r: 'c' },
+  { key: 'p2000-pulse', emoji: '🎯', image: '/assets/skins/p2000-pulse.png', name: 'P2000 | Pulse', rarity: 'common', priceUsd: 5, r: 'c' },
+  { key: 'p250-asiimov', emoji: '💣', image: '/assets/skins/p250-asiimov.png', name: 'P250 | Asiimov', rarity: 'uncommon', priceUsd: 18, r: 'u' },
+  { key: 'awp-atheris', emoji: '⚡', image: '/assets/skins/awp-atheris.png', name: 'AWP | Atheris', rarity: 'uncommon', priceUsd: 22, r: 'u' },
+  { key: 'm4a4-spider-lily', emoji: '🌊', image: '/assets/skins/m4a4-spider-lily.png', name: 'M4A4 | Spider Lily', rarity: 'rare', priceUsd: 45, r: 'r' },
+  { key: 'm4a1s-hyper-beast', emoji: '🔧', image: '/assets/skins/m4a1s-hyper-beast.png', name: 'M4A1-S | Hyper Beast', rarity: 'rare', priceUsd: 85, r: 'r' },
+  { key: 'ak-fire-serpent', emoji: '🔥', image: '/assets/skins/ak-fire-serpent.png', name: 'AK-47 | Fire Serpent', rarity: 'legendary', priceUsd: 420, r: 'l' },
+  { key: 'karambit-tiger-tooth', emoji: '🔪', image: '/assets/skins/karambit-tiger-tooth.png', name: 'Karambit | Tiger Tooth', rarity: 'legendary', priceUsd: 890, r: 'l' }
+];
+
+function normalizeLanguage(raw) {
+  const v = String(raw || '').toLowerCase().trim();
+  if (v.startsWith('uz')) return 'uz';
+  if (v.startsWith('kk') || v.startsWith('kz')) return 'kk';
+  if (v.startsWith('en')) return 'en';
+  return 'ru';
+}
+
+function t(key) {
+  return (i18n[currentLang] && i18n[currentLang][key]) || i18n.ru[key] || key;
+}
+
+function tr(key, vars = {}) {
+  let out = t(key);
+  for (const [k, v] of Object.entries(vars)) {
+    out = out.replaceAll(`{${k}}`, String(v));
+  }
+  return out;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch] || ch));
+}
+
+function formatPromoCountdown(msLeft) {
+  const total = Math.max(0, Math.floor(msLeft / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function stopPromoCountdown() {
+  if (promoCountdownTimer) {
+    clearInterval(promoCountdownTimer);
+    promoCountdownTimer = null;
+  }
+}
+
+function updatePromoHero() {
+  const heroTag = document.getElementById('hero-tag');
+  const heroTitle = document.getElementById('hero-title');
+  const heroSubtitle = document.getElementById('hero-subtitle');
+  const heroTimer = document.getElementById('hero-promo-timer');
+  const heroBtn = document.getElementById('hero-promo-btn');
+  if (!heroTag || !heroTitle || !heroSubtitle || !heroTimer || !heroBtn) return;
+
+  stopPromoCountdown();
+  const code = activePromo?.code ? String(activePromo.code) : '';
+  const expiryMs = new Date(activePromo?.expiresAt || 0).getTime();
+  const isActive = Boolean(code && Number.isFinite(expiryMs) && expiryMs > (Date.now() + promoClockOffsetMs));
+
+  if (!isActive) {
+    heroTag.textContent = t('hero_tag');
+    heroTitle.innerHTML = tr('hero_title_html', { code: escapeHtml(t('promo_no_code')) });
+    heroSubtitle.textContent = t('hero_subtitle_empty');
+    heroTimer.textContent = '--:--:--';
+    heroBtn.textContent = t('hero_promo_unavailable_btn');
+    heroBtn.classList.add('disabled');
+    return;
+  }
+
+  const tick = () => {
+    const nowMs = Date.now() + promoClockOffsetMs;
+    const left = expiryMs - nowMs;
+    if (left <= 0) {
+      activePromo = null;
+      updatePromoHero();
+      return;
+    }
+    heroTimer.textContent = formatPromoCountdown(left);
+  };
+
+  heroTag.textContent = t('hero_tag');
+  heroTitle.innerHTML = tr('hero_title_html', { code: escapeHtml(code) });
+  heroSubtitle.textContent = t('hero_subtitle');
+  heroBtn.textContent = t('hero_promo_copy_btn');
+  heroBtn.classList.remove('disabled');
+  tick();
+  promoCountdownTimer = setInterval(tick, 1000);
+}
+
+async function copyActivePromoCode() {
+  if (!activePromo?.code) {
+    toast(t('msg_promo_none'));
+    return;
+  }
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(activePromo.code);
+    }
+    toast(t('msg_promo_copied'));
+  } catch {
+    toast(t('msg_promo_none'));
+  }
+}
+
+function getCaseTitle(caseName) {
+  const meta = caseMeta[caseName];
+  if (!meta?.key) return caseName;
+  return t(meta.key);
+}
+
+function renderOpenButtonLabel(priceValue = null) {
+  const openBtn = document.getElementById('open-btn');
+  if (!openBtn) return;
+  const currentPrice = priceValue === null
+    ? (document.getElementById('open-price')?.textContent || '0')
+    : String(priceValue);
+  openBtn.innerHTML = t('open_for').replace('{price}', `<span id="open-price">${currentPrice}</span>`);
+}
+
+function applyLanguage() {
+  const popularTitle = document.getElementById('popular-title');
+  const seeAll = document.getElementById('see-all-label');
+  const caseOpenCta = document.getElementById('case-open-cta');
+  const caseSubPremier = document.getElementById('case-sub-premier');
+  const caseNamePremier = document.getElementById('case-name-premier');
+  const caseNameGamma = document.getElementById('case-name-gamma');
+  const caseNameDanger = document.getElementById('case-name-danger');
+  const caseNameClutch = document.getElementById('case-name-clutch');
+  const caseNameMirage = document.getElementById('case-name-mirage');
+  const caseNameAnubis = document.getElementById('case-name-anubis');
+  const caseNameInferno = document.getElementById('case-name-inferno');
+  const caseNameOverpass = document.getElementById('case-name-overpass');
+  const caseNameFree = document.getElementById('case-name-free');
+  const caseSubGamma = document.getElementById('case-sub-gamma');
+  const caseSubDanger = document.getElementById('case-sub-danger');
+  const caseSubClutch = document.getElementById('case-sub-clutch');
+  const caseSubMirage = document.getElementById('case-sub-mirage');
+  const caseSubAnubis = document.getElementById('case-sub-anubis');
+  const caseSubInferno = document.getElementById('case-sub-inferno');
+  const caseSubOverpass = document.getElementById('case-sub-overpass');
+  const caseSubFree = document.getElementById('case-sub-free');
+  const recentDrops = document.getElementById('recent-drops-title');
+  const profileHeader = document.getElementById('profile-header-title');
+  const upgradesHeader = document.getElementById('upgrades-header-title');
+  const upgradeHeroSub = document.getElementById('upgrade-hero-sub');
+  const upgradeSourceTitle = document.getElementById('upgrade-source-title');
+  const upgradeTargetTitle = document.getElementById('upgrade-target-title');
+  const openCaseSub = document.getElementById('open-case-sub');
+  const openBtn = document.getElementById('open-btn');
+  const openPrice = document.getElementById('open-price');
+  const openBackBtn = document.getElementById('open-back-btn');
+  const caseContentsTitle = document.getElementById('case-contents-title');
+  const inventoryHeader = document.getElementById('inventory-header-title');
+  const invItemsLabel = document.getElementById('inv-stat-items-label');
+  const invValueLabel = document.getElementById('inv-stat-value-label');
+  const invRareLabel = document.getElementById('inv-stat-rare-label');
+  const statCasesLabel = document.getElementById('stat-cases-opened-label');
+  const statTotalLabel = document.getElementById('stat-total-won-label');
+  const statTopLabel = document.getElementById('stat-top-drop-label');
+  const refTitle = document.getElementById('ref-program-title');
+  const refSub = document.getElementById('ref-program-sub');
+  const topupTitle = document.getElementById('topup-menu-title');
+  const topupSub = document.getElementById('topup-menu-sub');
+  const withdrawTitle = document.getElementById('withdraw-title');
+  const withdrawSub = document.getElementById('withdraw-sub');
+  const fairTitle = document.getElementById('fair-title');
+  const fairSub = document.getElementById('fair-sub');
+  const historyTitle = document.getElementById('history-screen-title');
+  const historyMenuTitle = document.getElementById('history-menu-title');
+  const languageMenuTitle = document.getElementById('language-menu-title');
+  const languageScreenTitle = document.getElementById('language-screen-title');
+  const languageCurrentLabel = document.getElementById('language-current-label');
+  const depositScreenTitle = document.getElementById('deposit-screen-title');
+  const depositManualSub = document.getElementById('deposit-manual-sub');
+  const depositSumLabel = document.getElementById('deposit-sum-label');
+  const depositStarsOnly = document.getElementById('deposit-stars-only');
+  const winSellBtn = document.getElementById('win-sell-btn');
+  const winKeepBtn = document.getElementById('win-keep-btn');
+
+  if (popularTitle) popularTitle.textContent = t('popular_title');
+  if (seeAll) seeAll.textContent = t('see_all');
+  if (caseOpenCta) caseOpenCta.textContent = t('open_cta');
+  if (caseSubPremier) caseSubPremier.textContent = t('case_sub_premier');
+  if (caseNamePremier) caseNamePremier.textContent = t('case_premier');
+  if (caseNameGamma) caseNameGamma.textContent = t('case_gamma');
+  if (caseNameDanger) caseNameDanger.textContent = t('case_danger');
+  if (caseNameClutch) caseNameClutch.textContent = t('case_clutch');
+  if (caseNameMirage) caseNameMirage.textContent = t('case_mirage');
+  if (caseNameAnubis) caseNameAnubis.textContent = t('case_anubis');
+  if (caseNameInferno) caseNameInferno.textContent = t('case_inferno');
+  if (caseNameOverpass) caseNameOverpass.textContent = t('case_overpass');
+  if (caseNameFree) caseNameFree.textContent = t('case_free');
+  if (caseSubGamma) caseSubGamma.textContent = tr('case_sub_with_count', { count: 12 });
+  if (caseSubDanger) caseSubDanger.textContent = tr('case_sub_with_count', { count: 16 });
+  if (caseSubClutch) caseSubClutch.textContent = tr('case_sub_with_count', { count: 18 });
+  if (caseSubMirage) caseSubMirage.textContent = tr('case_sub_with_count', { count: 15 });
+  if (caseSubAnubis) caseSubAnubis.textContent = tr('case_sub_with_count', { count: 14 });
+  if (caseSubInferno) caseSubInferno.textContent = tr('case_sub_with_count', { count: 17 });
+  if (caseSubOverpass) caseSubOverpass.textContent = tr('case_sub_with_count', { count: 13 });
+  if (caseSubFree) caseSubFree.textContent = t('case_sub_free');
+  if (recentDrops) recentDrops.textContent = t('recent_drops');
+
+  if (profileHeader) profileHeader.textContent = t('profile_header');
+  if (upgradesHeader) upgradesHeader.textContent = t('upgrades_header');
+  if (upgradeHeroSub) upgradeHeroSub.textContent = t('upgrade_hero_sub');
+  if (upgradeSourceTitle) upgradeSourceTitle.textContent = t('upgrade_source_title');
+  if (upgradeTargetTitle) upgradeTargetTitle.textContent = t('upgrade_target_title');
+  if (openCaseSub) openCaseSub.textContent = t('open_case_sub');
+  if (openBtn) renderOpenButtonLabel(openPrice?.textContent || '0');
+  if (openBackBtn) openBackBtn.textContent = t('open_back');
+  if (caseContentsTitle) caseContentsTitle.textContent = t('case_contents_title');
+  if (inventoryHeader) inventoryHeader.textContent = t('inventory_header');
+  if (invItemsLabel) invItemsLabel.textContent = t('inv_items_label');
+  if (invValueLabel) invValueLabel.textContent = t('inv_value_label');
+  if (invRareLabel) invRareLabel.textContent = t('inv_rare_label');
+  if (statCasesLabel) statCasesLabel.textContent = t('stat_cases_opened_label');
+  if (statTotalLabel) statTotalLabel.textContent = t('stat_total_won_label');
+  if (statTopLabel) statTopLabel.textContent = t('stat_top_drop_label');
+  if (refTitle) refTitle.textContent = t('menu_ref_title');
+  if (refSub) refSub.textContent = t('menu_ref_sub');
+  if (topupTitle) topupTitle.textContent = t('menu_topup_title');
+  if (topupSub) topupSub.textContent = t('menu_topup_sub');
+  if (withdrawTitle) withdrawTitle.textContent = t('menu_withdraw_title');
+  if (withdrawSub) withdrawSub.textContent = t('menu_withdraw_sub');
+  if (fairTitle) fairTitle.textContent = t('menu_fair_title');
+  if (fairSub) fairSub.textContent = t('menu_fair_sub');
+  if (historyTitle) historyTitle.textContent = t('history_title');
+  if (historyMenuTitle) historyMenuTitle.textContent = t('history_menu');
+  if (languageMenuTitle) languageMenuTitle.textContent = t('language_menu');
+  if (languageScreenTitle) languageScreenTitle.textContent = t('language_title');
+  if (languageCurrentLabel) languageCurrentLabel.textContent = languageNames[currentLang] || languageNames.ru;
+  if (depositScreenTitle) depositScreenTitle.textContent = t('deposit_title');
+  if (depositManualSub) depositManualSub.textContent = t('deposit_manual_sub');
+  if (depositSumLabel) depositSumLabel.textContent = t('deposit_sum_label');
+  if (depositStarsOnly) depositStarsOnly.textContent = t('deposit_stars_only');
+  if (winSellBtn) winSellBtn.textContent = t('win_sell_btn');
+  if (winKeepBtn) winKeepBtn.textContent = t('win_keep_btn');
+  updatePromoHero();
+  applyCaseConfigToHome();
+
+  document.querySelectorAll('.bottom-nav').forEach((nav) => {
+    const labels = nav.querySelectorAll('.nav-label');
+    if (labels.length < 4) return;
+    labels[0].textContent = t('nav_home');
+    labels[1].textContent = t('nav_upgrade');
+    labels[2].textContent = t('nav_inventory');
+    labels[3].textContent = t('nav_profile');
+  });
+
+  document.querySelectorAll('#language-list .menu-item').forEach((item) => {
+    const lang = item.getAttribute('data-lang') || '';
+    item.classList.toggle('active-lang', lang === currentLang);
+    const arrow = item.querySelector('.menu-arrow');
+    if (arrow) arrow.textContent = lang === currentLang ? '✓' : '›';
+  });
+
+  const langSubs = {
+    ru: t('lang_ru_sub'),
+    uz: t('lang_uz_sub'),
+    kk: t('lang_kk_sub'),
+    en: t('lang_en_sub'),
+  };
+  document.querySelectorAll('#language-list .menu-item').forEach((item) => {
+    const lang = item.getAttribute('data-lang') || '';
+    const sub = item.querySelector('.menu-text span');
+    if (sub && langSubs[lang]) sub.textContent = langSubs[lang];
+  });
+
+  syncDepositInput();
+  renderOpenHistory();
+  renderDropsFeed();
+  renderInventory();
+  renderAuthState();
+  syncUpgradeActionState();
+}
+
+async function saveUserLanguage(language) {
+  if (isDemoMode() || !authState.initData) return;
+  const data = await apiFetch('/api/user/settings', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ language }),
+  });
+  authState.user = data.user || authState.user;
+}
+
+function setLanguage(language, options = {}) {
+  const { silent = false, persist = true } = options;
+  const nextLang = normalizeLanguage(language);
+  currentLang = supportedLanguages.includes(nextLang) ? nextLang : 'ru';
+  localStorage.setItem('vault_lang', currentLang);
+  applyLanguage();
+
+  if (persist) {
+    saveUserLanguage(currentLang).catch(() => {});
+  }
+  if (!silent) {
+    toast(`${t('toast_lang_saved')}: ${languageNames[currentLang] || languageNames.ru}`);
+  }
+}
+
+function detectInitialLanguage() {
+  const fromUser = normalizeLanguage(authState?.user?.settings?.language || '');
+  if (supportedLanguages.includes(fromUser) && fromUser !== 'ru') return fromUser;
+  const fromStorage = normalizeLanguage(localStorage.getItem('vault_lang') || '');
+  if (supportedLanguages.includes(fromStorage) && fromStorage !== 'ru') return fromStorage;
+  const fromTg = normalizeLanguage(tg?.initDataUnsafe?.user?.language_code || '');
+  if (supportedLanguages.includes(fromTg)) return fromTg;
+  return 'ru';
+}
+
+async function apiFetch(url, options = {}) {
+  const headers = { ...(options.headers || {}) };
+  if (authState.initData) headers['x-telegram-init-data'] = authState.initData;
+  const resp = await fetch(url, { ...options, headers });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.ok) throw new Error(data.error || `HTTP ${resp.status}`);
+  return data;
+}
+
+function randomPoolItem() {
+  return clientRoulettePool[Math.floor(Math.random() * clientRoulettePool.length)];
+}
+
+function makeDemoWinner() {
+  const base = randomPoolItem();
+  return {
+    ...base,
+    id: `demo-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    priceText: `$${base.priceUsd}`,
+  };
+}
+
+function makeUserFromInitDataUnsafe() {
+  const u = tg?.initDataUnsafe?.user;
+  if (!u) return null;
+  return {
+    tgUserId: u.id || null,
+    username: u.username || null,
+    firstName: u.first_name || null,
+    lastName: u.last_name || null,
+    photoUrl: u.photo_url || null,
+    balance,
+    steamId: null,
+    steamLinkedAt: null,
+  };
+}
+
+function enterDemoMode(reason) {
+  runtimeState.mode = 'demo';
+  runtimeState.backendReachable = false;
+  runtimeState.lastError = String(reason || '');
+
+  if (balance <= 0) balance = 2450;
+  if (!authState.user) authState.user = makeUserFromInitDataUnsafe();
+  updateBalance();
+  renderAuthState();
+  renderInventory();
+  renderOpenHistory();
+  renderDropsFeed();
+  renderUpgrades();
+
+  if (!demoNoticeShown && !tg) {
+    demoNoticeShown = true;
+    toast(t('msg_demo_mode'));
+  }
+}
+
+function isDemoMode() {
+  return runtimeState.mode === 'demo';
+}
+
+function pushDemoInventoryItem(item) {
+  const mapped = {
+    id: item.id || `demo-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    key: item.key || null,
+    emoji: item.emoji,
+    image: item.image || null,
+    name: item.name,
+    rarity: item.rarity,
+    r: item.r || (item.rarity === 'legendary' ? 'l' : item.rarity === 'rare' ? 'r' : item.rarity === 'uncommon' ? 'u' : 'c'),
+    priceUsd: Number(item.priceUsd || 0),
+    priceText: item.priceText || `$${item.priceUsd || 0}`,
+    sellStars: Math.round(Number(item.priceUsd || 0) * 10),
+  };
+  inventory.push(mapped);
+  return mapped;
+}
+
+function skinVisual(item, imgClass, emojiClass) {
+  const imagePath = normalizeImagePath(item?.image);
+  if (item && imagePath) {
+    const safeName = item.name || 'skin';
+    return `<img src="${imagePath}" class="${imgClass}" alt="${safeName}">`;
+  }
+  const cls = emojiClass ? ` class="${emojiClass}"` : '';
+  return `<span${cls}>${item?.emoji || '🎯'}</span>`;
+}
+
+function normalizeImagePath(pathValue) {
+  const raw = String(pathValue || '').trim();
+  if (!raw) return '';
+  if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+  if (raw.startsWith('/')) return raw;
+  return `/${raw}`;
+}
+
+function shortenErrorMessage(message) {
+  const clean = String(message || '').replace(/\\s+/g, ' ').trim();
+  if (!clean) return t('msg_unknown_error');
+  if (clean.length <= 90) return clean;
+  return clean.slice(0, 87) + '...';
+}
+
+function getInitDataFromLocation() {
+  try {
+    const hash = window.location.hash ? window.location.hash.slice(1) : '';
+    if (hash) {
+      const hashParams = new URLSearchParams(hash);
+      const hashData = hashParams.get('tgWebAppData');
+      if (hashData) return decodeURIComponent(hashData);
+    }
+  } catch {}
+
+  try {
+    const qs = new URLSearchParams(window.location.search || '');
+    const queryData = qs.get('tgWebAppData');
+    if (queryData) return decodeURIComponent(queryData);
+  } catch {}
+
+  return '';
+}
+
+async function resolveInitData() {
+  if (!tg) return '';
+  tg.ready();
+  tg.expand();
+
+  for (let i = 0; i < 8; i++) {
+    const val = tg.initData || '';
+    if (val) return val;
+    await new Promise(resolve => setTimeout(resolve, 120));
+  }
+
+  return getInitDataFromLocation();
+}
+
+function formatTgName(user) {
+  const full = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+  if (full) return full;
+  if (user?.username) return `@${user.username}`;
+  return t('profile_name_fallback');
+}
+
+function renderAuthState() {
+  const nameEl = document.getElementById('profile-name');
+  const steamStatusEl = document.getElementById('steam-status');
+  const steamTitleEl = document.getElementById('steam-link-title');
+  const steamSubEl = document.getElementById('steam-link-sub');
+  const steamArrowEl = document.getElementById('steam-link-arrow');
+  const avatarEl = document.getElementById('profile-avatar');
+
+  if (!authState.user) {
+    if (nameEl) nameEl.textContent = t('profile_open_in_tg');
+    if (steamStatusEl) steamStatusEl.textContent = t('steam_status_no_tg');
+    if (steamTitleEl) steamTitleEl.textContent = t('steam_link_title');
+    if (steamSubEl) steamSubEl.textContent = t('steam_link_sub_no_tg');
+    if (steamArrowEl) steamArrowEl.textContent = '›';
+    if (avatarEl) avatarEl.textContent = '👤';
+    renderProfileStats();
+    return;
+  }
+
+  if (nameEl) nameEl.textContent = formatTgName(authState.user);
+  if (avatarEl) {
+    const steamAvatar = authState.user.steamAvatarUrl || '';
+    if (steamAvatar) {
+      avatarEl.innerHTML = `<img src="${steamAvatar}" alt="Steam avatar">`;
+    } else {
+      avatarEl.textContent = authState.user.firstName ? authState.user.firstName[0].toUpperCase() : '🦊';
+    }
+  }
+  if (authState.user.steamId) {
+    const steamLabel = authState.user.steamProfileName ? `${authState.user.steamProfileName} · ${authState.user.steamId}` : `Steam ID: ${authState.user.steamId}`;
+    if (steamStatusEl) steamStatusEl.textContent = steamLabel;
+    if (steamTitleEl) steamTitleEl.textContent = t('steam_linked_title');
+    if (steamSubEl) steamSubEl.textContent = t('steam_linked_sub');
+    if (steamArrowEl) steamArrowEl.textContent = '✓';
+  } else {
+    if (steamStatusEl) steamStatusEl.textContent = t('steam_status_not_linked');
+    if (steamTitleEl) steamTitleEl.textContent = t('steam_link_title');
+    if (steamSubEl) steamSubEl.textContent = t('steam_link_sub');
+    if (steamArrowEl) steamArrowEl.textContent = '›';
+  }
+  renderProfileStats();
+}
+
+function renderProfileStats() {
+  const stats = authState?.user?.stats || {};
+  const casesOpened = Number(stats.casesOpened || 0);
+  const totalWonUsd = Number(stats.totalWonUsd || 0);
+  const topDropUsd = Number(stats.topDropUsd || 0);
+  const topDropName = stats.topDropName || t('stat_no_data');
+
+  const casesEl = document.getElementById('stat-cases-opened');
+  const totalEl = document.getElementById('stat-total-won');
+  const topEl = document.getElementById('stat-top-drop');
+  const topNameEl = document.getElementById('stat-top-drop-name');
+  if (casesEl) casesEl.textContent = String(casesOpened);
+  if (totalEl) totalEl.textContent = `$${Math.round(totalWonUsd)}`;
+  if (topEl) topEl.textContent = `$${Math.round(topDropUsd)}`;
+  if (topNameEl) topNameEl.textContent = topDropName;
+}
+
+function updateBalance() {
+  document.getElementById('balance').textContent = balance.toLocaleString('ru');
+  document.getElementById('balance2').textContent = balance.toLocaleString('ru');
+  const b3 = document.getElementById('balance3');
+  if (b3) b3.textContent = balance.toLocaleString('ru');
+  const b4 = document.getElementById('balance4');
+  if (b4) b4.textContent = balance.toLocaleString('ru');
+}
+
+function getSkinTemplateByKey(key) {
+  return clientRoulettePool.find((x) => x.key === key) || null;
+}
+
+function calcUpgradeChance(sourcePrice, targetPrice) {
+  if (!targetPrice || targetPrice <= sourcePrice) return 0;
+  return Math.max(3, Math.min(95, Math.round((Number(sourcePrice || 0) / Number(targetPrice || 1)) * 100)));
+}
+
+function itemRarityClass(item) {
+  const rarity = String(item?.rarity || 'common');
+  return `rarity-${rarity}`;
+}
+
+function setUpgradeStatus(state = 'pick', chance = 0) {
+  const statusEl = document.getElementById('upgrade-spin-status');
+  if (!statusEl) return;
+  statusEl.className = `upgrade-spin-status state-${state}`;
+  if (state === 'ready') {
+    statusEl.textContent = tr('upgrade_status_ready', { chance: Math.max(0, Math.min(100, Math.round(Number(chance || 0)))) });
+    return;
+  }
+  if (state === 'spinning') {
+    statusEl.textContent = t('upgrade_status_spinning');
+    return;
+  }
+  if (state === 'win') {
+    statusEl.textContent = t('upgrade_status_win');
+    return;
+  }
+  if (state === 'lose') {
+    statusEl.textContent = t('upgrade_status_lose');
+    return;
+  }
+  statusEl.textContent = t('upgrade_status_pick');
+}
+
+function resetUpgradeLabelTicker() {
+  if (upgradeLabelTicker) {
+    clearInterval(upgradeLabelTicker);
+    upgradeLabelTicker = null;
+  }
+}
+
+function selectedUpgradeSourceItem() {
+  return inventory.find((x) => x.id === upgradeSourceItemId) || null;
+}
+
+function selectedUpgradeTargetItem() {
+  return getSkinTemplateByKey(upgradeTargetKey);
+}
+
+function renderUpgradeWheel(chance = 0, sourcePrice = 0, targetPrice = 0) {
+  const wheel = document.getElementById('upgrade-wheel');
+  const label = document.getElementById('upgrade-wheel-label');
+  const meta = document.getElementById('upgrade-wheel-meta');
+  if (!wheel || !label) return;
+  const clamped = Math.max(0, Math.min(100, Number(chance || 0)));
+  wheel.style.setProperty('--chance-angle', `${Math.round((clamped / 100) * 360)}deg`);
+  label.classList.remove('win', 'lose');
+  label.textContent = `${clamped}%`;
+  if (meta) {
+    const src = Number(sourcePrice || 0);
+    const tgt = Number(targetPrice || 0);
+    if (src > 0 && tgt > src && clamped > 0) {
+      const mult = (tgt / src).toFixed(2);
+      meta.textContent = `x${mult}`;
+    } else {
+      meta.textContent = t('upgrade_wheel_meta');
+    }
+  }
+}
+
+function renderUpgradeSlots() {
+  const sourceSlot = document.getElementById('upgrade-source-slot');
+  const targetSlot = document.getElementById('upgrade-target-slot');
+  const source = selectedUpgradeSourceItem();
+  const target = selectedUpgradeTargetItem();
+
+  if (sourceSlot) {
+    if (!source) {
+      sourceSlot.className = 'up-slot';
+      sourceSlot.textContent = t('upgrade_source_placeholder');
+    } else {
+      sourceSlot.className = `up-slot is-source ${itemRarityClass(source)}`;
+      sourceSlot.innerHTML = (
+        `<div class="up-slot-item">` +
+        skinVisual(source, 'inv-emoji img', 'inv-emoji') +
+        `<div class="up-slot-name">${source.name}</div>` +
+        `<div class="up-slot-price">$${Number(source.priceUsd || 0)}</div>` +
+        `</div>`
+      );
+    }
+  }
+
+  if (targetSlot) {
+    if (!target) {
+      targetSlot.className = 'up-slot';
+      targetSlot.textContent = t('upgrade_target_placeholder');
+    } else {
+      targetSlot.className = `up-slot is-target ${itemRarityClass(target)}`;
+      targetSlot.innerHTML = (
+        `<div class="up-slot-item">` +
+        skinVisual(target, 'inv-emoji img', 'inv-emoji') +
+        `<div class="up-slot-name">${target.name}</div>` +
+        `<div class="up-slot-price">$${Number(target.priceUsd || 0)}</div>` +
+        `</div>`
+      );
+    }
+  }
+}
+
+function renderUpgradeSources() {
+  const root = document.getElementById('upgrade-source-list');
+  if (!root) return;
+  if (!inventory.length) {
+    root.innerHTML = `<div class="up-slot" style="grid-column:1/-1;min-height:86px">${t('msg_inventory_empty')}</div>`;
+    return;
+  }
+  root.innerHTML = inventory.map((item) => (
+    `<div class="up-pick up-${item.rarity || 'common'} ${item.id === upgradeSourceItemId ? 'active' : ''}" onclick="pickUpgradeSource('${item.id}')">` +
+    skinVisual(item, 'inv-emoji img', 'inv-emoji') +
+    `<div class="up-pick-name">${item.name}</div>` +
+    `<div class="up-pick-price"><b>$${Number(item.priceUsd || 0)}</b></div>` +
+    `</div>`
+  )).join('');
+}
+
+function renderUpgradeTargets() {
+  const root = document.getElementById('upgrade-target-list');
+  if (!root) return;
+  const source = selectedUpgradeSourceItem();
+  const sourcePrice = Number(source?.priceUsd || 0);
+  const targets = clientRoulettePool.filter((x) => Number(x.priceUsd || 0) > sourcePrice);
+  if (!targets.length) {
+    root.innerHTML = `<div class="up-slot" style="grid-column:1/-1;min-height:86px">${t('upgrade_target_placeholder')}</div>`;
+    return;
+  }
+  if (!targets.some((x) => x.key === upgradeTargetKey)) {
+    upgradeTargetKey = targets[0].key;
+  }
+  root.innerHTML = targets.map((item) => {
+    const chance = calcUpgradeChance(sourcePrice, Number(item.priceUsd || 0));
+    return (
+      `<div class="up-pick up-${item.rarity || 'common'} ${item.key === upgradeTargetKey ? 'active' : ''}" onclick="pickUpgradeTarget('${item.key}')">` +
+      skinVisual(item, 'inv-emoji img', 'inv-emoji') +
+      `<div class="up-pick-name">${item.name}</div>` +
+      `<div class="up-pick-price"><b>$${Number(item.priceUsd || 0)}</b> · ${chance}%</div>` +
+      `</div>`
+    );
+  }).join('');
+}
+
+function syncUpgradeActionState() {
+  const btn = document.getElementById('upgrade-run-btn');
+  const source = selectedUpgradeSourceItem();
+  const target = selectedUpgradeTargetItem();
+  const sourcePrice = Number(source?.priceUsd || 0);
+  const targetPrice = Number(target?.priceUsd || 0);
+  const chance = calcUpgradeChance(sourcePrice, targetPrice);
+  renderUpgradeWheel(chance, sourcePrice, targetPrice);
+  renderUpgradeSlots();
+  if (!btn) return;
+  if (upgradeAnimating) {
+    btn.disabled = true;
+    btn.textContent = '🎯 ...';
+    setUpgradeStatus('spinning', chance);
+    return;
+  }
+  if (!source || !target || chance <= 0) {
+    btn.disabled = true;
+    btn.textContent = t('toast_select_upgrade').replace('❌ ', '');
+    setUpgradeStatus('pick');
+    return;
+  }
+  btn.disabled = false;
+  btn.textContent = `${t('upgrade_run')} (${chance}%)`;
+  setUpgradeStatus('ready', chance);
+}
+
+function pickUpgradeSource(itemId) {
+  if (upgradeAnimating) return;
+  upgradeSourceItemId = itemId;
+  const source = selectedUpgradeSourceItem();
+  const sourcePrice = Number(source?.priceUsd || 0);
+  const targets = clientRoulettePool.filter((x) => Number(x.priceUsd || 0) > sourcePrice);
+  upgradeTargetKey = targets[0]?.key || null;
+  renderUpgrades();
+}
+
+function pickUpgradeTarget(key) {
+  if (upgradeAnimating) return;
+  upgradeTargetKey = key;
+  renderUpgrades();
+}
+
+async function runUpgradeSpin() {
+  if (upgradeAnimating) return;
+  const source = selectedUpgradeSourceItem();
+  const target = selectedUpgradeTargetItem();
+  const chance = calcUpgradeChance(Number(source?.priceUsd || 0), Number(target?.priceUsd || 0));
+  if (!source || !target || chance <= 0) {
+    toast(t('toast_select_upgrade'));
+    return;
+  }
+
+  upgradeAnimating = true;
+  syncUpgradeActionState();
+  const arrow = document.getElementById('upgrade-wheel-arrow');
+  const wheel = document.getElementById('upgrade-wheel');
+  const board = document.querySelector('.upgrade-board');
+  const label = document.getElementById('upgrade-wheel-label');
+
+  try {
+    let result = null;
+    if (isDemoMode() || !authState.initData) {
+      const success = Math.random() * 100 <= chance;
+      const wonItem = success ? pushDemoInventoryItem({ ...target, id: `demo-up-${Date.now()}` }) : null;
+      const srcIndex = inventory.findIndex((x) => x.id === source.id);
+      if (srcIndex >= 0) inventory.splice(srcIndex, 1);
+      result = { success, chance, wonItem, sourceItem: source };
+    } else {
+      result = await apiFetch('/api/upgrades/try', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sourceItemId: source.id, targetKey: target.key })
+      });
+    }
+
+    const finalChance = Math.max(1, Math.min(99, Number(result.chance || chance)));
+    const success = Boolean(result.success);
+    const winSlice = Math.round((finalChance / 100) * 360);
+    const stopBase = success
+      ? Math.max(14, Math.min(winSlice - 8, Math.floor(winSlice * 0.62)))
+      : Math.min(340, winSlice + Math.max(14, Math.floor((360 - winSlice) * 0.45)));
+    const currentMod = ((upgradeArrowRotation % 360) + 360) % 360;
+    const deltaToStop = ((stopBase - currentMod) + 360) % 360;
+    const turns = 7 + Math.floor(Math.random() * 3);
+    const finalDeg = upgradeArrowRotation + (turns * 360) + deltaToStop;
+    const overshoot = (success ? 10 : 15) + Math.floor(Math.random() * 8);
+
+    if (board) board.classList.add('spinning');
+    if (wheel) wheel.classList.add('spinning');
+    resetUpgradeLabelTicker();
+    let ticker = 0;
+    if (label) {
+      const base = Math.max(0, Math.min(100, Math.round(finalChance)));
+      upgradeLabelTicker = setInterval(() => {
+        ticker += 1;
+        const wobble = Math.sin(ticker * 0.9) * 1.8;
+        label.textContent = `${Math.max(0, Math.min(100, Math.round(base + wobble)))}%`;
+      }, 90);
+    }
+    setUpgradeStatus('spinning', finalChance);
+
+    if (arrow) {
+      arrow.style.setProperty('--arrow-duration', '2.95s');
+      arrow.style.setProperty('--arrow-ease', 'cubic-bezier(0.08, 0.9, 0.16, 1)');
+      arrow.style.setProperty('--arrow-rotation', `${finalDeg + overshoot}deg`);
+    }
+    await new Promise((r) => setTimeout(r, 3000));
+    if (arrow) {
+      arrow.style.setProperty('--arrow-duration', '420ms');
+      arrow.style.setProperty('--arrow-ease', 'cubic-bezier(0.24, 0.78, 0.2, 1)');
+      arrow.style.setProperty('--arrow-rotation', `${finalDeg}deg`);
+    }
+    await new Promise((r) => setTimeout(r, 460));
+    upgradeArrowRotation = finalDeg;
+    resetUpgradeLabelTicker();
+    if (label) {
+      label.classList.toggle('win', success);
+      label.classList.toggle('lose', !success);
+      label.textContent = `${finalChance}%`;
+    }
+    setUpgradeStatus(success ? 'win' : 'lose', finalChance);
+    if (board) board.classList.remove('spinning');
+    if (wheel) wheel.classList.remove('spinning');
+
+    if (isDemoMode() || !authState.initData) {
+      balance = Number(balance || 0);
+      renderInventory();
+      if (success && result.wonItem) appendHistoryFromWinner('upgrade', result.wonItem);
+      toast(success ? `${t('toast_upgrade_win')}: ${target.name}` : t('toast_upgrade_lose'));
+      renderUpgrades();
+    } else {
+      await refreshState();
+      toast(success ? `${t('toast_upgrade_win')}: ${target.name}` : t('toast_upgrade_lose'));
+      if (success && result.wonItem) {
+        lastWonItemId = result.wonItem.id || null;
+        showWin(result.wonItem);
+      }
+    }
+  } catch (e) {
+    toast(`❌ ${shortenErrorMessage(e.message)}`);
+  } finally {
+    upgradeAnimating = false;
+    resetUpgradeLabelTicker();
+    syncUpgradeActionState();
+  }
+}
+
+function renderUpgrades() {
+  if (!upgradeSourceItemId && inventory.length) {
+    upgradeSourceItemId = inventory[0].id;
+  }
+  renderUpgradeSources();
+  renderUpgradeTargets();
+  syncUpgradeActionState();
+}
+
+function bindUpgradeScrollEffects() {
+  if (upgradeScrollBound) return;
+  const screen = document.getElementById('screen-upgrades');
+  const scrollArea = screen?.querySelector('.scroll-area');
+  const wrap = screen?.querySelector('.upgrade-wrap');
+  if (!screen || !scrollArea || !wrap) return;
+
+  const sync = () => {
+    const y = Math.max(0, Math.min(240, Number(scrollArea.scrollTop || 0)));
+    const glow = Math.max(0, Math.min(1, y / 110));
+    wrap.style.setProperty('--up-scroll-y', `${y.toFixed(2)}px`);
+    wrap.style.setProperty('--up-scroll-glow', `${glow.toFixed(3)}`);
+    wrap.classList.toggle('scrolled', y > 14);
+  };
+
+  scrollArea.addEventListener('scroll', sync, { passive: true });
+  sync();
+  upgradeScrollBound = true;
+}
+
+function triggerUpgradeIntro() {
+  const wrap = document.querySelector('#screen-upgrades .upgrade-wrap');
+  if (!wrap) return;
+  wrap.classList.remove('intro');
+  void wrap.offsetWidth;
+  wrap.classList.add('intro');
+  setTimeout(() => wrap.classList.remove('intro'), 460);
+}
+
+function renderInventory() {
+  const grid = document.getElementById('inventory-grid');
+  if (!grid) return;
+
+  if (!inventory.length) {
+    grid.innerHTML = `<div style=\"grid-column:1/-1;color:var(--muted);text-align:center;padding:24px 0\">${t('msg_inventory_empty')}</div>`;
+  } else {
+    grid.innerHTML = inventory.map(item => (
+      `<div class=\"inv-card i${item.r}\" data-item-id=\"${item.id}\" onclick=\"sellInventoryItem('${item.id}')\">` +
+      skinVisual(item, 'inv-emoji img', 'inv-emoji') +
+      `<div class=\"inv-name\">${item.name}</div>` +
+      `<div class=\"inv-price\">$${item.priceUsd}</div>` +
+      `</div>`
+    )).join('');
+  }
+
+  const invCount = document.getElementById('inv-count');
+  const invValue = document.getElementById('inv-value');
+  const invLegendary = document.getElementById('inv-legendary');
+  const sellAllBtn = document.getElementById('sell-all-btn');
+  const totalUsd = inventory.reduce((s, x) => s + Number(x.priceUsd || 0), 0);
+  const legendaryCount = inventory.filter(x => x.rarity === 'legendary').length;
+
+  if (invCount) invCount.textContent = String(inventory.length);
+  if (invValue) invValue.textContent = `$${Math.round(totalUsd)}`;
+  if (invLegendary) invLegendary.textContent = String(legendaryCount);
+  if (sellAllBtn) sellAllBtn.textContent = tr('sell_all', { count: inventory.length });
+  if (currentScreen === 'upgrades') renderUpgrades();
+}
+
+function formatTimeAgo(iso) {
+  const t = new Date(iso || 0).getTime();
+  if (!t) return '';
+  const diffSec = Math.max(1, Math.floor((Date.now() - t) / 1000));
+  if (diffSec < 60) return tr('time_s', { n: diffSec });
+  const m = Math.floor(diffSec / 60);
+  if (m < 60) return tr('time_m', { n: m });
+  const h = Math.floor(m / 60);
+  if (h < 24) return tr('time_h', { n: h });
+  const d = Math.floor(h / 24);
+  return tr('time_d', { n: d });
+}
+
+function renderOpenHistory() {
+  const root = document.getElementById('history-list');
+  if (!root) return;
+  const list = Array.isArray(openHistory) ? openHistory.slice(0, 20) : [];
+  const openCountEl = document.getElementById('history-open-count');
+  if (openCountEl) {
+    openCountEl.textContent = tr('history_count', { count: openHistory.length });
+  }
+  if (!list.length) {
+    root.innerHTML = `<div class="history-item"><div class="history-main"><strong>${t('history_empty_title')}</strong><span>${t('history_empty_sub')}</span></div></div>`;
+    return;
+  }
+  root.innerHTML = list.map((entry) => {
+    const item = entry.item || entry;
+    const caseName = caseMeta[entry.caseName] ? getCaseTitle(entry.caseName) : (entry.caseName || t('history_case_fallback'));
+    const whenText = formatTimeAgo(entry.openedAt);
+    return (
+      `<div class="history-item">` +
+      skinVisual(item, 'history-thumb', '') +
+      `<div class="history-main"><strong>${item.name || t('history_item_fallback')}</strong><span>${caseName}${whenText ? ` · ${whenText}` : ''}</span></div>` +
+      `<div class="history-price">$${Number(item.priceUsd || 0)}</div>` +
+      `</div>`
+    );
+  }).join('');
+}
+
+function renderDropsFeed() {
+  const root = document.getElementById('drops-feed');
+  if (!root) return;
+  const list = Array.isArray(openHistory) ? openHistory.slice(0, 12) : [];
+  if (!list.length) return;
+  root.innerHTML = list.map((entry) => {
+    const item = entry.item || entry;
+    const rarity = item.rarity || 'common';
+    const caseName = caseMeta[entry.caseName] ? getCaseTitle(entry.caseName) : (entry.caseName || 'VAULT');
+    const userLabel = authState?.user?.username ? `@${authState.user.username}` : 'you';
+    return (
+      `<div class="drop-card">` +
+      `<div class="drop-bar bar-${rarity}"></div>` +
+      skinVisual(item, 'drop-skin-emoji img', 'drop-skin-emoji') +
+      `<div class="drop-name">${item.name || t('history_item_fallback')}</div>` +
+      `<div class="drop-price ${rarity}">$${Number(item.priceUsd || 0)}</div>` +
+      `<div class="drop-user">${userLabel} · ${caseName}</div>` +
+      `</div>`
+    );
+  }).join('');
+}
+
+function isCaseEnabled(caseName) {
+  if (!caseName) return false;
+  if (caseEnabled && Object.prototype.hasOwnProperty.call(caseEnabled, caseName)) {
+    return caseEnabled[caseName] !== false;
+  }
+  return true;
+}
+
+function applyCaseConfigToHome() {
+  document.querySelectorAll('.case-card[data-case]').forEach((card) => {
+    const caseName = card.getAttribute('data-case') || '';
+    const enabled = isCaseEnabled(caseName);
+    card.classList.toggle('case-card-disabled', !enabled);
+    card.style.display = enabled ? '' : 'none';
+    const priceEl = card.querySelector('.case-price');
+    if (priceEl) {
+      const price = Number(casePrices?.[caseName] || 0);
+      priceEl.textContent = `⭐ ${price.toLocaleString('en-US')}`;
+    }
+  });
+}
+
+function appendHistoryFromWinner(caseName, item) {
+  openHistory.unshift({
+    id: `local-win-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    caseName,
+    openedAt: new Date().toISOString(),
+    item: { ...item, image: normalizeImagePath(item?.image) },
+  });
+  openHistory = openHistory.slice(0, 100);
+  renderOpenHistory();
+  renderDropsFeed();
+}
+
+async function refreshState() {
+  if (isDemoMode()) {
+    updateBalance();
+    applyLanguage();
+    renderAuthState();
+    renderInventory();
+    renderOpenHistory();
+    renderDropsFeed();
+    applyCaseConfigToHome();
+    renderUpgrades();
+    return;
+  }
+  if (!authState.initData) return;
+  const state = await apiFetch('/api/state');
+  runtimeState.mode = 'live';
+  runtimeState.backendReachable = true;
+  runtimeState.lastError = '';
+  authState.user = state.user;
+  const langFromServer = normalizeLanguage(state?.user?.settings?.language || currentLang);
+  if (supportedLanguages.includes(langFromServer) && langFromServer !== currentLang) {
+    currentLang = langFromServer;
+    localStorage.setItem('vault_lang', currentLang);
+  }
+  balance = Number(state.user.balance || 0);
+  inventory = Array.isArray(state.inventory) ? state.inventory : [];
+  openHistory = Array.isArray(state.openHistory) ? state.openHistory : [];
+  casePrices = state.casePrices || casePrices;
+  caseEnabled = state.caseEnabled || caseEnabled;
+  paymentMethods = state?.payments?.methods || paymentMethods;
+  activePromo = state?.promo?.active || null;
+  promoClockOffsetMs = Number(state?.promo?.serverNowMs || Date.now()) - Date.now();
+  updateBalance();
+  applyLanguage();
+  renderAuthState();
+  renderInventory();
+  renderOpenHistory();
+  renderDropsFeed();
+  applyCaseConfigToHome();
+  renderUpgrades();
+}
+
+async function bootstrapAuth() {
+  currentLang = detectInitialLanguage();
+  applyLanguage();
+  if (tg) {
+    authState.initData = await resolveInitData();
+  }
+
+  if (!authState.initData) {
+    enterDemoMode('no-telegram-initData');
+    applyLanguage();
+    renderAuthState();
+    updateBalance();
+    renderInventory();
+    const maybeTgMiniApp = Boolean(tg && (tg.platform || tg.initDataUnsafe?.user));
+    if (maybeTgMiniApp) {
+      toast(t('msg_tg_data_fail'));
+    } else {
+      toast(t('msg_open_in_tg'));
+    }
+    return;
+  }
+
+  try {
+    await refreshState();
+  } catch (e) {
+    enterDemoMode(`auth-failed:${e.message}`);
+    if (!tg) {
+      toast(tr('msg_demo_prefix', { error: shortenErrorMessage(e.message) }));
+    }
+  }
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function goHome() { showScreen('home'); currentScreen = 'home'; }
+function goInventory() { showScreen('inventory'); currentScreen = 'inventory'; }
+function goProfile() { showScreen('profile'); currentScreen = 'profile'; }
+function goUpgrades() {
+  showScreen('upgrades');
+  currentScreen = 'upgrades';
+  bindUpgradeScrollEffects();
+  triggerUpgradeIntro();
+  renderUpgrades();
+}
+function showHistoryScreen() { showScreen('history'); currentScreen = 'history'; renderOpenHistory(); }
+function goBackFromHistory() { showScreen('profile'); currentScreen = 'profile'; }
+function showLanguageScreen() { languageBack = currentScreen; showScreen('language'); currentScreen = 'language'; applyLanguage(); }
+function goBackFromLanguage() { showScreen(languageBack || 'profile'); currentScreen = languageBack || 'profile'; }
+
+function showCase(name) {
+  if (!isCaseEnabled(name)) {
+    toast(t('msg_case_disabled'));
+    return;
+  }
+  currentCase = name;
+  const price = casePrices[name] || 850;
+  const meta = caseMeta[name] || { key: '', emoji: '📦' };
+  const title = getCaseTitle(name);
+  document.getElementById('open-case-name').textContent = title;
+  document.getElementById('big-case-emoji').textContent = meta.emoji;
+  document.getElementById('big-case-title').textContent = title;
+  renderOpenButtonLabel(name === 'free' ? '0' : price);
+  document.getElementById('roulette-wrap').style.display = 'none';
+  showScreen('open');
+}
+
+function setMulti(el, count) {
+  multiCount = count;
+  document.querySelectorAll('.multi-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const price = casePrices[currentCase] || 850;
+  const total = price * count;
+  renderOpenButtonLabel(currentCase === 'free' ? '0' : total);
+}
+
+function renderRouletteWithWinner(winner) {
+  const wrap = document.getElementById('roulette-wrap');
+  const track = document.getElementById('roulette-track');
+  wrap.style.display = 'block';
+  track.style.transition = 'none';
+  track.style.transform = 'translateX(0)';
+  track.innerHTML = '';
+
+  const items = [];
+  for (let i = 0; i < 40; i++) items.push(randomPoolItem());
+  items[30] = winner;
+
+  items.forEach(item => {
+    const el = document.createElement('div');
+    el.className = `roulette-item rarity-${item.rarity}`;
+    el.innerHTML = `${skinVisual(item, 'skin-img', '')}<span>${item.name.split('|')[0]}</span>`;
+    track.appendChild(el);
+  });
+
+  const containerWidth = wrap.offsetWidth;
+  const itemWidth = 110;
+  const targetOffset = 30 * itemWidth - (containerWidth / 2) + (itemWidth / 2);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      track.style.transition = 'transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+      track.style.transform = `translateX(-${targetOffset}px)`;
+    });
+  });
+}
+
+async function triggerOpen() {
+  if (!isCaseEnabled(currentCase)) {
+    toast(t('msg_case_disabled'));
+    return;
+  }
+  if (isDemoMode() || !authState.initData) {
+    const price = (casePrices[currentCase] || 0) * multiCount;
+    if (currentCase !== 'free' && balance < price) {
+      toast(t('msg_not_enough_stars'));
+      return;
+    }
+    if (currentCase !== 'free') {
+      balance -= price;
+      updateBalance();
+    }
+    const demoWinner = pushDemoInventoryItem(makeDemoWinner());
+    lastWonItemId = demoWinner.id;
+    appendHistoryFromWinner(currentCase, demoWinner);
+    renderRouletteWithWinner(demoWinner);
+    setTimeout(() => {
+      showWin(demoWinner);
+      renderInventory();
+      toast(t('msg_demo_case_opened'));
+    }, 5500);
+    return;
+  }
+
+  const btn = document.getElementById('open-btn');
+  btn.disabled = true;
+  try {
+    const data = await apiFetch('/api/cases/open', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ caseName: currentCase, count: multiCount })
+    });
+
+    const winner = data.winner;
+    lastWonItemId = winner.id;
+    balance = Number(data.balance || 0);
+    updateBalance();
+    renderRouletteWithWinner(winner);
+
+    setTimeout(async () => {
+      showWin(winner);
+      await refreshState();
+      if (Array.isArray(data.winners) && data.winners.length > 1) {
+        toast(tr('msg_multi_opened', { count: data.winners.length }));
+      }
+      btn.disabled = false;
+    }, 5500);
+  } catch (e) {
+    btn.disabled = false;
+    toast(`❌ ${shortenErrorMessage(e.message)}`);
+  }
+}
+
+function showWin(item) {
+  const overlay = document.getElementById('win-overlay');
+  document.getElementById('win-emoji').innerHTML = skinVisual(item, 'skin-img-big', '');
+  document.getElementById('win-name').textContent = item.name;
+  document.getElementById('win-price').textContent = item.priceText || `$${item.priceUsd || 0}`;
+
+  const rarityNames = {
+    common: t('rarity_common'),
+    uncommon: t('rarity_uncommon'),
+    rare: t('rarity_rare'),
+    legendary: t('rarity_legendary')
+  };
+  const rEl = document.getElementById('win-rarity');
+  rEl.textContent = rarityNames[item.rarity] || t('history_item_fallback');
+  rEl.style.background = (rarityColors[item.rarity] || '#888') + '22';
+  rEl.style.color = rarityColors[item.rarity] || '#888';
+  rEl.style.border = `1px solid ${(rarityColors[item.rarity] || '#888')}44`;
+
+  const glow = document.getElementById('win-glow');
+  glow.style.background = `radial-gradient(circle, ${rarityColors[item.rarity] || '#888'}, transparent 70%)`;
+  overlay.classList.add('show');
+}
+
+async function sellItem() {
+  document.getElementById('win-overlay').classList.remove('show');
+  if (!lastWonItemId) {
+    toast(t('msg_sell_item_missing'));
+    return;
+  }
+  if (isDemoMode()) {
+    const idx = inventory.findIndex(x => x.id === lastWonItemId);
+    if (idx >= 0) {
+      const item = inventory[idx];
+      const stars = Number(item.sellStars || Math.round(Number(item.priceUsd || 0) * 10));
+      inventory.splice(idx, 1);
+      balance += stars;
+      updateBalance();
+      renderInventory();
+      lastWonItemId = null;
+      toast(tr('msg_sold_amount', { stars }));
+      return;
+    }
+  }
+  try {
+    const data = await apiFetch('/api/inventory/sell', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ itemId: lastWonItemId })
+    });
+    lastWonItemId = null;
+    await refreshState();
+    toast(tr('msg_sold_amount', { stars: data.stars }));
+  } catch (e) {
+    toast(`❌ ${shortenErrorMessage(e.message)}`);
+  }
+}
+
+function keepItem() {
+  document.getElementById('win-overlay').classList.remove('show');
+  lastWonItemId = null;
+  toast(t('msg_item_saved'));
+}
+
+async function sellInventoryItem(itemId) {
+  if (isDemoMode()) {
+    const idx = inventory.findIndex(x => x.id === itemId);
+    if (idx === -1) {
+      toast(t('msg_item_not_found'));
+      return;
+    }
+    const item = inventory[idx];
+    const stars = Number(item.sellStars || Math.round(Number(item.priceUsd || 0) * 10));
+    inventory.splice(idx, 1);
+    balance += stars;
+    updateBalance();
+    renderInventory();
+    toast(tr('msg_sold_amount', { stars }));
+    return;
+  }
+  try {
+    const data = await apiFetch('/api/inventory/sell', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ itemId })
+    });
+    await refreshState();
+    toast(tr('msg_sold_amount', { stars: data.stars }));
+  } catch (e) {
+    toast(`❌ ${shortenErrorMessage(e.message)}`);
+  }
+}
+
+async function sellAllInventory() {
+  if (!inventory.length) {
+    toast(t('msg_inventory_already_empty'));
+    return;
+  }
+  if (isDemoMode()) {
+    const totalStars = inventory.reduce((s, item) => s + Number(item.sellStars || Math.round(Number(item.priceUsd || 0) * 10)), 0);
+    const soldCount = inventory.length;
+    inventory = [];
+    balance += totalStars;
+    updateBalance();
+    renderInventory();
+    toast(tr('msg_sold_many', { count: soldCount, stars: totalStars }));
+    return;
+  }
+  try {
+    const data = await apiFetch('/api/inventory/sell-all', { method: 'POST' });
+    await refreshState();
+    toast(tr('msg_sold_many', { count: data.soldCount, stars: data.totalStars }));
+  } catch (e) {
+    toast(`❌ ${shortenErrorMessage(e.message)}`);
+  }
+}
+
+function showDeposit() {
+  depositBack = currentScreen;
+  document.getElementById('deposit-back').onclick = () => showScreen(depositBack);
+  syncDepositInput();
+  showScreen('deposit');
+}
+
+function getStarsPaymentConfig() {
+  const cfg = paymentMethods?.telegram_stars || {};
+  const enabled = cfg.enabled !== false;
+  let minAmount = Math.floor(Number(cfg.minAmount || 1));
+  let maxAmount = Math.floor(Number(cfg.maxAmount || 5000));
+  if (!Number.isFinite(minAmount) || minAmount < 1) minAmount = 1;
+  if (!Number.isFinite(maxAmount) || maxAmount < 1) maxAmount = Math.max(minAmount, 1);
+  if (maxAmount < minAmount) maxAmount = minAmount;
+  return {
+    title: String(cfg.title || 'Telegram Stars'),
+    enabled,
+    minAmount,
+    maxAmount,
+  };
+}
+
+function getDepositAmount() {
+  const input = document.getElementById('deposit-input');
+  const raw = Number((input?.value || '').trim());
+  if (!Number.isFinite(raw)) return 0;
+  return Math.floor(raw);
+}
+
+function syncDepositInput() {
+  const methodCfg = getStarsPaymentConfig();
+  const input = document.getElementById('deposit-input');
+  const hint = document.getElementById('deposit-hint');
+  const btn = document.getElementById('deposit-btn');
+  if (!input || !hint || !btn) return;
+  input.min = String(methodCfg.minAmount);
+  input.max = String(methodCfg.maxAmount);
+
+  let amount = getDepositAmount();
+  if (!amount) amount = 0;
+  if (!methodCfg.enabled) {
+    hint.textContent = t('msg_payment_method_disabled');
+    btn.textContent = t('msg_payment_method_disabled');
+    btn.disabled = true;
+    return;
+  }
+  btn.disabled = false;
+  if (amount < methodCfg.minAmount) {
+    hint.textContent = tr('deposit_hint_default', { min: methodCfg.minAmount, max: methodCfg.maxAmount });
+    btn.textContent = tr('deposit_btn_enter_amount', { min: methodCfg.minAmount, max: methodCfg.maxAmount });
+    return;
+  }
+  if (amount > methodCfg.maxAmount) {
+    hint.textContent = tr('deposit_hint_too_much', { max: methodCfg.maxAmount });
+    btn.textContent = tr('deposit_btn_topup', { amount: methodCfg.maxAmount });
+    return;
+  }
+  hint.textContent = tr('deposit_hint_will_charge', { amount });
+  btn.textContent = tr('deposit_btn_topup', { amount });
+}
+
+async function waitOrderPaid(orderId, attempts = 12, delayMs = 2000) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const data = await apiFetch(`/api/payments/order/${encodeURIComponent(orderId)}`);
+      if (data.order.status === 'paid') return true;
+      if (data.order.status === 'expired') return false;
+    } catch {}
+    await new Promise(resolve => setTimeout(resolve, delayMs));
+  }
+  return false;
+}
+
+async function doDeposit() {
+  const methodCfg = getStarsPaymentConfig();
+  if (!methodCfg.enabled) {
+    toast(t('msg_payment_method_disabled'));
+    return;
+  }
+  const amount = getDepositAmount();
+  if (amount < methodCfg.minAmount || amount > methodCfg.maxAmount) {
+    toast(tr('msg_enter_amount_range', { min: methodCfg.minAmount, max: methodCfg.maxAmount }));
+    return;
+  }
+
+  if (isDemoMode()) {
+    balance += amount;
+    updateBalance();
+    renderInventory();
+    openHistory.unshift({
+      id: `demo-deposit-${Date.now()}`,
+      caseName: 'Top Up',
+      openedAt: new Date().toISOString(),
+      item: { name: t('topup_item_name'), image: '', emoji: '⭐', rarity: 'uncommon', priceUsd: Math.max(1, Math.round(amount / 10)), r: 'u' },
+    });
+    openHistory = openHistory.slice(0, 100);
+    renderOpenHistory();
+    renderDropsFeed();
+    toast(tr('msg_demo_balance_topped', { amount }));
+    setTimeout(() => showScreen(depositBack), 250);
+    return;
+  }
+  if (!tg || !authState.initData) {
+    toast(t('msg_topup_tg_only'));
+    return;
+  }
+
+  const btn = document.getElementById('deposit-btn');
+  const oldLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = t('msg_creating_invoice');
+
+  try {
+    const created = await apiFetch('/api/payments/stars/create', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ amount })
+    });
+
+    tg.openInvoice(created.invoiceLink, async (status) => {
+      if (status === 'paid') {
+        const paid = await waitOrderPaid(created.orderId);
+        if (paid) {
+          await refreshState();
+          toast(tr('msg_topped_up', { amount }));
+          setTimeout(() => showScreen(depositBack), 300);
+        } else {
+          toast(t('msg_wait_webhook'));
+        }
+      } else if (status === 'cancelled') {
+        toast(t('msg_payment_cancelled'));
+      } else if (status === 'failed') {
+        toast(t('msg_payment_failed'));
+      } else {
+        toast(tr('msg_payment_status', { status }));
+      }
+    });
+  } catch (e) {
+    toast(tr('msg_create_invoice_fail', { error: shortenErrorMessage(e.message) }));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = oldLabel;
+  }
+}
+
+async function startSteamLink() {
+  if (isDemoMode()) {
+    toast(t('msg_steam_link_backend_only'));
+    return;
+  }
+  if (!authState.initData) {
+    toast(t('msg_steam_link_tg_only'));
+    return;
+  }
+  try {
+    const data = await apiFetch('/api/steam/link/start', { method: 'POST' });
+    if (tg && typeof tg.openLink === 'function') tg.openLink(data.steamUrl);
+    else window.open(data.steamUrl, '_blank');
+    toast(t('msg_steam_open'));
+  } catch (e) {
+    toast(tr('msg_steam_link_fail', { error: shortenErrorMessage(e.message) }));
+  }
+}
+
+function toastRefCopied() {
+  toast(t('msg_ref_copied'));
+}
+
+function toastWithdrawInSteam() {
+  toast(t('msg_withdraw_steam'));
+}
+
+function toastProvablyFair() {
+  toast(t('msg_fair'));
+}
+
+function setNav(i) {
+  if (i === 0) goHome();
+  if (i === 1) goUpgrades();
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+bootstrapAuth();
+bindUpgradeScrollEffects();
+renderUpgrades();
+syncDepositInput();
+window.addEventListener('focus', () => {
+  refreshState().catch(() => {});
+});
+</script>
+</body>
+</html>
