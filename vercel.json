@@ -7,6 +7,10 @@
   },
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/index" },
+    { "source": "/admin", "destination": "/api/index" },
+    { "source": "/admin/:path*", "destination": "/api/index" },
+    { "source": "/vault-admin", "destination": "/api/index" },
+    { "source": "/vault-admin/:path*", "destination": "/api/index" },
     { "source": "/auth/:path*", "destination": "/api/index" },
     { "source": "/telegram/webhook", "destination": "/api/index" },
     { "source": "/assets/:path*", "destination": "/api/index" }
