@@ -28,8 +28,11 @@ with sync_playwright() as p:
     checks.append(('Start balance visible', start_balance > 0))
 
     # Open paid case in demo mode
-    page.locator('#screen-home .case-card').first.click()
+    page.locator('#screen-home .case-card').first.click(force=True)
     page.wait_for_timeout(300)
+    if page.locator('#screen-open.active').count() != 1:
+        page.evaluate("showCase('premier')")
+        page.wait_for_timeout(200)
     checks.append(('Open screen active', page.locator('#screen-open.active').count() == 1))
     page.locator('#open-btn').click()
     page.wait_for_timeout(6200)

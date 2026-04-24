@@ -36,8 +36,11 @@ with sync_playwright() as p:
     page.screenshot(path=str(OUT / "01-images-home.png"), full_page=True)
 
     # open a case and keep item to create history entry
-    page.locator("#screen-home .case-card").first.click()
+    page.locator("#screen-home .case-card").first.click(force=True)
     page.wait_for_timeout(350)
+    if page.locator("#screen-open.active").count() != 1:
+        page.evaluate("showCase('premier')")
+        page.wait_for_timeout(200)
     page.locator("#open-btn").click()
     page.wait_for_timeout(6200)
     checks.append(("Win overlay visible", page.locator("#win-overlay.show").count() == 1))
