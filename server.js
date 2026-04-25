@@ -288,6 +288,16 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function escapeHtml(raw) {
+  return String(raw ?? '').replace(/[&<>"']/g, (ch) => {
+    if (ch === '&') return '&amp;';
+    if (ch === '<') return '&lt;';
+    if (ch === '>') return '&gt;';
+    if (ch === '"') return '&quot;';
+    return '&#39;';
+  });
+}
+
 function isAdminConfigured() {
   return Boolean(ADMIN_LOGIN && ADMIN_PASSWORD);
 }
