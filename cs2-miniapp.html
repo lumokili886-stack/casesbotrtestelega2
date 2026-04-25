@@ -1439,7 +1439,15 @@
   }
   .upgrade-wheel-arrow {
     position: absolute;
-    inset: 12px;
+    inset: 18px;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    width: auto;
+    height: auto;
+    background: transparent;
+    border: 0;
     border-radius: 50%;
     transform-origin: 50% 50%;
     transform: rotate(var(--arrow-rotation, 0deg));
@@ -1452,9 +1460,9 @@
     content: '';
     position: absolute;
     left: 50%;
-    bottom: 19px;
+    top: 0;
     width: 2px;
-    height: 10px;
+    height: 8px;
     transform: translateX(-50%);
     background: linear-gradient(180deg, #ffe8a4, #f2b236);
     border-radius: 2px;
@@ -1463,13 +1471,13 @@
     content: '';
     position: absolute;
     left: 50%;
-    bottom: 8px;
+    top: 6px;
     width: 0;
     height: 0;
     transform: translateX(-50%);
-    border-left: 7px solid transparent;
-    border-right: 7px solid transparent;
-    border-bottom: 12px solid #ffd45f;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 10px solid #ffd45f;
     filter: drop-shadow(0 0 6px rgba(255,202,74,0.35));
   }
   .upgrade-wheel-dot { display: none !important; }
@@ -1536,9 +1544,7 @@
     box-shadow: 0 0 0 1px rgba(232,166,48,0.28);
   }
   .upgrade-presets {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0,1fr));
-    gap: 7px;
+    display: none;
   }
   .upgrade-preset {
     border: 1px solid rgba(255,255,255,0.11);
@@ -1627,9 +1633,9 @@
     .upgrade-wheel::before { inset: 34px; }
     .upgrade-wheel-label { font-size: 34px; }
     .upgrade-wheel-meta { bottom: 66px; font-size: 18px; }
-    .upgrade-wheel-arrow { inset: 10px; }
-    .upgrade-wheel-arrow::before { bottom: 17px; height: 9px; }
-    .upgrade-wheel-arrow::after { bottom: 7px; border-left-width: 6px; border-right-width: 6px; border-bottom-width: 10px; }
+    .upgrade-wheel-arrow { inset: 16px; }
+    .upgrade-wheel-arrow::before { top: 0; height: 7px; }
+    .upgrade-wheel-arrow::after { top: 5px; border-left-width: 5px; border-right-width: 5px; border-bottom-width: 9px; }
     .upgrade-controls { grid-template-columns: 1fr; }
     .upgrade-settings-label { min-width: 100%; }
     .up-pick { grid-template-columns: 44px 1fr auto; padding: 9px; gap: 8px; }
@@ -3483,17 +3489,7 @@ function buildUpgradePresets() {
 function renderUpgradePresets() {
   const root = document.getElementById('upgrade-presets');
   if (!root) return;
-  const presets = buildUpgradePresets();
-  if (!presets.length) {
-    root.innerHTML = '';
-    return;
-  }
-  root.innerHTML = presets.map((preset) => (
-    `<button class="upgrade-preset ${preset.targetKey === upgradeTargetKey ? 'active' : ''}" onclick="pickUpgradePreset('${preset.targetKey}','${preset.mode}')">` +
-      `<div class="v">${escapeHtml(preset.label)}</div>` +
-      `<div class="k">${escapeHtml(preset.sub)}</div>` +
-    `</button>`
-  )).join('');
+  root.innerHTML = '';
 }
 
 function pickUpgradePreset(targetKey, mode) {
