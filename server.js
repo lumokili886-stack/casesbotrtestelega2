@@ -58,12 +58,51 @@ const defaultCasePrices = {
   free: 0,
 };
 
+const defaultCasePresentation = {
+  premier: { title: 'Premier Case', subtitle: '14 скинов · до AK-47 Asiimov', image: '/assets/cases/vault-case.png', variant: 'case-variant-gold', badge: 'HOT', featured: true },
+  gamma: { title: 'Gamma 2 Case', subtitle: '12 скинов', image: '/assets/cases/vault-case.png', variant: 'case-variant-blue', badge: 'NEW', featured: false },
+  danger: { title: 'Danger Zone', subtitle: '16 скинов', image: '/assets/cases/vault-case.png', variant: 'case-variant-violet', badge: 'TOP', featured: false },
+  clutch: { title: 'Clutch Case', subtitle: '18 скинов', image: '/assets/cases/vault-case.png', variant: 'case-variant-gold', badge: '', featured: false },
+  mirage: { title: 'Mirage Pulse', subtitle: '15 скинов', image: '/assets/cases/vault-case.png', variant: 'case-variant-blue', badge: 'HOT', featured: false },
+  anubis: { title: 'Anubis Relic', subtitle: '14 скинов', image: '/assets/cases/vault-case.png', variant: 'case-variant-violet', badge: 'NEW', featured: false },
+  inferno: { title: 'Inferno Ember', subtitle: '17 скинов', image: '/assets/cases/vault-case.png', variant: 'case-variant-gold', badge: 'TOP', featured: false },
+  overpass: { title: 'Overpass Rush', subtitle: '13 скинов', image: '/assets/cases/vault-case.png', variant: 'case-variant-blue', badge: '', featured: false },
+  free: { title: '🎁 Бесплатный кейс', subtitle: '1 открытие · каждый день', image: '/assets/cases/vault-case.png', variant: 'case-variant-violet', badge: 'FREE', featured: false },
+};
+
+function sanitizeCasePresentation(raw = {}, fallback = {}) {
+  const title = String(raw?.title || fallback?.title || 'VAULT Case').trim().slice(0, 80) || 'VAULT Case';
+  const subtitle = String(raw?.subtitle || fallback?.subtitle || 'CS2 skins').trim().slice(0, 120) || 'CS2 skins';
+  const image = String(raw?.image || fallback?.image || '/assets/cases/vault-case.png').trim() || '/assets/cases/vault-case.png';
+  const variantRaw = String(raw?.variant || fallback?.variant || 'case-variant-gold').trim().toLowerCase();
+  const badge = String(raw?.badge || fallback?.badge || '').trim().slice(0, 12).toUpperCase();
+  const featured = Boolean(raw?.featured === true || fallback?.featured === true);
+  const variant = ['case-variant-gold', 'case-variant-blue', 'case-variant-violet'].includes(variantRaw)
+    ? variantRaw
+    : 'case-variant-gold';
+  return {
+    title,
+    subtitle,
+    image,
+    variant,
+    badge,
+    featured,
+  };
+}
+
 function buildDefaultCaseConfig() {
   const out = {};
   for (const [name, price] of Object.entries(defaultCasePrices)) {
+    const presentation = sanitizeCasePresentation(defaultCasePresentation[name], defaultCasePresentation[name]);
     out[name] = {
       price: Number(price || 0),
       enabled: true,
+      title: presentation.title,
+      subtitle: presentation.subtitle,
+      image: presentation.image,
+      variant: presentation.variant,
+      badge: presentation.badge,
+      featured: presentation.featured,
       updatedAt: null,
       updatedBy: null,
     };
@@ -239,7 +278,7 @@ function normalizeCaseDraftStore(db) {
     changed = true;
   }
   for (const [caseName, draft] of Object.entries(db.caseDrafts.cases)) {
-    if (!Object.prototype.hasOwnProperty.call(defaultCasePrices, caseName) || !draft || typeof draft !== 'object') {
+    if (!sanitizeCaseSlug(caseName) || !draft || typeof draft !== 'object') {
       delete db.caseDrafts.cases[caseName];
       changed = true;
       continue;
@@ -678,6 +717,64 @@ function normalizeCaseConfig(db) {
     }
     if (!Object.prototype.hasOwnProperty.call(cfg, 'updatedAt')) cfg.updatedAt = null;
     if (!Object.prototype.hasOwnProperty.call(cfg, 'updatedBy')) cfg.updatedBy = null;
+    const defaultPresentation = defaultCasePresentation[name] || {};
+    const nextPresentation = sanitizeCasePresentation(cfg, defaultPresentation);
+    for (const [presentationKey, presentationValue] of Object.entries(nextPresentation)) {
+      if (cfg[presentationKey] !== presentationValue) {
+        cfg[presentationKey] = presentationValue;
+        changed = true;
+      }
+    }
+  }
+
+  for (const [name, cfg] of Object.entries(db.caseConfig)) {
+    if (!cfg || typeof cfg !== 'object') {
+      db.caseConfig[name] = {
+        price: 0,
+        enabled: true,
+        dropTable: null,
+        ...sanitizeCasePresentation({}, {}),
+        updatedAt: null,
+        updatedBy: null,
+      };
+      changed = true;
+      continue;
+    }
+    const priceNum = Math.max(0, Math.floor(Number(cfg.price ?? 0)));
+    const enabled = Boolean(cfg.enabled !== false);
+    const normalizedPrice = Number.isFinite(priceNum) ? priceNum : 0;
+    if (cfg.price !== normalizedPrice) {
+      cfg.price = normalizedPrice;
+      changed = true;
+    }
+    if (name === 'free' && cfg.price !== 0) {
+      cfg.price = 0;
+      changed = true;
+    }
+    if (cfg.enabled !== enabled) {
+      cfg.enabled = enabled;
+      changed = true;
+    }
+    const nextDropTable = normalizeCaseDropTable(cfg.dropTable).table;
+    const prevDropTableRaw = cfg.dropTable && typeof cfg.dropTable === 'object' ? cfg.dropTable : null;
+    const prevNorm = normalizeCaseDropTable(prevDropTableRaw).table;
+    if (JSON.stringify(prevNorm) !== JSON.stringify(nextDropTable)) {
+      cfg.dropTable = nextDropTable;
+      changed = true;
+    } else if (!Object.prototype.hasOwnProperty.call(cfg, 'dropTable')) {
+      cfg.dropTable = nextDropTable;
+      changed = true;
+    }
+    const defaultPresentation = defaultCasePresentation[name] || {};
+    const nextPresentation = sanitizeCasePresentation(cfg, defaultPresentation);
+    for (const [presentationKey, presentationValue] of Object.entries(nextPresentation)) {
+      if (cfg[presentationKey] !== presentationValue) {
+        cfg[presentationKey] = presentationValue;
+        changed = true;
+      }
+    }
+    if (!Object.prototype.hasOwnProperty.call(cfg, 'updatedAt')) cfg.updatedAt = null;
+    if (!Object.prototype.hasOwnProperty.call(cfg, 'updatedBy')) cfg.updatedBy = null;
   }
   return changed;
 }
@@ -827,6 +924,31 @@ function getCasePriceMap(db) {
   const out = {};
   for (const [name, cfg] of Object.entries(db.caseConfig || {})) out[name] = Number(cfg?.price || 0);
   return out;
+}
+
+function getCaseCatalogMap(db) {
+  const out = {};
+  for (const [name, cfg] of Object.entries(db.caseConfig || {})) {
+    const presentation = sanitizeCasePresentation(cfg, defaultCasePresentation[name] || {});
+    out[name] = {
+      title: presentation.title,
+      subtitle: presentation.subtitle,
+      image: presentation.image,
+      variant: presentation.variant,
+      badge: presentation.badge,
+      featured: presentation.featured,
+    };
+  }
+  return out;
+}
+
+function sanitizeCaseSlug(raw) {
+  return String(raw || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9_-]/g, '')
+    .slice(0, 40);
 }
 
 function b64urlEncode(input) {
@@ -1875,10 +1997,27 @@ function renderAdminPage(options = {}) {
       <div class="section-block hidden" id="section-cases">
         <div class="panel">
           <h3>Управление Кейсами (цена / вкл-выкл)</h3>
+          <div class="row" style="margin-bottom:10px">
+            <input id="case-create-name" placeholder="slug (например vault-pro)" style="min-width:160px;flex:1">
+            <input id="case-create-title" placeholder="Название кейса" style="min-width:180px;flex:1.2">
+            <input id="case-create-price" type="number" min="0" step="1" value="900" placeholder="Цена ⭐" style="width:120px">
+            <label class="hint" style="display:flex;align-items:center;gap:6px"><input id="case-create-enabled" type="checkbox" checked> Включен</label>
+            <button class="btn primary" id="btn-case-create">Создать кейс</button>
+          </div>
+          <div class="row" style="margin-bottom:8px">
+            <input id="case-create-subtitle" placeholder="Подпись (например 14 скинов)" style="min-width:240px;flex:1.4">
+            <input id="case-create-badge" placeholder="Бейдж (HOT/NEW/TOP/FREE)" style="width:170px">
+            <select id="case-create-variant" style="min-width:180px">
+              <option value="case-variant-gold">Вариант: Gold</option>
+              <option value="case-variant-blue">Вариант: Blue</option>
+              <option value="case-variant-violet">Вариант: Violet</option>
+            </select>
+            <label class="hint" style="display:flex;align-items:center;gap:6px"><input id="case-create-featured" type="checkbox"> Featured</label>
+          </div>
           <div class="hint" id="economy-mode-cases-hint" style="margin-bottom:8px">Режим экономики: PRODUCTION</div>
           <div class="table-wrap" style="max-height:320px">
             <table id="cases-table">
-              <thead><tr><th>Case</th><th>Price ⭐</th><th>Enabled</th><th>Updated</th></tr></thead>
+              <thead><tr><th>Case</th><th>Title</th><th>Price ⭐</th><th>Enabled</th><th>Updated</th></tr></thead>
               <tbody></tbody>
             </table>
           </div>
@@ -2284,6 +2423,7 @@ function renderAdminPage(options = {}) {
         const draftHint = c.hasDraft ? ('<div class="hint">draft: ' + esc(c.draftPrice) + ' / ' + esc(c.draftEnabled ? 'on' : 'off') + '</div>') : '<div class="hint">draft: -</div>';
         return '<tr>' +
           '<td>'+esc(c.caseName)+'</td>' +
+          '<td>'+esc(c.title || c.caseName)+'</td>' +
           '<td><input data-case-price="'+esc(c.caseName)+'" type="number" min="0" step="1" value="'+esc(c.hasDraft ? c.draftPrice : c.price)+'" '+disPrice+' style="width:110px"></td>' +
           '<td><input data-case-enabled="'+esc(c.caseName)+'" type="checkbox" '+((c.hasDraft ? c.draftEnabled : c.enabled) ? 'checked' : '')+'></td>' +
           '<td>'+esc(fmtTs(c.updatedAt))+'<div class="hint">'+esc(c.updatedBy || '-')+' · '+(c.hasCustomDropTable ? 'custom drop' : 'default drop')+'</div>'+draftHint+'</td>' +
@@ -2880,6 +3020,41 @@ function renderAdminPage(options = {}) {
     if (sectionSelect) {
       sectionSelect.onchange = () => setSection(sectionSelect.value || 'overview');
     }
+    document.getElementById('btn-case-create').onclick = async () => {
+      const btn = document.getElementById('btn-case-create');
+      const caseName = String(document.getElementById('case-create-name')?.value || '').trim();
+      const title = String(document.getElementById('case-create-title')?.value || '').trim();
+      const subtitle = String(document.getElementById('case-create-subtitle')?.value || '').trim();
+      const price = Number(document.getElementById('case-create-price')?.value || 0);
+      const enabled = Boolean(document.getElementById('case-create-enabled')?.checked);
+      const badge = String(document.getElementById('case-create-badge')?.value || '').trim();
+      const variant = String(document.getElementById('case-create-variant')?.value || 'case-variant-gold');
+      const featured = Boolean(document.getElementById('case-create-featured')?.checked);
+      if (!caseName || !title) {
+        showNotice('Укажите slug и название кейса', 'bad', 2800);
+        return;
+      }
+      btn.disabled = true;
+      const progress = createProgressNotice('Создаем кейс...');
+      try {
+        await jfetch('/admin/api/cases/create', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ caseName, title, subtitle, price, enabled, badge, variant, featured }),
+        });
+        document.getElementById('case-create-name').value = '';
+        document.getElementById('case-create-title').value = '';
+        document.getElementById('case-create-subtitle').value = '';
+        document.getElementById('case-create-badge').value = '';
+        document.getElementById('case-create-featured').checked = false;
+        await loadDashboard({ section: 'cases' });
+        progress.done('Кейс создан');
+      } catch (e) {
+        progress.done('Ошибка: ' + e.message, 'bad', 3400);
+      } finally {
+        btn.disabled = false;
+      }
+    };
     document.getElementById('btn-cases-save-all').onclick = async () => {
       const btn = document.getElementById('btn-cases-save-all');
       btn.disabled = true;
@@ -3317,6 +3492,7 @@ app.get('/api/state', async (req, res) => {
     .slice(0, 50);
 
   const casePriceMap = getCasePriceMap(auth.db);
+  const caseCatalog = getCaseCatalogMap(auth.db);
   const caseEnabledMap = {};
   for (const [name, cfg] of Object.entries(auth.db.caseConfig || {})) caseEnabledMap[name] = Boolean(cfg?.enabled !== false);
   const paymentMethods = {};
@@ -3338,6 +3514,7 @@ app.get('/api/state', async (req, res) => {
     inventoryCount: inv.length,
     inventoryUsdValue: inv.reduce((s, x) => s + Number(x.priceUsd || 0), 0),
     casePrices: casePriceMap,
+    caseCatalog,
     caseEnabled: caseEnabledMap,
     payments: { methods: paymentMethods },
     promo: {
@@ -3353,12 +3530,8 @@ app.post('/api/cases/open', async (req, res) => {
 
   const caseName = String(req.body?.caseName || '');
   const count = Number(req.body?.count || 1);
-
-  if (!Object.prototype.hasOwnProperty.call(defaultCasePrices, caseName)) {
-    return res.status(400).json({ ok: false, error: 'unknown case' });
-  }
   const caseCfg = auth.db.caseConfig?.[caseName] || null;
-  if (!caseCfg) return res.status(400).json({ ok: false, error: 'case config missing' });
+  if (!caseCfg) return res.status(400).json({ ok: false, error: 'unknown case' });
   if (caseCfg.enabled === false) return res.status(400).json({ ok: false, error: 'case is disabled' });
   if (!Number.isInteger(count) || count < 1 || count > 10) {
     return res.status(400).json({ ok: false, error: 'count must be 1..10' });
@@ -4299,6 +4472,12 @@ app.get('/admin/api/cases', ensureAdminAuth(), async (_req, res) => {
       caseName,
       price: Number(cfg?.price || 0),
       enabled: Boolean(cfg?.enabled !== false),
+      title: String(cfg?.title || ''),
+      subtitle: String(cfg?.subtitle || ''),
+      image: String(cfg?.image || ''),
+      variant: String(cfg?.variant || 'case-variant-gold'),
+      badge: String(cfg?.badge || ''),
+      featured: Boolean(cfg?.featured === true),
       hasCustomDropTable: Boolean(normalizeCaseDropTable(cfg?.dropTable).table),
       hasDraft: Boolean(economy.caseDrafts?.cases?.[caseName]),
       draftPrice: Number(economy.caseDrafts?.cases?.[caseName]?.price || 0),
@@ -4316,12 +4495,77 @@ app.get('/admin/api/cases', ensureAdminAuth(), async (_req, res) => {
   }
 });
 
+app.post('/admin/api/cases/create', ensureAdminAuth(), async (req, res) => {
+  try {
+    const caseName = sanitizeCaseSlug(req.body?.caseName);
+    const title = String(req.body?.title || '').trim();
+    const subtitle = String(req.body?.subtitle || '').trim();
+    const nextPriceRaw = Number(req.body?.price ?? 0);
+    const enabled = Boolean(req.body?.enabled !== false);
+    const badge = String(req.body?.badge || '').trim();
+    const variant = String(req.body?.variant || 'case-variant-gold').trim();
+    const image = String(req.body?.image || '/assets/cases/vault-case.png').trim();
+    const featured = Boolean(req.body?.featured === true);
+
+    if (!caseName || caseName.length < 2) {
+      return res.status(400).json({ ok: false, error: 'caseName must contain at least 2 chars' });
+    }
+    if (!Number.isInteger(nextPriceRaw) || nextPriceRaw < 0) {
+      return res.status(400).json({ ok: false, error: 'price must be integer >= 0' });
+    }
+
+    const db = await readDb();
+    cleanup(db);
+    normalizeAllConfig(db);
+    if (db.caseConfig?.[caseName]) {
+      return res.status(400).json({ ok: false, error: 'case already exists' });
+    }
+
+    const presentation = sanitizeCasePresentation({ title, subtitle, image, variant, badge, featured }, {});
+    const created = {
+      caseName,
+      price: caseName === 'free' ? 0 : Number(nextPriceRaw),
+      enabled,
+      title: presentation.title,
+      subtitle: presentation.subtitle,
+      image: presentation.image,
+      variant: presentation.variant,
+      badge: presentation.badge,
+      featured: presentation.featured,
+      dropTable: null,
+      updatedAt: nowIso(),
+      updatedBy: req.admin?.login || 'admin',
+    };
+    db.caseConfig[caseName] = created;
+    if (db.sandboxEconomy?.caseConfig && !db.sandboxEconomy.caseConfig[caseName]) {
+      db.sandboxEconomy.caseConfig[caseName] = cloneJson(created);
+      db.sandboxEconomy.updatedAt = nowIso();
+      db.sandboxEconomy.updatedBy = req.admin?.login || 'admin';
+    }
+    appendAdminAudit(db, {
+      action: 'case_create',
+      reason: `${caseName} created price=${created.price} enabled=${created.enabled}`,
+      adminLogin: req.admin?.login || 'admin',
+    });
+    appendConfigHistory(db, {
+      entityType: 'case_config',
+      entityKey: caseName,
+      action: 'create',
+      before: null,
+      after: created,
+      createdBy: req.admin?.login || 'admin',
+    });
+    if (!await persistDbOr503(res, db)) return;
+    return res.json({ ok: true, case: created });
+  } catch (e) {
+    console.error('[admin] case create failed:', e);
+    return res.status(503).json({ ok: false, error: 'Storage temporarily unavailable' });
+  }
+});
+
 app.post('/admin/api/cases/:caseName', ensureAdminAuth(), async (req, res) => {
   try {
     const caseName = String(req.params.caseName || '').trim();
-    if (!Object.prototype.hasOwnProperty.call(defaultCasePrices, caseName)) {
-      return res.status(400).json({ ok: false, error: 'unknown case' });
-    }
     const nextPriceRaw = Number(req.body?.price);
     const nextEnabled = req.body?.enabled;
     if (!Number.isInteger(nextPriceRaw) || nextPriceRaw < 0) {
@@ -4331,6 +4575,9 @@ app.post('/admin/api/cases/:caseName', ensureAdminAuth(), async (req, res) => {
     cleanup(db);
     normalizeAllConfig(db);
     const economy = getEconomyStore(db, req);
+    if (!economy.caseConfig?.[caseName]) {
+      return res.status(400).json({ ok: false, error: 'unknown case' });
+    }
     const beforeDraft = cloneJson(economy.caseDrafts?.cases?.[caseName] || null);
     const currentPublished = economy.caseConfig?.[caseName] || null;
     const draft = {
@@ -4427,9 +4674,6 @@ app.post('/admin/api/case-drafts/publish', ensureAdminAuth(), async (req, res) =
 app.get('/admin/api/case-lab/:caseName', ensureAdminAuth(), async (req, res) => {
   try {
     const caseName = String(req.params.caseName || '').trim();
-    if (!Object.prototype.hasOwnProperty.call(defaultCasePrices, caseName)) {
-      return res.status(400).json({ ok: false, error: 'unknown case' });
-    }
     const db = await readDb();
     cleanup(db);
     normalizeAllConfig(db);
@@ -4474,9 +4718,6 @@ app.get('/admin/api/case-lab/:caseName', ensureAdminAuth(), async (req, res) => 
 app.post('/admin/api/case-lab/:caseName', ensureAdminAuth(), async (req, res) => {
   try {
     const caseName = String(req.params.caseName || '').trim();
-    if (!Object.prototype.hasOwnProperty.call(defaultCasePrices, caseName)) {
-      return res.status(400).json({ ok: false, error: 'unknown case' });
-    }
     const nextPriceRaw = Number(req.body?.price);
     const nextEnabled = req.body?.enabled;
     if (!Number.isInteger(nextPriceRaw) || nextPriceRaw < 0) {
@@ -4547,9 +4788,6 @@ app.post('/admin/api/case-lab/:caseName', ensureAdminAuth(), async (req, res) =>
 app.post('/admin/api/case-lab/:caseName/simulate', ensureAdminAuth(), async (req, res) => {
   try {
     const caseName = String(req.params.caseName || '').trim();
-    if (!Object.prototype.hasOwnProperty.call(defaultCasePrices, caseName)) {
-      return res.status(400).json({ ok: false, error: 'unknown case' });
-    }
     const spins = Number(req.body?.spins || 1000);
     const db = await readDb();
     cleanup(db);
@@ -4934,12 +5172,10 @@ app.post('/admin/api/config-history/:entryId/rollback', ensureAdminAuth(), async
 
     const target = cloneJson(entry.before);
     if (entry.entityType === 'case_config') {
-      if (!Object.prototype.hasOwnProperty.call(defaultCasePrices, entry.entityKey)) {
-        return res.status(400).json({ ok: false, error: 'unsupported case key for rollback' });
-      }
       db.caseConfig[entry.entityKey] = target || {
-        price: defaultCasePrices[entry.entityKey] || 0,
+        price: 0,
         enabled: true,
+        ...sanitizeCasePresentation({}, defaultCasePresentation[entry.entityKey] || {}),
         dropTable: null,
         updatedAt: nowIso(),
         updatedBy: req.admin?.login || 'admin',
