@@ -77,6 +77,40 @@
     color: var(--accent);
     text-shadow: 0 0 20px rgba(232,166,48,0.4);
   }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .online-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(61,220,132,0.34);
+    background: linear-gradient(180deg, rgba(11,22,18,0.95), rgba(16,39,30,0.9));
+    color: #b8f6d2;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .online-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #38d97f;
+    box-shadow: 0 0 10px rgba(61,220,132,0.7);
+    animation: online-pulse 1.8s ease-in-out infinite;
+  }
+  .online-count { color: #ffffff; font-weight: 800; }
+  .online-label { color: #a3dfbe; font-weight: 600; }
+  .online-chip.online-compact { padding: 4px 8px; font-size: 10px; margin-left: auto; }
+  @keyframes online-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.18); opacity: 0.72; }
+  }
 
   .balance-pill {
     display: flex;
@@ -423,7 +457,7 @@
     transition: all 0.2s;
   }
   .back-btn:active { transform: scale(0.9); }
-  .open-header h2 { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+  .open-header h2 { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 1px; flex: 1; min-width: 0; }
 
   .case-showcase {
     display: flex;
@@ -1369,6 +1403,142 @@
     word-break: break-word;
   }
   .toast.show { opacity: 1; }
+
+  /* ===== UPGRADE V2 OVERRIDES ===== */
+  .upgrade-wrap { padding: 14px; }
+  .upgrade-hero-title { font-size: 22px; }
+  .upgrade-board {
+    display: block;
+    padding: 14px 12px 12px;
+    border-radius: 20px;
+  }
+  .upgrade-wheel-wrap {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .upgrade-wheel {
+    width: 286px;
+    height: 286px;
+    border: 3px solid rgba(255,255,255,0.12);
+    background: conic-gradient(
+      from 180deg,
+      rgba(255,220,54,0.95) 0deg,
+      rgba(255,148,37,0.95) 108deg,
+      rgba(255,74,55,0.95) 180deg,
+      rgba(255,255,255,0.09) 180deg,
+      rgba(255,255,255,0.09) 360deg
+    );
+  }
+  .upgrade-wheel::before { inset: 48px; }
+  .upgrade-wheel::after { inset: -12px; border-style: solid; border-color: rgba(255,255,255,0.08); }
+  .upgrade-wheel-spokes {
+    inset: 10px;
+    opacity: 0.35;
+    mask: radial-gradient(circle, transparent 57%, #000 60%, #000 73%, transparent 76%);
+  }
+  .upgrade-wheel-arrow {
+    top: 50%;
+    left: 50%;
+    height: 46%;
+    width: 4px;
+    transform-origin: 50% calc(100% - 6px);
+  }
+  .upgrade-wheel-label {
+    font-size: 68px;
+    letter-spacing: -1px;
+    font-family: 'Rajdhani', sans-serif;
+    color: #b2ff4a;
+    text-shadow: 0 0 24px rgba(165,255,77,0.25);
+  }
+  .upgrade-wheel-meta {
+    bottom: 76px;
+    font-size: 26px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #9ed95f;
+  }
+  .upgrade-slot-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .upgrade-slot-row .up-slot {
+    min-height: 96px;
+    font-size: 11px;
+  }
+  .upgrade-settings {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    background: rgba(14,18,28,0.66);
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  .upgrade-settings-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .upgrade-settings-row:last-child { margin-bottom: 0; }
+  .upgrade-settings-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
+    min-width: 124px;
+  }
+  .upgrade-toggle-btn {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #111726;
+    color: #cad4ea;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 7px 10px;
+    cursor: pointer;
+  }
+  .upgrade-toggle-btn.active {
+    border-color: rgba(232,166,48,0.65);
+    background: linear-gradient(90deg, rgba(232,166,48,0.2), rgba(232,166,48,0.1));
+    color: #fff1cb;
+    box-shadow: 0 0 0 1px rgba(232,166,48,0.28);
+  }
+  .upgrade-presets {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 7px;
+  }
+  .upgrade-preset {
+    border: 1px solid rgba(255,255,255,0.11);
+    border-radius: 10px;
+    background: rgba(17,23,34,0.85);
+    padding: 9px 6px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .upgrade-preset .v { font-size: 13px; font-weight: 800; color: #f1f5ff; }
+  .upgrade-preset .k { font-size: 10px; color: #9fb0cd; margin-top: 2px; text-transform: uppercase; letter-spacing: .4px; }
+  .upgrade-preset.active {
+    border-color: rgba(78,158,255,0.85);
+    box-shadow: 0 0 0 1px rgba(78,158,255,0.35), 0 0 14px rgba(78,158,255,0.22);
+  }
+  .upgrade-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .upgrade-select-grid { grid-template-columns: 1fr; max-height: 280px; overflow: auto; }
+  .upgrade-select-grid::-webkit-scrollbar { display: none; }
+  @media (max-width: 420px) {
+    .upgrade-wheel { width: 258px; height: 258px; }
+    .upgrade-wheel-label { font-size: 58px; }
+    .upgrade-wheel-meta { bottom: 66px; font-size: 23px; }
+    .upgrade-controls { grid-template-columns: 1fr; }
+    .upgrade-settings-label { min-width: 100%; }
+  }
 </style>
 </head>
 <body>
@@ -1377,10 +1547,13 @@
 <div id="screen-home" class="screen active">
   <div class="header">
     <div class="logo">VAULT</div>
-    <div class="balance-pill" onclick="showDeposit()">
-      <span class="icon">⭐</span>
-      <span class="amount" id="balance">2,450</span>
-      <div class="plus-btn">+</div>
+    <div class="header-right">
+      <div class="online-chip"><span class="online-dot"></span><span class="online-label">Online</span><span class="online-count">0</span></div>
+      <div class="balance-pill" onclick="showDeposit()">
+        <span class="icon">⭐</span>
+        <span class="amount" id="balance">2,450</span>
+        <div class="plus-btn">+</div>
+      </div>
     </div>
   </div>
 
@@ -1474,10 +1647,13 @@
 <div id="screen-upgrades" class="screen">
   <div class="header">
     <div class="logo" style="font-size:18px" id="upgrades-header-title">🚀 Апгрейды</div>
-    <div class="balance-pill" onclick="showDeposit()">
-      <span class="icon">⭐</span>
-      <span class="amount" id="balance4">0</span>
-      <div class="plus-btn">+</div>
+    <div class="header-right">
+      <div class="online-chip"><span class="online-dot"></span><span class="online-label">Online</span><span class="online-count">0</span></div>
+      <div class="balance-pill" onclick="showDeposit()">
+        <span class="icon">⭐</span>
+        <span class="amount" id="balance4">0</span>
+        <div class="plus-btn">+</div>
+      </div>
     </div>
   </div>
   <div class="scroll-area">
@@ -1488,18 +1664,33 @@
       </div>
 
       <div class="upgrade-board">
-        <div class="up-slot" id="upgrade-source-slot">Выбери скин из инвентаря</div>
         <div class="upgrade-wheel-wrap">
           <div class="upgrade-wheel" id="upgrade-wheel">
             <div class="upgrade-wheel-glow"></div>
             <div class="upgrade-wheel-spokes"></div>
             <div class="upgrade-wheel-arrow" id="upgrade-wheel-arrow"></div>
-            <div class="upgrade-wheel-label" id="upgrade-wheel-label">0%</div>
-            <div class="upgrade-wheel-meta" id="upgrade-wheel-meta">chance</div>
+            <div class="upgrade-wheel-label" id="upgrade-wheel-label">0.00%</div>
+            <div class="upgrade-wheel-meta" id="upgrade-wheel-meta">средний шанс</div>
             <div class="upgrade-wheel-dot"></div>
           </div>
         </div>
-        <div class="up-slot" id="upgrade-target-slot">Выбери цель апгрейда</div>
+        <div class="upgrade-slot-row">
+          <div class="up-slot" id="upgrade-source-slot">Выбери скин из инвентаря</div>
+          <div class="up-slot" id="upgrade-target-slot">Выбери цель апгрейда</div>
+        </div>
+        <div class="upgrade-settings">
+          <div class="upgrade-settings-row">
+            <div class="upgrade-settings-label" id="upgrade-speed-label">Скорость прокрута</div>
+            <button class="upgrade-toggle-btn active" id="upgrade-speed-normal" onclick="setUpgradeSpinSpeed('normal')">Обычная</button>
+            <button class="upgrade-toggle-btn" id="upgrade-speed-fast" onclick="setUpgradeSpinSpeed('fast')">Быстрая</button>
+          </div>
+          <div class="upgrade-settings-row">
+            <div class="upgrade-settings-label" id="upgrade-quick-label">Быстрый подбор</div>
+            <button class="upgrade-toggle-btn active" id="upgrade-quick-coef" onclick="quickPickUpgrade('coef')">По коэф.</button>
+            <button class="upgrade-toggle-btn" id="upgrade-quick-chance" onclick="quickPickUpgrade('chance')">По %</button>
+          </div>
+          <div class="upgrade-presets" id="upgrade-presets"></div>
+        </div>
       </div>
 
       <div class="upgrade-action-sticky">
@@ -1532,6 +1723,7 @@
   <div class="open-header">
     <div class="back-btn" onclick="goHome()">←</div>
     <h2 id="open-case-name">Premier Case</h2>
+    <div class="online-chip online-compact"><span class="online-dot"></span><span class="online-label">Online</span><span class="online-count">0</span></div>
   </div>
 
   <div class="scroll-area" style="padding-bottom: 0">
@@ -1580,10 +1772,13 @@
 <div id="screen-inventory" class="screen">
   <div class="header">
     <div class="logo" style="font-size:18px" id="inventory-header-title">🎒 Инвентарь</div>
-    <div class="balance-pill" onclick="showDeposit()">
-      <span class="icon">⭐</span>
-      <span class="amount" id="balance2">2,450</span>
-      <div class="plus-btn">+</div>
+    <div class="header-right">
+      <div class="online-chip"><span class="online-dot"></span><span class="online-label">Online</span><span class="online-count">0</span></div>
+      <div class="balance-pill" onclick="showDeposit()">
+        <span class="icon">⭐</span>
+        <span class="amount" id="balance2">2,450</span>
+        <div class="plus-btn">+</div>
+      </div>
     </div>
   </div>
   <div class="scroll-area">
@@ -1625,10 +1820,13 @@
 <div id="screen-profile" class="screen">
   <div class="header">
     <div class="logo" style="font-size:18px" id="profile-header-title">👤 Профиль</div>
-    <div class="balance-pill" onclick="showDeposit()">
-      <span class="icon">⭐</span>
-      <span class="amount" id="balance3">0</span>
-      <div class="plus-btn">+</div>
+    <div class="header-right">
+      <div class="online-chip"><span class="online-dot"></span><span class="online-label">Online</span><span class="online-count">0</span></div>
+      <div class="balance-pill" onclick="showDeposit()">
+        <span class="icon">⭐</span>
+        <span class="amount" id="balance3">0</span>
+        <div class="plus-btn">+</div>
+      </div>
     </div>
   </div>
   <div class="scroll-area">
@@ -1715,6 +1913,7 @@
   <div class="open-header">
     <div class="back-btn" onclick="goBackFromHistory()">←</div>
     <h2 id="history-screen-title">История выигрышей</h2>
+    <div class="online-chip online-compact"><span class="online-dot"></span><span class="online-label">Online</span><span class="online-count">0</span></div>
   </div>
   <div class="scroll-area" style="padding:14px 14px 90px">
     <div class="history-list" id="history-list">
@@ -1728,6 +1927,7 @@
   <div class="open-header">
     <div class="back-btn" onclick="goBackFromLanguage()">←</div>
     <h2 id="language-screen-title">Язык интерфейса</h2>
+    <div class="online-chip online-compact"><span class="online-dot"></span><span class="online-label">Online</span><span class="online-count">0</span></div>
   </div>
   <div class="scroll-area">
     <div class="deposit-wrap">
@@ -1762,6 +1962,7 @@
   <div class="open-header">
     <div class="back-btn" id="deposit-back">←</div>
     <h2 id="deposit-screen-title">Пополнение</h2>
+    <div class="online-chip online-compact"><span class="online-dot"></span><span class="online-label">Online</span><span class="online-count">0</span></div>
   </div>
   <div class="scroll-area">
     <div class="deposit-wrap">
@@ -1831,6 +2032,10 @@ let upgradeAnimating = false;
 let upgradeArrowRotation = 0;
 let upgradeLabelTicker = null;
 let upgradeScrollBound = false;
+let upgradeSpinSpeed = 'normal';
+let upgradeQuickMode = 'coef';
+let onlineUsers = 0;
+let onlinePollTimer = null;
 let currentLang = 'ru';
 
 const rarityColors = { common: '#888', uncommon: '#4e9eff', rare: '#9d4edd', legendary: '#e8a630' };
@@ -1869,6 +2074,14 @@ const i18n = {
     upgrade_target_title: 'Доступные цели',
     upgrade_run: '🎯 Запустить апгрейд',
     upgrade_wheel_meta: 'шанс',
+    upgrade_speed_label: 'Скорость прокрута',
+    upgrade_speed_normal: 'Обычная',
+    upgrade_speed_fast: 'Быстрая',
+    upgrade_quick_label: 'Быстрый подбор',
+    upgrade_quick_coef: 'По коэф.',
+    upgrade_quick_chance: 'По %',
+    upgrade_preset_coef: 'коэф',
+    upgrade_preset_chance: 'шанс',
     upgrade_status_pick: 'Выбери предмет и цель',
     upgrade_status_ready: 'Шанс апгрейда: {chance}%',
     upgrade_status_spinning: 'Крутим апгрейд...',
@@ -1910,6 +2123,7 @@ const i18n = {
     nav_upgrade: 'Апгрейд',
     nav_inventory: 'Инвентарь',
     nav_profile: 'Профиль',
+    online_label: 'Онлайн',
     profile_header: '👤 Профиль',
     upgrades_header: '🚀 Апгрейды',
     history_title: 'История выигрышей',
@@ -2015,6 +2229,14 @@ const i18n = {
     upgrade_target_title: 'Mavjud maqsadlar',
     upgrade_run: '🎯 Apgreydni boshlash',
     upgrade_wheel_meta: 'imkon',
+    upgrade_speed_label: 'Aylantirish tezligi',
+    upgrade_speed_normal: 'Oddiy',
+    upgrade_speed_fast: 'Tez',
+    upgrade_quick_label: 'Tez tanlash',
+    upgrade_quick_coef: 'Koeff bo\'yicha',
+    upgrade_quick_chance: '% bo\'yicha',
+    upgrade_preset_coef: 'koeff',
+    upgrade_preset_chance: 'imkon',
     upgrade_status_pick: 'Predmet va maqsadni tanlang',
     upgrade_status_ready: 'Apgreyd ehtimoli: {chance}%',
     upgrade_status_spinning: 'Apgreyd aylantirilmoqda...',
@@ -2056,6 +2278,7 @@ const i18n = {
     nav_upgrade: 'Apgreyd',
     nav_inventory: 'Inventar',
     nav_profile: 'Profil',
+    online_label: 'Online',
     profile_header: '👤 Profil',
     upgrades_header: '🚀 Apgreydlar',
     history_title: "Yutuqlar tarixi",
@@ -2161,6 +2384,14 @@ const i18n = {
     upgrade_target_title: 'Қолжетімді мақсаттар',
     upgrade_run: '🎯 Апгрейдті бастау',
     upgrade_wheel_meta: 'мүмкіндік',
+    upgrade_speed_label: 'Айналдыру жылдамдығы',
+    upgrade_speed_normal: 'Қалыпты',
+    upgrade_speed_fast: 'Жылдам',
+    upgrade_quick_label: 'Жылдам таңдау',
+    upgrade_quick_coef: 'Коэфф бойынша',
+    upgrade_quick_chance: '% бойынша',
+    upgrade_preset_coef: 'коэфф',
+    upgrade_preset_chance: 'мүмкіндік',
     upgrade_status_pick: 'Зат пен мақсатты таңда',
     upgrade_status_ready: 'Апгрейд мүмкіндігі: {chance}%',
     upgrade_status_spinning: 'Апгрейд айналуда...',
@@ -2202,6 +2433,7 @@ const i18n = {
     nav_upgrade: 'Апгрейд',
     nav_inventory: 'Инвентарь',
     nav_profile: 'Профиль',
+    online_label: 'Онлайн',
     profile_header: '👤 Профиль',
     upgrades_header: '🚀 Апгрейдтер',
     history_title: 'Ұтыстар тарихы',
@@ -2307,6 +2539,14 @@ const i18n = {
     upgrade_target_title: 'Available Targets',
     upgrade_run: '🎯 Run Upgrade',
     upgrade_wheel_meta: 'chance',
+    upgrade_speed_label: 'Spin speed',
+    upgrade_speed_normal: 'Normal',
+    upgrade_speed_fast: 'Fast',
+    upgrade_quick_label: 'Quick pick',
+    upgrade_quick_coef: 'By coef',
+    upgrade_quick_chance: 'By %',
+    upgrade_preset_coef: 'coef',
+    upgrade_preset_chance: 'chance',
     upgrade_status_pick: 'Select source and target',
     upgrade_status_ready: 'Upgrade chance: {chance}%',
     upgrade_status_spinning: 'Spinning upgrade...',
@@ -2348,6 +2588,7 @@ const i18n = {
     nav_upgrade: 'Upgrade',
     nav_inventory: 'Inventory',
     nav_profile: 'Profile',
+    online_label: 'Online',
     profile_header: '👤 Profile',
     upgrades_header: '🚀 Upgrades',
     history_title: 'Win History',
@@ -2644,6 +2885,12 @@ function applyLanguage() {
   const upgradeHeroSub = document.getElementById('upgrade-hero-sub');
   const upgradeSourceTitle = document.getElementById('upgrade-source-title');
   const upgradeTargetTitle = document.getElementById('upgrade-target-title');
+  const upgradeSpeedLabel = document.getElementById('upgrade-speed-label');
+  const upgradeQuickLabel = document.getElementById('upgrade-quick-label');
+  const upgradeSpeedNormal = document.getElementById('upgrade-speed-normal');
+  const upgradeSpeedFast = document.getElementById('upgrade-speed-fast');
+  const upgradeQuickCoef = document.getElementById('upgrade-quick-coef');
+  const upgradeQuickChance = document.getElementById('upgrade-quick-chance');
   const openCaseSub = document.getElementById('open-case-sub');
   const openBtn = document.getElementById('open-btn');
   const openPrice = document.getElementById('open-price');
@@ -2704,6 +2951,12 @@ function applyLanguage() {
   if (upgradeHeroSub) upgradeHeroSub.textContent = t('upgrade_hero_sub');
   if (upgradeSourceTitle) upgradeSourceTitle.textContent = t('upgrade_source_title');
   if (upgradeTargetTitle) upgradeTargetTitle.textContent = t('upgrade_target_title');
+  if (upgradeSpeedLabel) upgradeSpeedLabel.textContent = t('upgrade_speed_label');
+  if (upgradeQuickLabel) upgradeQuickLabel.textContent = t('upgrade_quick_label');
+  if (upgradeSpeedNormal) upgradeSpeedNormal.textContent = t('upgrade_speed_normal');
+  if (upgradeSpeedFast) upgradeSpeedFast.textContent = t('upgrade_speed_fast');
+  if (upgradeQuickCoef) upgradeQuickCoef.textContent = t('upgrade_quick_coef');
+  if (upgradeQuickChance) upgradeQuickChance.textContent = t('upgrade_quick_chance');
   if (openCaseSub) openCaseSub.textContent = t('open_case_sub');
   if (openBtn) renderOpenButtonLabel(openPrice?.textContent || '0');
   if (openBackBtn) openBackBtn.textContent = t('open_back');
@@ -2734,8 +2987,10 @@ function applyLanguage() {
   if (depositStarsOnly) depositStarsOnly.textContent = t('deposit_stars_only');
   if (winSellBtn) winSellBtn.textContent = t('win_sell_btn');
   if (winKeepBtn) winKeepBtn.textContent = t('win_keep_btn');
+  document.querySelectorAll('.online-label').forEach((el) => { el.textContent = t('online_label'); });
   updatePromoHero();
   applyCaseConfigToHome();
+  renderUpgradePresets();
 
   document.querySelectorAll('.bottom-nav').forEach((nav) => {
     const labels = nav.querySelectorAll('.nav-label');
@@ -3020,6 +3275,36 @@ function updateBalance() {
   if (b4) b4.textContent = balance.toLocaleString('ru');
 }
 
+function setOnlineUsers(value) {
+  const next = Math.max(0, Math.floor(Number(value || 0)));
+  onlineUsers = next;
+  document.querySelectorAll('.online-count').forEach((el) => {
+    el.textContent = String(next);
+  });
+}
+
+async function refreshOnlineUsers() {
+  try {
+    const data = await fetch('/api/online', { method: 'GET' }).then((r) => r.json());
+    if (data?.ok) setOnlineUsers(data.onlineUsers);
+  } catch {}
+}
+
+async function pingPresence() {
+  if (isDemoMode() || !authState.initData) return;
+  try {
+    await apiFetch('/api/auth/telegram', { method: 'POST' });
+  } catch {}
+}
+
+function startOnlinePolling() {
+  if (onlinePollTimer) clearInterval(onlinePollTimer);
+  onlinePollTimer = setInterval(async () => {
+    await pingPresence();
+    await refreshOnlineUsers();
+  }, 25000);
+}
+
 function getSkinTemplateByKey(key) {
   return clientRoulettePool.find((x) => x.key === key) || null;
 }
@@ -3027,6 +3312,128 @@ function getSkinTemplateByKey(key) {
 function calcUpgradeChance(sourcePrice, targetPrice) {
   if (!targetPrice || targetPrice <= sourcePrice) return 0;
   return Math.max(3, Math.min(95, Math.round((Number(sourcePrice || 0) / Number(targetPrice || 1)) * 100)));
+}
+
+function findUpgradeTargetByCoef(sourcePrice, coef) {
+  const src = Number(sourcePrice || 0);
+  if (!(src > 0)) return null;
+  const targets = clientRoulettePool.filter((x) => Number(x.priceUsd || 0) > src);
+  if (!targets.length) return null;
+  let best = null;
+  let bestDiff = Infinity;
+  for (const item of targets) {
+    const ratio = Number(item.priceUsd || 0) / src;
+    const diff = Math.abs(ratio - Number(coef || 1));
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = item;
+    }
+  }
+  return best;
+}
+
+function findUpgradeTargetByChance(sourcePrice, chancePct) {
+  const src = Number(sourcePrice || 0);
+  if (!(src > 0)) return null;
+  const targets = clientRoulettePool.filter((x) => Number(x.priceUsd || 0) > src);
+  if (!targets.length) return null;
+  let best = null;
+  let bestDiff = Infinity;
+  for (const item of targets) {
+    const chance = calcUpgradeChance(src, Number(item.priceUsd || 0));
+    const diff = Math.abs(chance - Number(chancePct || 0));
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = item;
+    }
+  }
+  return best;
+}
+
+function buildUpgradePresets() {
+  const source = selectedUpgradeSourceItem();
+  const sourcePrice = Number(source?.priceUsd || 0);
+  if (!(sourcePrice > 0)) return [];
+  const out = [];
+  const coefList = [1.15, 1.35, 1.65];
+  const chanceList = [75, 60, 45];
+  for (const coef of coefList) {
+    const target = findUpgradeTargetByCoef(sourcePrice, coef);
+    if (!target) continue;
+    out.push({
+      mode: 'coef',
+      label: `x${coef.toFixed(2)}`,
+      sub: t('upgrade_preset_coef'),
+      targetKey: target.key,
+    });
+  }
+  for (const chance of chanceList) {
+    const target = findUpgradeTargetByChance(sourcePrice, chance);
+    if (!target) continue;
+    const realChance = calcUpgradeChance(sourcePrice, Number(target.priceUsd || 0));
+    out.push({
+      mode: 'chance',
+      label: `${realChance}%`,
+      sub: t('upgrade_preset_chance'),
+      targetKey: target.key,
+    });
+  }
+  return out.slice(0, 6);
+}
+
+function renderUpgradePresets() {
+  const root = document.getElementById('upgrade-presets');
+  if (!root) return;
+  const presets = buildUpgradePresets();
+  if (!presets.length) {
+    root.innerHTML = '';
+    return;
+  }
+  root.innerHTML = presets.map((preset) => (
+    `<button class="upgrade-preset ${preset.targetKey === upgradeTargetKey ? 'active' : ''}" onclick="pickUpgradePreset('${preset.targetKey}','${preset.mode}')">` +
+      `<div class="v">${escapeHtml(preset.label)}</div>` +
+      `<div class="k">${escapeHtml(preset.sub)}</div>` +
+    `</button>`
+  )).join('');
+}
+
+function pickUpgradePreset(targetKey, mode) {
+  if (upgradeAnimating) return;
+  upgradeQuickMode = mode === 'chance' ? 'chance' : 'coef';
+  upgradeTargetKey = targetKey;
+  syncUpgradeToggleButtons();
+  renderUpgrades();
+}
+
+function setUpgradeSpinSpeed(speed) {
+  if (upgradeAnimating) return;
+  upgradeSpinSpeed = speed === 'fast' ? 'fast' : 'normal';
+  syncUpgradeToggleButtons();
+}
+
+function quickPickUpgrade(mode) {
+  if (upgradeAnimating) return;
+  upgradeQuickMode = mode === 'chance' ? 'chance' : 'coef';
+  const source = selectedUpgradeSourceItem();
+  const sourcePrice = Number(source?.priceUsd || 0);
+  if (!(sourcePrice > 0)) return;
+  const target = upgradeQuickMode === 'chance'
+    ? findUpgradeTargetByChance(sourcePrice, 58)
+    : findUpgradeTargetByCoef(sourcePrice, 1.45);
+  if (target?.key) upgradeTargetKey = target.key;
+  syncUpgradeToggleButtons();
+  renderUpgrades();
+}
+
+function syncUpgradeToggleButtons() {
+  const speedNormal = document.getElementById('upgrade-speed-normal');
+  const speedFast = document.getElementById('upgrade-speed-fast');
+  const quickCoef = document.getElementById('upgrade-quick-coef');
+  const quickChance = document.getElementById('upgrade-quick-chance');
+  if (speedNormal) speedNormal.classList.toggle('active', upgradeSpinSpeed === 'normal');
+  if (speedFast) speedFast.classList.toggle('active', upgradeSpinSpeed === 'fast');
+  if (quickCoef) quickCoef.classList.toggle('active', upgradeQuickMode === 'coef');
+  if (quickChance) quickChance.classList.toggle('active', upgradeQuickMode === 'chance');
 }
 
 function itemRarityClass(item) {
@@ -3080,7 +3487,7 @@ function renderUpgradeWheel(chance = 0, sourcePrice = 0, targetPrice = 0) {
   const clamped = Math.max(0, Math.min(100, Number(chance || 0)));
   wheel.style.setProperty('--chance-angle', `${Math.round((clamped / 100) * 360)}deg`);
   label.classList.remove('win', 'lose');
-  label.textContent = `${clamped}%`;
+  label.textContent = `${clamped.toFixed(2)}%`;
   if (meta) {
     const src = Number(sourcePrice || 0);
     const tgt = Number(targetPrice || 0);
@@ -3260,6 +3667,11 @@ async function runUpgradeSpin() {
     const turns = 7 + Math.floor(Math.random() * 3);
     const finalDeg = upgradeArrowRotation + (turns * 360) + deltaToStop;
     const overshoot = (success ? 10 : 15) + Math.floor(Math.random() * 8);
+    const isFast = upgradeSpinSpeed === 'fast';
+    const spinMainMs = isFast ? 1450 : 3000;
+    const settleMs = isFast ? 260 : 460;
+    const spinDuration = isFast ? '1.4s' : '2.95s';
+    const settleDuration = isFast ? '240ms' : '420ms';
 
     if (board) board.classList.add('spinning');
     if (wheel) wheel.classList.add('spinning');
@@ -3270,29 +3682,29 @@ async function runUpgradeSpin() {
       upgradeLabelTicker = setInterval(() => {
         ticker += 1;
         const wobble = Math.sin(ticker * 0.9) * 1.8;
-        label.textContent = `${Math.max(0, Math.min(100, Math.round(base + wobble)))}%`;
+        label.textContent = `${Math.max(0, Math.min(100, (base + wobble))).toFixed(2)}%`;
       }, 90);
     }
     setUpgradeStatus('spinning', finalChance);
 
     if (arrow) {
-      arrow.style.setProperty('--arrow-duration', '2.95s');
+      arrow.style.setProperty('--arrow-duration', spinDuration);
       arrow.style.setProperty('--arrow-ease', 'cubic-bezier(0.08, 0.9, 0.16, 1)');
       arrow.style.setProperty('--arrow-rotation', `${finalDeg + overshoot}deg`);
     }
-    await new Promise((r) => setTimeout(r, 3000));
+    await new Promise((r) => setTimeout(r, spinMainMs));
     if (arrow) {
-      arrow.style.setProperty('--arrow-duration', '420ms');
+      arrow.style.setProperty('--arrow-duration', settleDuration);
       arrow.style.setProperty('--arrow-ease', 'cubic-bezier(0.24, 0.78, 0.2, 1)');
       arrow.style.setProperty('--arrow-rotation', `${finalDeg}deg`);
     }
-    await new Promise((r) => setTimeout(r, 460));
+    await new Promise((r) => setTimeout(r, settleMs));
     upgradeArrowRotation = finalDeg;
     resetUpgradeLabelTicker();
     if (label) {
       label.classList.toggle('win', success);
       label.classList.toggle('lose', !success);
-      label.textContent = `${finalChance}%`;
+      label.textContent = `${Number(finalChance || 0).toFixed(2)}%`;
     }
     setUpgradeStatus(success ? 'win' : 'lose', finalChance);
     if (board) board.classList.remove('spinning');
@@ -3325,8 +3737,10 @@ function renderUpgrades() {
   if (!upgradeSourceItemId && inventory.length) {
     upgradeSourceItemId = inventory[0].id;
   }
+  syncUpgradeToggleButtons();
   renderUpgradeSources();
   renderUpgradeTargets();
+  renderUpgradePresets();
   syncUpgradeActionState();
 }
 
@@ -3514,6 +3928,7 @@ async function refreshState() {
   casePrices = state.casePrices || casePrices;
   caseCatalog = state.caseCatalog || caseCatalog;
   caseEnabled = state.caseEnabled || caseEnabled;
+  setOnlineUsers(state?.onlineUsers ?? onlineUsers);
   paymentMethods = state?.payments?.methods || paymentMethods;
   activePromo = state?.promo?.active || null;
   promoClockOffsetMs = Number(state?.promo?.serverNowMs || Date.now()) - Date.now();
@@ -3530,12 +3945,16 @@ async function refreshState() {
 async function bootstrapAuth() {
   currentLang = detectInitialLanguage();
   applyLanguage();
+  setOnlineUsers(Math.max(1, onlineUsers || 0));
+  startOnlinePolling();
+  refreshOnlineUsers().catch(() => {});
   if (tg) {
     authState.initData = await resolveInitData();
   }
 
   if (!authState.initData) {
     enterDemoMode('no-telegram-initData');
+    setOnlineUsers(Math.max(1, onlineUsers || 87));
     applyLanguage();
     renderAuthState();
     updateBalance();
@@ -3551,6 +3970,7 @@ async function bootstrapAuth() {
 
   try {
     await refreshState();
+    await refreshOnlineUsers();
   } catch (e) {
     enterDemoMode(`auth-failed:${e.message}`);
     if (!tg) {

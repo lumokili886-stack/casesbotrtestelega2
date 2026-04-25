@@ -44,6 +44,7 @@ const ADMIN_2FA_ISSUER = String(process.env.ADMIN_2FA_ISSUER || 'VAULT Admin');
 const ADMIN_AUTH_WINDOW_MS = Number(process.env.ADMIN_AUTH_WINDOW_MS || 10 * 60 * 1000);
 const ADMIN_AUTH_BLOCK_MS = Number(process.env.ADMIN_AUTH_BLOCK_MS || 15 * 60 * 1000);
 const ADMIN_AUTH_MAX_ATTEMPTS = Number(process.env.ADMIN_AUTH_MAX_ATTEMPTS || 6);
+const ONLINE_WINDOW_MS = Number(process.env.ONLINE_WINDOW_MS || 2 * 60 * 1000);
 const adminAuthRateState = new Map();
 
 const defaultCasePrices = {
@@ -949,6 +950,17 @@ function sanitizeCaseSlug(raw) {
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9_-]/g, '')
     .slice(0, 40);
+}
+
+function getOnlineUsersCount(db) {
+  const users = Object.values(db?.users || {});
+  const nowMs = Date.now();
+  let count = 0;
+  for (const user of users) {
+    const updatedMs = new Date(user?.updatedAt || 0).getTime();
+    if (Number.isFinite(updatedMs) && (nowMs - updatedMs) <= ONLINE_WINDOW_MS) count += 1;
+  }
+  return count;
 }
 
 function b64urlEncode(input) {
@@ -3457,6 +3469,22 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true, now: nowIso(), storage });
 });
 
+app.get('/api/online', async (_req, res) => {
+  try {
+    const db = await readDb();
+    cleanup(db);
+    normalizeAllConfig(db);
+    return res.json({
+      ok: true,
+      onlineUsers: getOnlineUsersCount(db),
+      windowMs: ONLINE_WINDOW_MS,
+    });
+  } catch (e) {
+    console.error('[api] online failed:', e);
+    return res.status(503).json({ ok: false, error: 'Storage temporarily unavailable' });
+  }
+});
+
 app.post('/api/auth/telegram', async (req, res) => {
   const auth = await ensureAuthed(req, res);
   if (!auth) return;
@@ -3516,6 +3544,7 @@ app.get('/api/state', async (req, res) => {
     casePrices: casePriceMap,
     caseCatalog,
     caseEnabled: caseEnabledMap,
+    onlineUsers: getOnlineUsersCount(auth.db),
     payments: { methods: paymentMethods },
     promo: {
       serverNowMs: Date.now(),
