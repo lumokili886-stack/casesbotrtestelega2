@@ -3539,13 +3539,46 @@ app.get(ADMIN_PAGE_PATHS, (req, res) => {
   if (!isAdminConfigured()) return res.status(404).send('Not Found');
   const cookies = parseCookies(req);
   const parsed = parseAdminSession(cookies[ADMIN_COOKIE] || '');
-  const html = renderAdminPage({
-    loginErrorMessage: normalizeAdminLoginError(req.query?.login_error || ''),
-  });
-  if (!parsed.ok) {
+  try {
+    const html = renderAdminPage({
+      loginErrorMessage: normalizeAdminLoginError(req.query?.login_error || ''),
+    });
+    if (!parsed.ok) {
+      return res.status(200).type('html').send(html);
+    }
     return res.status(200).type('html').send(html);
+  } catch (e) {
+    console.error('[admin] render page failed:', e);
+    const fallbackError = normalizeAdminLoginError(req.query?.login_error || '');
+    const fallbackHtml = `<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VAULT Admin Login</title>
+  <style>
+    body{margin:0;background:#0b0f16;color:#e7ecf5;font:14px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif}
+    .box{max-width:420px;margin:64px auto;padding:16px;border:1px solid #2a3550;border-radius:12px;background:#121826}
+    input{width:100%;height:40px;background:#101827;color:#e7ecf5;border:1px solid #2a3550;border-radius:10px;padding:0 12px;margin-bottom:10px}
+    button{width:100%;height:42px;border-radius:10px;border:1px solid #4f77bf;background:#2b5da4;color:#fff;font-weight:700;cursor:pointer}
+    .hint{margin-bottom:10px;color:#96a1b8}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2 style="margin:0 0 6px">VAULT Admin Login</h2>
+    <div class="hint">Аварийный вход (fallback). После входа откроется админка.</div>
+    <form method="POST" action="/admin/login">
+      <input name="login" placeholder="login" autocomplete="username">
+      <input name="password" placeholder="password" type="password" autocomplete="current-password">
+      <button type="submit">Войти</button>
+    </form>
+    <div style="margin-top:10px;color:#ff9f9f">${escapeHtml(fallbackError)}</div>
+  </div>
+</body>
+</html>`;
+    return res.status(200).type('html').send(fallbackHtml);
   }
-  return res.status(200).type('html').send(html);
 });
 
 const ADMIN_FORM_LOGIN_PATHS = Array.from(new Set([
