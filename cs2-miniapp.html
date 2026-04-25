@@ -1419,24 +1419,24 @@
     margin-bottom: 12px;
   }
   .upgrade-wheel {
-    width: 286px;
-    height: 286px;
+    width: 272px;
+    height: 272px;
     border: 3px solid rgba(255,255,255,0.12);
     background: conic-gradient(
       from 180deg,
       rgba(255,220,54,0.95) 0deg,
-      rgba(255,148,37,0.95) 108deg,
-      rgba(255,74,55,0.95) 180deg,
-      rgba(255,255,255,0.09) 180deg,
+      rgba(255,148,37,0.95) calc(var(--chance-angle, 180deg) * 0.6),
+      rgba(255,74,55,0.95) var(--chance-angle, 180deg),
+      rgba(255,255,255,0.09) var(--chance-angle, 180deg),
       rgba(255,255,255,0.09) 360deg
     );
   }
-  .upgrade-wheel::before { inset: 48px; }
+  .upgrade-wheel::before { inset: 66px; }
   .upgrade-wheel::after { inset: -12px; border-style: solid; border-color: rgba(255,255,255,0.08); }
   .upgrade-wheel-spokes {
     inset: 10px;
     opacity: 0.35;
-    mask: radial-gradient(circle, transparent 57%, #000 60%, #000 73%, transparent 76%);
+    mask: radial-gradient(circle, transparent 63%, #000 66%, #000 74%, transparent 77%);
   }
   .upgrade-wheel-arrow {
     top: 50%;
@@ -1446,7 +1446,7 @@
     transform-origin: 50% calc(100% - 6px);
   }
   .upgrade-wheel-label {
-    font-size: 68px;
+    font-size: 46px;
     letter-spacing: -1px;
     font-family: 'Rajdhani', sans-serif;
     color: #b2ff4a;
@@ -1530,12 +1530,56 @@
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
-  .upgrade-select-grid { grid-template-columns: 1fr; max-height: 280px; overflow: auto; }
+  .upgrade-select-grid { grid-template-columns: 1fr; max-height: 300px; overflow: auto; }
   .upgrade-select-grid::-webkit-scrollbar { display: none; }
+  .up-pick {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 9px;
+    border-radius: 11px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: linear-gradient(180deg, rgba(19,26,40,0.95), rgba(13,18,29,0.95));
+  }
+  .up-pick .inv-emoji {
+    width: 40px;
+    height: 40px;
+    border-radius: 9px;
+    background: #0b111d;
+    border: 1px solid rgba(255,255,255,0.08);
+    margin: 0;
+  }
+  .up-pick-name {
+    margin-top: 0;
+    font-size: 12px;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .up-pick-price {
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    min-width: 62px;
+  }
+  .up-pick-price .chance {
+    color: #8bb8ff;
+    font-weight: 700;
+  }
+  .up-pick.active {
+    transform: translateY(-1px);
+    border-color: rgba(232,166,48,0.72);
+    box-shadow: 0 0 0 1px rgba(232,166,48,0.22), 0 0 18px rgba(232,166,48,0.16);
+  }
   @media (max-width: 420px) {
-    .upgrade-wheel { width: 258px; height: 258px; }
-    .upgrade-wheel-label { font-size: 58px; }
-    .upgrade-wheel-meta { bottom: 66px; font-size: 23px; }
+    .upgrade-wheel { width: 244px; height: 244px; }
+    .upgrade-wheel::before { inset: 60px; }
+    .upgrade-wheel-label { font-size: 40px; }
+    .upgrade-wheel-meta { bottom: 62px; font-size: 21px; }
     .upgrade-controls { grid-template-columns: 1fr; }
     .upgrade-settings-label { min-width: 100%; }
   }
@@ -3285,9 +3329,13 @@ function setOnlineUsers(value) {
 
 async function refreshOnlineUsers() {
   try {
-    const data = await fetch('/api/online', { method: 'GET' }).then((r) => r.json());
+    const resp = await fetch('/api/online', { method: 'GET', cache: 'no-store' });
+    if (!resp.ok) throw new Error(`online ${resp.status}`);
+    const data = await resp.json();
     if (data?.ok) setOnlineUsers(data.onlineUsers);
-  } catch {}
+  } catch {
+    if (onlineUsers <= 0) setOnlineUsers(1);
+  }
 }
 
 async function pingPresence() {
@@ -3574,7 +3622,7 @@ function renderUpgradeTargets() {
       `<div class="up-pick up-${item.rarity || 'common'} ${item.key === upgradeTargetKey ? 'active' : ''}" onclick="pickUpgradeTarget('${item.key}')">` +
       skinVisual(item, 'inv-emoji img', 'inv-emoji') +
       `<div class="up-pick-name">${item.name}</div>` +
-      `<div class="up-pick-price"><b>$${Number(item.priceUsd || 0)}</b> · ${chance}%</div>` +
+      `<div class="up-pick-price"><b>$${Number(item.priceUsd || 0)}</b><span class="chance">${chance}%</span></div>` +
       `</div>`
     );
   }).join('');
