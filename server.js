@@ -129,6 +129,18 @@ function buildDefaultConfigHistoryStore() {
   return { entries: [] };
 }
 
+function buildDefaultSandboxEconomyStore(sourceCaseConfig = null) {
+  const baseline = sourceCaseConfig && typeof sourceCaseConfig === 'object'
+    ? cloneJson(sourceCaseConfig)
+    : buildDefaultCaseConfig();
+  return {
+    caseConfig: baseline,
+    caseDrafts: buildDefaultCaseDraftStore(),
+    updatedAt: nowIso(),
+    updatedBy: 'system',
+  };
+}
+
 function parsePromoExpiresAt(raw) {
   const d = new Date(raw || '');
   if (Number.isNaN(d.getTime())) return null;
@@ -174,10 +186,45 @@ function normalizeAllConfig(db) {
   let changed = false;
   changed = normalizeCaseConfig(db) || changed;
   changed = normalizeCaseDraftStore(db) || changed;
+  changed = normalizeSandboxEconomyStore(db) || changed;
   changed = normalizePaymentConfig(db) || changed;
   changed = normalizePromoConfig(db) || changed;
   changed = normalizeConfigHistoryStore(db) || changed;
   changed = ensureAdminStore(db) || changed;
+  return changed;
+}
+
+function normalizeSandboxEconomyStore(db) {
+  if (!db.sandboxEconomy || typeof db.sandboxEconomy !== 'object') {
+    db.sandboxEconomy = buildDefaultSandboxEconomyStore(db.caseConfig);
+    return true;
+  }
+  let changed = false;
+  if (!db.sandboxEconomy.caseConfig || typeof db.sandboxEconomy.caseConfig !== 'object') {
+    db.sandboxEconomy.caseConfig = cloneJson(db.caseConfig || buildDefaultCaseConfig());
+    changed = true;
+  }
+  if (!db.sandboxEconomy.caseDrafts || typeof db.sandboxEconomy.caseDrafts !== 'object') {
+    db.sandboxEconomy.caseDrafts = buildDefaultCaseDraftStore();
+    changed = true;
+  }
+
+  const tmpCaseConfig = { caseConfig: db.sandboxEconomy.caseConfig };
+  changed = normalizeCaseConfig(tmpCaseConfig) || changed;
+  db.sandboxEconomy.caseConfig = tmpCaseConfig.caseConfig;
+
+  const tmpCaseDrafts = { caseDrafts: db.sandboxEconomy.caseDrafts };
+  changed = normalizeCaseDraftStore(tmpCaseDrafts) || changed;
+  db.sandboxEconomy.caseDrafts = tmpCaseDrafts.caseDrafts;
+
+  if (!Object.prototype.hasOwnProperty.call(db.sandboxEconomy, 'updatedAt')) {
+    db.sandboxEconomy.updatedAt = nowIso();
+    changed = true;
+  }
+  if (!Object.prototype.hasOwnProperty.call(db.sandboxEconomy, 'updatedBy')) {
+    db.sandboxEconomy.updatedBy = 'system';
+    changed = true;
+  }
   return changed;
 }
 
@@ -866,6 +913,7 @@ function createEmptyDb() {
     paymentConfig: buildDefaultPaymentConfig(),
     promoConfig: buildDefaultPromoConfig(),
     configHistory: buildDefaultConfigHistoryStore(),
+    sandboxEconomy: buildDefaultSandboxEconomyStore(),
   };
 }
 
@@ -881,6 +929,7 @@ function sanitizeDb(db) {
   if (!base.paymentConfig || typeof base.paymentConfig !== 'object') base.paymentConfig = buildDefaultPaymentConfig();
   if (!base.promoConfig || typeof base.promoConfig !== 'object') base.promoConfig = buildDefaultPromoConfig();
   if (!base.configHistory || typeof base.configHistory !== 'object') base.configHistory = buildDefaultConfigHistoryStore();
+  if (!base.sandboxEconomy || typeof base.sandboxEconomy !== 'object') base.sandboxEconomy = buildDefaultSandboxEconomyStore(base.caseConfig);
   return base;
 }
 
@@ -1826,6 +1875,7 @@ function renderAdminPage(options = {}) {
       <div class="section-block hidden" id="section-cases">
         <div class="panel">
           <h3>Управление Кейсами (цена / вкл-выкл)</h3>
+          <div class="hint" id="economy-mode-cases-hint" style="margin-bottom:8px">Режим экономики: PRODUCTION</div>
           <div class="table-wrap" style="max-height:320px">
             <table id="cases-table">
               <thead><tr><th>Case</th><th>Price ⭐</th><th>Enabled</th><th>Updated</th></tr></thead>
@@ -1843,6 +1893,14 @@ function renderAdminPage(options = {}) {
         <div class="panel">
           <h3>Конструктор Кейса + Симулятор</h3>
           <div class="hint" style="margin-bottom:10px">Настройте дроп-таблицу конкретного кейса и проверьте экономику через симуляцию до сохранения.</div>
+          <div class="row" style="margin-bottom:10px;align-items:center">
+            <label class="hint" style="display:flex;align-items:center;gap:6px">
+              <input id="economy-sandbox-toggle" type="checkbox">
+              Sandbox Mode (без влияния на прод)
+            </label>
+            <button class="btn" id="btn-economy-sandbox-reset">Сбросить sandbox из prod</button>
+            <div class="hint" id="economy-sandbox-status">Sandbox: loading...</div>
+          </div>
           <div class="row" style="margin-bottom:10px">
             <select id="case-lab-case" style="min-width:220px;flex:1"></select>
             <input id="case-lab-price" type="number" min="0" step="1" placeholder="Цена ⭐" style="width:130px">
@@ -2070,6 +2128,36 @@ function renderAdminPage(options = {}) {
     let caseLabState = null;
     let paymentCenterRows = [];
     let configHistoryRows = [];
+    let economySandboxEnabled = false;
+    let economySandboxMeta = null;
+
+    function withEconomyMode(url){
+      const base = String(url || '');
+      if (!economySandboxEnabled) return base;
+      const hasQuery = base.includes('?');
+      return base + (hasQuery ? '&' : '?') + 'sandbox=1';
+    }
+
+    async function jfetchEconomy(url, opt = {}) {
+      return jfetch(withEconomyMode(url), opt);
+    }
+
+    function renderEconomySandboxUi() {
+      const modeLabel = economySandboxEnabled ? 'SANDBOX' : 'PRODUCTION';
+      const toggle = document.getElementById('economy-sandbox-toggle');
+      const statusEl = document.getElementById('economy-sandbox-status');
+      const hintEl = document.getElementById('economy-mode-cases-hint');
+      if (toggle) toggle.checked = economySandboxEnabled;
+      if (hintEl) hintEl.textContent = 'Режим экономики: ' + modeLabel;
+      if (statusEl) {
+        const draftCount = Number(economySandboxMeta?.draftCount || 0);
+        const updatedAt = economySandboxMeta?.updatedAt ? fmtTs(economySandboxMeta.updatedAt) : '-';
+        const updatedBy = economySandboxMeta?.updatedBy || '-';
+        statusEl.textContent = economySandboxEnabled
+          ? ('Sandbox активен · draft: ' + draftCount + ' · updated: ' + updatedAt + ' · by: ' + updatedBy)
+          : 'Sandbox выключен (работа с прод-экономикой)';
+      }
+    }
 
     function renderKpi(data){
       const grid = document.getElementById('kpi-grid');
@@ -2081,7 +2169,8 @@ function renderAdminPage(options = {}) {
         ['Active Cases', data.kpi.activeCases],
       ];
       grid.innerHTML = items.map(([k,v]) => '<div class="card"><div class="k">'+esc(k)+'</div><div class="v">'+esc(v)+'</div></div>').join('');
-      document.getElementById('meta-line').textContent = 'Private Control Center';
+      const modeLabel = economySandboxEnabled ? 'SANDBOX' : 'PRODUCTION';
+      document.getElementById('meta-line').textContent = 'Private Control Center · Economy: ' + modeLabel;
       renderFunnel(data.funnel || null);
     }
 
@@ -2328,11 +2417,11 @@ function renderAdminPage(options = {}) {
     async function loadCaseLab(caseName, withSimulation = false){
       const key = String(caseName || document.getElementById('case-lab-case')?.value || '');
       if (!key) return;
-      const data = await jfetch('/admin/api/case-lab/' + encodeURIComponent(key));
+      const data = await jfetchEconomy('/admin/api/case-lab/' + encodeURIComponent(key));
       renderCaseLab(data);
       if (withSimulation) {
         const draft = collectCaseLabDraft();
-        const sim = await jfetch('/admin/api/case-lab/' + encodeURIComponent(key) + '/simulate', {
+        const sim = await jfetchEconomy('/admin/api/case-lab/' + encodeURIComponent(key) + '/simulate', {
           method:'POST',
           headers:{'content-type':'application/json'},
           body: JSON.stringify({ spins: Number(document.getElementById('case-lab-spins')?.value || 1000), draft }),
@@ -2344,7 +2433,7 @@ function renderAdminPage(options = {}) {
     async function applyCasePreset(){
       const presetKey = String(document.getElementById('case-lab-preset')?.value || 'balanced');
       const priceStars = Number(document.getElementById('case-lab-price')?.value || 0);
-      const result = await jfetch('/admin/api/case-lab-preset/build', {
+      const result = await jfetchEconomy('/admin/api/case-lab-preset/build', {
         method:'POST',
         headers:{'content-type':'application/json'},
         body: JSON.stringify({ presetKey, priceStars }),
@@ -2641,21 +2730,24 @@ function renderAdminPage(options = {}) {
       const targetSection = options.section || (options.preserveSection === false ? 'overview' : activeSection || 'overview');
       const q = document.getElementById('search-q').value || '';
       const limit = document.getElementById('search-limit').value || '100';
-      const [me, overview, users, activity, cases, promoCodes, payments, security, paymentCenter, configHistory] = await Promise.all([
+      const [me, overview, users, activity, cases, promoCodes, payments, security, paymentCenter, configHistory, sandboxInfo] = await Promise.all([
         jfetch('/admin/api/me'),
         jfetch('/admin/api/overview'),
         jfetch('/admin/api/users?q=' + encodeURIComponent(q) + '&limit=' + encodeURIComponent(limit)),
         jfetch('/admin/api/activity?limit=300'),
-        jfetch('/admin/api/cases'),
+        jfetchEconomy('/admin/api/cases'),
         jfetch('/admin/api/promocodes'),
         jfetch('/admin/api/payments'),
         jfetch('/admin/api/security'),
         jfetch('/admin/api/payments/orders?status=all&limit=200'),
         jfetch('/admin/api/config-history?limit=200'),
+        jfetch('/admin/api/economy-sandbox'),
       ]);
       currentAdmin = me.admin || null;
       securityState = security || null;
+      economySandboxMeta = sandboxInfo?.sandbox || null;
       renderKpi(overview);
+      renderEconomySandboxUi();
       renderUsers(users.users || []);
       renderActivity(activity.activity || []);
       renderCases(cases.cases || []);
@@ -2667,7 +2759,7 @@ function renderAdminPage(options = {}) {
         const nextValue = caseRows.some((c) => c.caseName === prev) ? prev : (caseRows[0]?.caseName || '');
         if (nextValue) {
           caseSelect.value = nextValue;
-          const caseLab = await jfetch('/admin/api/case-lab/' + encodeURIComponent(nextValue));
+          const caseLab = await jfetchEconomy('/admin/api/case-lab/' + encodeURIComponent(nextValue));
           renderCaseLab(caseLab);
         }
       }
@@ -2801,7 +2893,7 @@ function renderAdminPage(options = {}) {
           const key = enabledInput.getAttribute('data-case-enabled');
           const price = Number(priceInput ? priceInput.value : 0);
           const enabled = Boolean(enabledInput.checked);
-          await jfetch('/admin/api/cases/' + encodeURIComponent(key), {
+          await jfetchEconomy('/admin/api/cases/' + encodeURIComponent(key), {
             method:'POST',
             headers:{'content-type':'application/json'},
             body: JSON.stringify({ price, enabled }),
@@ -2820,7 +2912,7 @@ function renderAdminPage(options = {}) {
       btn.disabled = true;
       const progress = createProgressNotice('Публикуем черновики...');
       try {
-        await jfetch('/admin/api/case-drafts/publish', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({}) });
+        await jfetchEconomy('/admin/api/case-drafts/publish', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({}) });
         await loadDashboard({ section: 'cases' });
         progress.done('Черновики опубликованы');
       } catch (e) {
@@ -2854,7 +2946,7 @@ function renderAdminPage(options = {}) {
       btn.disabled = true;
       const progress = createProgressNotice('Считаем симуляцию...');
       try {
-        const data = await jfetch('/admin/api/case-lab/' + encodeURIComponent(draft.caseName) + '/simulate', {
+        const data = await jfetchEconomy('/admin/api/case-lab/' + encodeURIComponent(draft.caseName) + '/simulate', {
           method:'POST',
           headers:{'content-type':'application/json'},
           body: JSON.stringify({
@@ -2886,7 +2978,7 @@ function renderAdminPage(options = {}) {
       try {
         await applyCasePreset();
         const draft = collectCaseLabDraft();
-        const sim = await jfetch('/admin/api/case-lab/' + encodeURIComponent(draft.caseName) + '/simulate', {
+        const sim = await jfetchEconomy('/admin/api/case-lab/' + encodeURIComponent(draft.caseName) + '/simulate', {
           method:'POST',
           headers:{'content-type':'application/json'},
           body: JSON.stringify({ spins: Number(document.getElementById('case-lab-spins')?.value || 1000), draft }),
@@ -2917,7 +3009,7 @@ function renderAdminPage(options = {}) {
       btn.disabled = true;
       const progress = createProgressNotice('Сохраняем кейс...');
       try {
-        await jfetch('/admin/api/case-lab/' + encodeURIComponent(draft.caseName), {
+        await jfetchEconomy('/admin/api/case-lab/' + encodeURIComponent(draft.caseName), {
           method:'POST',
           headers:{'content-type':'application/json'},
           body: JSON.stringify(draft),
@@ -2940,7 +3032,7 @@ function renderAdminPage(options = {}) {
       btn.disabled = true;
       const progress = createProgressNotice('Публикуем кейс...');
       try {
-        await jfetch('/admin/api/case-drafts/publish', {
+        await jfetchEconomy('/admin/api/case-drafts/publish', {
           method:'POST',
           headers:{'content-type':'application/json'},
           body: JSON.stringify({ caseName: draft.caseName }),
@@ -3049,6 +3141,43 @@ function renderAdminPage(options = {}) {
         btn.disabled = false;
       }
     };
+
+    const economySandboxToggle = document.getElementById('economy-sandbox-toggle');
+    if (economySandboxToggle) {
+      economySandboxToggle.onchange = async () => {
+        economySandboxEnabled = Boolean(economySandboxToggle.checked);
+        renderEconomySandboxUi();
+        const progress = createProgressNotice(economySandboxEnabled ? 'Включаем sandbox-режим...' : 'Возвращаемся в production-режим...');
+        try {
+          await loadDashboard({ section: 'case-lab' });
+          progress.done(economySandboxEnabled ? 'Sandbox-режим включен' : 'Production-режим включен');
+        } catch (e) {
+          progress.done('Ошибка: ' + e.message, 'bad', 3400);
+        }
+      };
+    }
+
+    const economySandboxResetBtn = document.getElementById('btn-economy-sandbox-reset');
+    if (economySandboxResetBtn) {
+      economySandboxResetBtn.onclick = async () => {
+        const btn = economySandboxResetBtn;
+        btn.disabled = true;
+        const progress = createProgressNotice('Сбрасываем sandbox из production...');
+        try {
+          await jfetch('/admin/api/economy-sandbox/reset', {
+            method:'POST',
+            headers:{'content-type':'application/json'},
+            body: JSON.stringify({}),
+          });
+          await loadDashboard({ section: 'case-lab' });
+          progress.done('Sandbox синхронизирован с production');
+        } catch (e) {
+          progress.done('Ошибка: ' + e.message, 'bad', 3400);
+        } finally {
+          btn.disabled = false;
+        }
+      };
+    }
 
     document.getElementById('btn-2fa-setup-start').onclick = async () => {
       const progress = createProgressNotice('Готовим 2FA...');
@@ -3544,6 +3673,33 @@ app.post('/telegram/webhook', async (req, res) => {
   }
 });
 
+function isSandboxEconomyRequest(req) {
+  const raw = String(req.query?.sandbox ?? req.body?.sandbox ?? '').trim().toLowerCase();
+  return raw === '1' || raw === 'true' || raw === 'yes' || raw === 'on';
+}
+
+function getEconomyStore(db, req) {
+  const sandbox = isSandboxEconomyRequest(req);
+  if (sandbox) {
+    normalizeSandboxEconomyStore(db);
+    return {
+      sandbox: true,
+      caseConfig: db.sandboxEconomy.caseConfig,
+      caseDrafts: db.sandboxEconomy.caseDrafts,
+      markUpdated: (adminLogin = 'admin') => {
+        db.sandboxEconomy.updatedAt = nowIso();
+        db.sandboxEconomy.updatedBy = adminLogin;
+      },
+    };
+  }
+  return {
+    sandbox: false,
+    caseConfig: db.caseConfig,
+    caseDrafts: db.caseDrafts,
+    markUpdated: () => {},
+  };
+}
+
 const ADMIN_PAGE_PATHS = Array.from(new Set([ADMIN_PATH, '/admin', '/vault-admin']));
 app.get(ADMIN_PAGE_PATHS, (req, res) => {
   if (!isAdminConfigured()) return res.status(404).send('Not Found');
@@ -3934,6 +4090,57 @@ app.get('/admin/api/overview', ensureAdminAuth(), async (_req, res) => {
   }
 });
 
+app.get('/admin/api/economy-sandbox', ensureAdminAuth(), async (_req, res) => {
+  try {
+    const db = await readDb();
+    cleanup(db);
+    normalizeAllConfig(db);
+    const draftCount = Object.keys(db.sandboxEconomy?.caseDrafts?.cases || {}).length;
+    const updatedAt = db.sandboxEconomy?.updatedAt || null;
+    const updatedBy = db.sandboxEconomy?.updatedBy || null;
+    return res.json({
+      ok: true,
+      sandbox: {
+        ready: true,
+        draftCount,
+        updatedAt,
+        updatedBy,
+      },
+    });
+  } catch (e) {
+    console.error('[admin] economy sandbox status failed:', e);
+    return res.status(503).json({ ok: false, error: 'Storage temporarily unavailable' });
+  }
+});
+
+app.post('/admin/api/economy-sandbox/reset', ensureAdminAuth(), async (req, res) => {
+  try {
+    const db = await readDb();
+    cleanup(db);
+    normalizeAllConfig(db);
+    db.sandboxEconomy = buildDefaultSandboxEconomyStore(db.caseConfig);
+    db.sandboxEconomy.updatedBy = req.admin?.login || 'admin';
+    appendAdminAudit(db, {
+      action: 'economy_sandbox_reset',
+      reason: 'reset_from_production',
+      adminLogin: req.admin?.login || 'admin',
+    });
+    if (!await persistDbOr503(res, db)) return;
+    return res.json({
+      ok: true,
+      sandbox: {
+        ready: true,
+        draftCount: 0,
+        updatedAt: db.sandboxEconomy.updatedAt,
+        updatedBy: db.sandboxEconomy.updatedBy,
+      },
+    });
+  } catch (e) {
+    console.error('[admin] economy sandbox reset failed:', e);
+    return res.status(503).json({ ok: false, error: 'Storage temporarily unavailable' });
+  }
+});
+
 app.get('/admin/api/users', ensureAdminAuth(), async (req, res) => {
   try {
     const db = await readDb();
@@ -4087,21 +4294,22 @@ app.get('/admin/api/cases', ensureAdminAuth(), async (_req, res) => {
     const db = await readDb();
     cleanup(db);
     const changed = normalizeAllConfig(db);
-    const items = Object.entries(db.caseConfig || {}).map(([caseName, cfg]) => ({
+    const economy = getEconomyStore(db, _req);
+    const items = Object.entries(economy.caseConfig || {}).map(([caseName, cfg]) => ({
       caseName,
       price: Number(cfg?.price || 0),
       enabled: Boolean(cfg?.enabled !== false),
       hasCustomDropTable: Boolean(normalizeCaseDropTable(cfg?.dropTable).table),
-      hasDraft: Boolean(db.caseDrafts?.cases?.[caseName]),
-      draftPrice: Number(db.caseDrafts?.cases?.[caseName]?.price || 0),
-      draftEnabled: Boolean(db.caseDrafts?.cases?.[caseName]?.enabled !== false),
+      hasDraft: Boolean(economy.caseDrafts?.cases?.[caseName]),
+      draftPrice: Number(economy.caseDrafts?.cases?.[caseName]?.price || 0),
+      draftEnabled: Boolean(economy.caseDrafts?.cases?.[caseName]?.enabled !== false),
       updatedAt: cfg?.updatedAt || null,
       updatedBy: cfg?.updatedBy || null,
-      draftUpdatedAt: db.caseDrafts?.cases?.[caseName]?.updatedAt || null,
-      draftUpdatedBy: db.caseDrafts?.cases?.[caseName]?.updatedBy || null,
+      draftUpdatedAt: economy.caseDrafts?.cases?.[caseName]?.updatedAt || null,
+      draftUpdatedBy: economy.caseDrafts?.cases?.[caseName]?.updatedBy || null,
     })).sort((a, b) => a.caseName.localeCompare(b.caseName));
     if (changed) await writeDb(db);
-    return res.json({ ok: true, cases: items });
+    return res.json({ ok: true, sandbox: economy.sandbox, cases: items });
   } catch (e) {
     console.error('[admin] cases list failed:', e);
     return res.status(503).json({ ok: false, error: 'Storage temporarily unavailable' });
@@ -4122,8 +4330,9 @@ app.post('/admin/api/cases/:caseName', ensureAdminAuth(), async (req, res) => {
     const db = await readDb();
     cleanup(db);
     normalizeAllConfig(db);
-    const beforeDraft = cloneJson(db.caseDrafts?.cases?.[caseName] || null);
-    const currentPublished = db.caseConfig?.[caseName] || null;
+    const economy = getEconomyStore(db, req);
+    const beforeDraft = cloneJson(economy.caseDrafts?.cases?.[caseName] || null);
+    const currentPublished = economy.caseConfig?.[caseName] || null;
     const draft = {
       caseName,
       price: caseName === 'free' ? 0 : Number(nextPriceRaw),
@@ -4132,17 +4341,18 @@ app.post('/admin/api/cases/:caseName', ensureAdminAuth(), async (req, res) => {
       updatedAt: nowIso(),
       updatedBy: req.admin?.login || 'admin',
     };
-    db.caseDrafts.cases[caseName] = draft;
-    db.caseDrafts.updatedAt = nowIso();
-    db.caseDrafts.updatedBy = req.admin?.login || 'admin';
+    economy.caseDrafts.cases[caseName] = draft;
+    economy.caseDrafts.updatedAt = nowIso();
+    economy.caseDrafts.updatedBy = req.admin?.login || 'admin';
+    economy.markUpdated(req.admin?.login || 'admin');
     appendAdminAudit(db, {
-      action: 'case_draft_update',
-      reason: `${caseName} draft price=${draft.price} enabled=${draft.enabled}`,
+      action: economy.sandbox ? 'case_draft_update_sandbox' : 'case_draft_update',
+      reason: `${caseName} draft price=${draft.price} enabled=${draft.enabled} mode=${economy.sandbox ? 'sandbox' : 'prod'}`,
       adminLogin: req.admin?.login || 'admin',
     });
     appendConfigHistory(db, {
       entityType: 'case_draft',
-      entityKey: caseName,
+      entityKey: economy.sandbox ? `${caseName}::sandbox` : caseName,
       action: 'draft_update',
       before: beforeDraft,
       after: draft,
@@ -4158,6 +4368,7 @@ app.post('/admin/api/cases/:caseName', ensureAdminAuth(), async (req, res) => {
         updatedAt: draft.updatedAt,
         updatedBy: draft.updatedBy,
       },
+      sandbox: economy.sandbox,
     });
   } catch (e) {
     console.error('[admin] case update failed:', e);
@@ -4171,40 +4382,42 @@ app.post('/admin/api/case-drafts/publish', ensureAdminAuth(), async (req, res) =
     const db = await readDb();
     cleanup(db);
     normalizeAllConfig(db);
-    const entries = Object.entries(db.caseDrafts?.cases || {})
+    const economy = getEconomyStore(db, req);
+    const entries = Object.entries(economy.caseDrafts?.cases || {})
       .filter(([name]) => !onlyCaseName || name === onlyCaseName);
     if (!entries.length) return res.status(400).json({ ok: false, error: 'no drafts to publish' });
 
     const published = [];
     for (const [caseName, draft] of entries) {
-      if (!db.caseConfig?.[caseName]) continue;
-      const before = cloneJson(db.caseConfig[caseName]);
-      db.caseConfig[caseName].price = caseName === 'free' ? 0 : Math.max(0, Math.floor(Number(draft.price || 0)));
-      db.caseConfig[caseName].enabled = Boolean(draft.enabled !== false);
-      db.caseConfig[caseName].dropTable = normalizeCaseDropTable(draft.dropTable).table;
-      db.caseConfig[caseName].updatedAt = nowIso();
-      db.caseConfig[caseName].updatedBy = req.admin?.login || 'admin';
-      const after = cloneJson(db.caseConfig[caseName]);
+      if (!economy.caseConfig?.[caseName]) continue;
+      const before = cloneJson(economy.caseConfig[caseName]);
+      economy.caseConfig[caseName].price = caseName === 'free' ? 0 : Math.max(0, Math.floor(Number(draft.price || 0)));
+      economy.caseConfig[caseName].enabled = Boolean(draft.enabled !== false);
+      economy.caseConfig[caseName].dropTable = normalizeCaseDropTable(draft.dropTable).table;
+      economy.caseConfig[caseName].updatedAt = nowIso();
+      economy.caseConfig[caseName].updatedBy = req.admin?.login || 'admin';
+      const after = cloneJson(economy.caseConfig[caseName]);
       appendConfigHistory(db, {
         entityType: 'case_config',
-        entityKey: caseName,
+        entityKey: economy.sandbox ? `${caseName}::sandbox` : caseName,
         action: 'publish',
         before,
         after,
         createdBy: req.admin?.login || 'admin',
       });
       appendAdminAudit(db, {
-        action: 'case_publish',
-        reason: `${caseName} price=${after.price} enabled=${after.enabled} custom=${Boolean(after.dropTable)}`,
+        action: economy.sandbox ? 'case_publish_sandbox' : 'case_publish',
+        reason: `${caseName} price=${after.price} enabled=${after.enabled} custom=${Boolean(after.dropTable)} mode=${economy.sandbox ? 'sandbox' : 'prod'}`,
         adminLogin: req.admin?.login || 'admin',
       });
-      delete db.caseDrafts.cases[caseName];
+      delete economy.caseDrafts.cases[caseName];
       published.push(caseName);
     }
-    db.caseDrafts.updatedAt = nowIso();
-    db.caseDrafts.updatedBy = req.admin?.login || 'admin';
+    economy.caseDrafts.updatedAt = nowIso();
+    economy.caseDrafts.updatedBy = req.admin?.login || 'admin';
+    economy.markUpdated(req.admin?.login || 'admin');
     if (!await persistDbOr503(res, db)) return;
-    return res.json({ ok: true, published });
+    return res.json({ ok: true, sandbox: economy.sandbox, published });
   } catch (e) {
     console.error('[admin] case draft publish failed:', e);
     return res.status(503).json({ ok: false, error: 'Storage temporarily unavailable' });
@@ -4220,9 +4433,10 @@ app.get('/admin/api/case-lab/:caseName', ensureAdminAuth(), async (req, res) => 
     const db = await readDb();
     cleanup(db);
     normalizeAllConfig(db);
-    const publishedCfg = db.caseConfig?.[caseName] || null;
+    const economy = getEconomyStore(db, req);
+    const publishedCfg = economy.caseConfig?.[caseName] || null;
     if (!publishedCfg) return res.status(404).json({ ok: false, error: 'case config missing' });
-    const draftCfg = db.caseDrafts?.cases?.[caseName] || null;
+    const draftCfg = economy.caseDrafts?.cases?.[caseName] || null;
     const effectiveCfg = draftCfg || publishedCfg;
     const dropRows = getCaseDropTableRows(effectiveCfg);
     return res.json({
@@ -4235,6 +4449,7 @@ app.get('/admin/api/case-lab/:caseName', ensureAdminAuth(), async (req, res) => 
         updatedAt: effectiveCfg.updatedAt || null,
         updatedBy: effectiveCfg.updatedBy || null,
         draftExists: Boolean(draftCfg),
+        sandbox: economy.sandbox,
       },
       publishedCase: cloneJson(publishedCfg),
       draftCase: cloneJson(draftCfg),
@@ -4275,9 +4490,10 @@ app.post('/admin/api/case-lab/:caseName', ensureAdminAuth(), async (req, res) =>
     const db = await readDb();
     cleanup(db);
     normalizeAllConfig(db);
-    if (!db.caseConfig?.[caseName]) return res.status(404).json({ ok: false, error: 'case config missing' });
-    const beforeDraft = cloneJson(db.caseDrafts?.cases?.[caseName] || null);
-    db.caseDrafts.cases[caseName] = {
+    const economy = getEconomyStore(db, req);
+    if (!economy.caseConfig?.[caseName]) return res.status(404).json({ ok: false, error: 'case config missing' });
+    const beforeDraft = cloneJson(economy.caseDrafts?.cases?.[caseName] || null);
+    economy.caseDrafts.cases[caseName] = {
       caseName,
       price: caseName === 'free' ? 0 : Number(nextPriceRaw),
       enabled: Boolean(nextEnabled),
@@ -4285,34 +4501,36 @@ app.post('/admin/api/case-lab/:caseName', ensureAdminAuth(), async (req, res) =>
       updatedAt: nowIso(),
       updatedBy: req.admin?.login || 'admin',
     };
-    db.caseDrafts.updatedAt = nowIso();
-    db.caseDrafts.updatedBy = req.admin?.login || 'admin';
-    const sim = runCaseSimulation(db.caseDrafts.cases[caseName], 1000);
+    economy.caseDrafts.updatedAt = nowIso();
+    economy.caseDrafts.updatedBy = req.admin?.login || 'admin';
+    economy.markUpdated(req.admin?.login || 'admin');
+    const sim = runCaseSimulation(economy.caseDrafts.cases[caseName], 1000);
     appendAdminAudit(db, {
-      action: 'case_lab_draft_update',
-      reason: `${caseName} draft price=${db.caseDrafts.cases[caseName].price} enabled=${db.caseDrafts.cases[caseName].enabled} custom=${Boolean(parsedDropTable.table)} rtp=${sim.rtpPct}%`,
+      action: economy.sandbox ? 'case_lab_draft_update_sandbox' : 'case_lab_draft_update',
+      reason: `${caseName} draft price=${economy.caseDrafts.cases[caseName].price} enabled=${economy.caseDrafts.cases[caseName].enabled} custom=${Boolean(parsedDropTable.table)} rtp=${sim.rtpPct}% mode=${economy.sandbox ? 'sandbox' : 'prod'}`,
       adminLogin: req.admin?.login || 'admin',
     });
     appendConfigHistory(db, {
       entityType: 'case_draft',
-      entityKey: caseName,
+      entityKey: economy.sandbox ? `${caseName}::sandbox` : caseName,
       action: 'draft_update',
       before: beforeDraft,
-      after: db.caseDrafts.cases[caseName],
+      after: economy.caseDrafts.cases[caseName],
       createdBy: req.admin?.login || 'admin',
     });
     if (!await persistDbOr503(res, db)) return;
-    const dropRows = getCaseDropTableRows(db.caseDrafts.cases[caseName]);
+    const dropRows = getCaseDropTableRows(economy.caseDrafts.cases[caseName]);
     return res.json({
       ok: true,
       case: {
         caseName,
-        price: Number(db.caseDrafts.cases[caseName].price || 0),
-        enabled: Boolean(db.caseDrafts.cases[caseName].enabled !== false),
+        price: Number(economy.caseDrafts.cases[caseName].price || 0),
+        enabled: Boolean(economy.caseDrafts.cases[caseName].enabled !== false),
         useCustomDropTable: dropRows.useCustom,
-        updatedAt: db.caseDrafts.cases[caseName].updatedAt || null,
-        updatedBy: db.caseDrafts.cases[caseName].updatedBy || null,
+        updatedAt: economy.caseDrafts.cases[caseName].updatedAt || null,
+        updatedBy: economy.caseDrafts.cases[caseName].updatedBy || null,
         draftExists: true,
+        sandbox: economy.sandbox,
       },
       drops: {
         totalWeight: Number(dropRows.totalWeight || 0),
@@ -4336,7 +4554,8 @@ app.post('/admin/api/case-lab/:caseName/simulate', ensureAdminAuth(), async (req
     const db = await readDb();
     cleanup(db);
     normalizeAllConfig(db);
-    const baseCfg = db.caseDrafts?.cases?.[caseName] || db.caseConfig?.[caseName] || null;
+    const economy = getEconomyStore(db, req);
+    const baseCfg = economy.caseDrafts?.cases?.[caseName] || economy.caseConfig?.[caseName] || null;
     if (!baseCfg) return res.status(404).json({ ok: false, error: 'case config missing' });
     const draft = req.body?.draft && typeof req.body.draft === 'object' ? req.body.draft : {};
     const price = Number.isInteger(Number(draft.price)) && Number(draft.price) >= 0
@@ -4354,6 +4573,7 @@ app.post('/admin/api/case-lab/:caseName/simulate', ensureAdminAuth(), async (req
         price: Number(cfg.price || 0),
         enabled: Boolean(cfg.enabled !== false),
         useCustomDropTable: dropRows.useCustom,
+        sandbox: economy.sandbox,
       },
       drops: {
         totalWeight: Number(dropRows.totalWeight || 0),
