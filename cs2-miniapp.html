@@ -1439,41 +1439,44 @@
   }
   .upgrade-wheel-arrow {
     position: absolute;
-    inset: 12px;
-    border-radius: 50%;
-    background: transparent;
-    transform-origin: 50% 50%;
-    transform: rotate(var(--arrow-rotation, 0deg));
-    transition: transform var(--arrow-duration, 2.4s) var(--arrow-ease, cubic-bezier(0.12, 0.7, 0.2, 1));
-    z-index: 3;
+    left: 50%;
+    top: auto;
+    bottom: 34px;
+    width: 12px;
+    height: 24px;
+    transform: translateX(-50%);
     pointer-events: none;
-    filter: drop-shadow(0 0 8px rgba(232,166,48,0.42));
+    z-index: 4;
+    filter: drop-shadow(0 0 8px rgba(232,166,48,0.35));
   }
   .upgrade-wheel-arrow::before {
     content: '';
     position: absolute;
     left: 50%;
-    top: 12px;
-    width: 12px;
-    height: 22px;
+    top: 0;
+    width: 2px;
+    height: 14px;
     transform: translateX(-50%);
-    border-radius: 10px;
-    background: linear-gradient(180deg, #fff2c8 0%, #ffd77d 36%, #f0a82a 100%);
-    border: 1px solid rgba(255,239,196,0.66);
-    box-shadow: 0 4px 18px rgba(232,166,48,0.38);
+    background: linear-gradient(180deg, #ffe8a4, #f2b236);
+    border-radius: 2px;
   }
   .upgrade-wheel-arrow::after {
     content: '';
     position: absolute;
     left: 50%;
-    top: 30px;
+    top: 10px;
     width: 0;
     height: 0;
     transform: translateX(-50%);
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 9px solid #ffd070;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 13px solid #ffd45f;
+    filter: drop-shadow(0 0 6px rgba(255,202,74,0.35));
   }
+  .upgrade-wheel.spinning .upgrade-wheel-arrow {
+    animation: up-pointer-bounce 430ms ease-in-out infinite;
+  }
+  .upgrade-wheel-dot { display: none !important; }
   .upgrade-wheel-label {
     font-size: 38px;
     letter-spacing: -1px;
@@ -1554,10 +1557,24 @@
     border-color: rgba(78,158,255,0.85);
     box-shadow: 0 0 0 1px rgba(78,158,255,0.35), 0 0 14px rgba(78,158,255,0.22);
   }
+  .upgrade-action-sticky {
+    position: static;
+    margin-bottom: 12px;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    border: 0;
+    backdrop-filter: none;
+    transform: none;
+  }
   .upgrade-controls {
     display: grid;
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+  @keyframes up-pointer-bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-1.5px); }
   }
   @media (min-width: 940px) {
     .upgrade-controls { grid-template-columns: 1fr 1fr; }
@@ -1617,9 +1634,9 @@
     .upgrade-wheel::before { inset: 34px; }
     .upgrade-wheel-label { font-size: 34px; }
     .upgrade-wheel-meta { bottom: 66px; font-size: 18px; }
-    .upgrade-wheel-arrow { inset: 10px; }
-    .upgrade-wheel-arrow::before { width: 10px; height: 19px; top: 11px; }
-    .upgrade-wheel-arrow::after { top: 26px; border-left-width: 5px; border-right-width: 5px; border-top-width: 8px; }
+    .upgrade-wheel-arrow { bottom: 31px; width: 10px; height: 20px; }
+    .upgrade-wheel-arrow::before { height: 12px; }
+    .upgrade-wheel-arrow::after { top: 8px; border-left-width: 7px; border-right-width: 7px; border-bottom-width: 11px; }
     .upgrade-controls { grid-template-columns: 1fr; }
     .upgrade-settings-label { min-width: 100%; }
     .up-pick { grid-template-columns: 44px 1fr auto; padding: 9px; gap: 8px; }
@@ -1758,12 +1775,14 @@
             <div class="upgrade-wheel-arrow" id="upgrade-wheel-arrow"></div>
             <div class="upgrade-wheel-label" id="upgrade-wheel-label">0.00%</div>
             <div class="upgrade-wheel-meta" id="upgrade-wheel-meta">средний шанс</div>
-            <div class="upgrade-wheel-dot"></div>
           </div>
         </div>
         <div class="upgrade-slot-row">
           <div class="up-slot" id="upgrade-source-slot">Выбери скин из инвентаря</div>
           <div class="up-slot" id="upgrade-target-slot">Выбери цель апгрейда</div>
+        </div>
+        <div class="upgrade-action-sticky">
+          <button class="upgrade-run-btn" id="upgrade-run-btn" onclick="runUpgradeSpin()">🎯 Запустить апгрейд</button>
         </div>
         <div class="upgrade-settings">
           <div class="upgrade-settings-row">
@@ -1778,10 +1797,6 @@
           </div>
           <div class="upgrade-presets" id="upgrade-presets"></div>
         </div>
-      </div>
-
-      <div class="upgrade-action-sticky">
-        <button class="upgrade-run-btn" id="upgrade-run-btn" onclick="runUpgradeSpin()">🎯 Запустить апгрейд</button>
       </div>
       <div class="upgrade-spin-status" id="upgrade-spin-status">Выбери предмет и цель</div>
 
