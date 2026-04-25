@@ -1423,11 +1423,10 @@
     height: 258px;
     border: 3px solid rgba(255,255,255,0.12);
     background: conic-gradient(
-      from 180deg,
-      rgba(255,220,54,0.95) 0deg,
-      rgba(255,148,37,0.95) calc(var(--chance-angle, 180deg) * 0.6),
-      rgba(255,74,55,0.95) var(--chance-angle, 180deg),
-      rgba(255,255,255,0.09) var(--chance-angle, 180deg),
+      from -90deg,
+      rgba(255,194,74,0.95) 0deg,
+      rgba(255,153,64,0.95) var(--chance-angle, 180deg),
+      rgba(255,255,255,0.085) var(--chance-angle, 180deg),
       rgba(255,255,255,0.09) 360deg
     );
   }
@@ -1435,15 +1434,45 @@
   .upgrade-wheel::after { inset: -12px; border-style: solid; border-color: rgba(255,255,255,0.08); }
   .upgrade-wheel-spokes {
     inset: 10px;
-    opacity: 0.28;
-    mask: radial-gradient(circle, transparent 74%, #000 76%, #000 84%, transparent 86%);
+    opacity: 0.12;
+    mask: radial-gradient(circle, transparent 76%, #000 79%, #000 82%, transparent 84%);
   }
   .upgrade-wheel-arrow {
-    top: 50%;
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    background: transparent;
+    transform-origin: 50% 50%;
+    transform: rotate(var(--arrow-rotation, 0deg));
+    transition: transform var(--arrow-duration, 2.4s) var(--arrow-ease, cubic-bezier(0.12, 0.7, 0.2, 1));
+    z-index: 3;
+    pointer-events: none;
+    filter: drop-shadow(0 0 8px rgba(232,166,48,0.42));
+  }
+  .upgrade-wheel-arrow::before {
+    content: '';
+    position: absolute;
     left: 50%;
-    height: 46%;
-    width: 4px;
-    transform-origin: 50% calc(100% - 6px);
+    top: 12px;
+    width: 12px;
+    height: 22px;
+    transform: translateX(-50%);
+    border-radius: 10px;
+    background: linear-gradient(180deg, #fff2c8 0%, #ffd77d 36%, #f0a82a 100%);
+    border: 1px solid rgba(255,239,196,0.66);
+    box-shadow: 0 4px 18px rgba(232,166,48,0.38);
+  }
+  .upgrade-wheel-arrow::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 30px;
+    width: 0;
+    height: 0;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 9px solid #ffd070;
   }
   .upgrade-wheel-label {
     font-size: 38px;
@@ -1588,6 +1617,9 @@
     .upgrade-wheel::before { inset: 34px; }
     .upgrade-wheel-label { font-size: 34px; }
     .upgrade-wheel-meta { bottom: 66px; font-size: 18px; }
+    .upgrade-wheel-arrow { inset: 10px; }
+    .upgrade-wheel-arrow::before { width: 10px; height: 19px; top: 11px; }
+    .upgrade-wheel-arrow::after { top: 26px; border-left-width: 5px; border-right-width: 5px; border-top-width: 8px; }
     .upgrade-controls { grid-template-columns: 1fr; }
     .upgrade-settings-label { min-width: 100%; }
     .up-pick { grid-template-columns: 44px 1fr auto; padding: 9px; gap: 8px; }
