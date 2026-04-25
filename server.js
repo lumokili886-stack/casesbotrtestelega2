@@ -10,6 +10,7 @@ dotenv.config();
 
 const app = express();
 app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: false }));
 
 const PORT = Number(process.env.PORT || 3000);
 const PUBLIC_BASE_URL_ENV = process.env.PUBLIC_BASE_URL || '';
@@ -1555,7 +1556,14 @@ function ensureAdminAuth(options = {}) {
   };
 }
 
-function renderAdminPage() {
+function normalizeAdminLoginError(raw) {
+  const text = String(raw || '').trim();
+  if (!text) return '';
+  return text.replace(/[^\p{L}\p{N}\s:().,_+-]/gu, '').slice(0, 180);
+}
+
+function renderAdminPage(options = {}) {
+  const loginErrorMessage = normalizeAdminLoginError(options.loginErrorMessage || '');
   return `<!doctype html>
 <html lang="ru">
 <head>
@@ -1655,11 +1663,13 @@ function renderAdminPage() {
   <div id="login-box" class="login">
     <div class="title" style="font-size:22px">VAULT Admin Login</div>
     <div class="sub" style="margin:4px 0 12px">Закрытая панель. Доступ только по админ-учетке.</div>
+    <form id="login-form" method="POST" action="/admin/login">
     <div id="login-stage-password">
-      <div class="row" style="margin-bottom:8px"><input id="login" placeholder="login" style="flex:1"></div>
-      <div class="row" style="margin-bottom:12px"><input id="password" placeholder="password" type="password" style="flex:1"></div>
-      <button id="btn-login" class="btn primary" style="width:100%">Войти</button>
+      <div class="row" style="margin-bottom:8px"><input id="login" name="login" placeholder="login" style="flex:1"></div>
+      <div class="row" style="margin-bottom:12px"><input id="password" name="password" placeholder="password" type="password" style="flex:1"></div>
+      <button id="btn-login" type="submit" class="btn primary" style="width:100%">Войти</button>
     </div>
+    </form>
     <div id="login-stage-2fa" class="hidden">
       <div class="hint" style="margin-bottom:8px">Введите 6-значный код из Authenticator.</div>
       <div class="row" style="margin-bottom:12px"><input id="login-2fa-code" placeholder="123456" inputmode="numeric" maxlength="6" style="flex:1"></div>
@@ -1668,7 +1678,7 @@ function renderAdminPage() {
         <button id="btn-login-2fa-back" class="btn" style="width:110px">Назад</button>
       </div>
     </div>
-    <div id="login-msg" class="hint" style="margin-top:10px"></div>
+    <div id="login-msg" class="hint" style="margin-top:10px">${escapeHtml(loginErrorMessage)}</div>
   </div>
 
   <div id="admin-app" class="hidden">
@@ -2677,7 +2687,7 @@ function renderAdminPage() {
       }
     }
 
-    document.getElementById('btn-login').onclick = async () => {
+    async function handlePasswordLogin() {
       const login = document.getElementById('login').value.trim();
       const password = document.getElementById('password').value;
       const msg = document.getElementById('login-msg');
@@ -2701,6 +2711,17 @@ function renderAdminPage() {
       } catch (e) {
         msg.textContent = 'Ошибка: ' + e.message;
       }
+    }
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+      loginForm.onsubmit = async (ev) => {
+        ev.preventDefault();
+        await handlePasswordLogin();
+      };
+    }
+    document.getElementById('btn-login').onclick = async (ev) => {
+      if (ev) ev.preventDefault();
+      await handlePasswordLogin();
     };
 
     document.getElementById('btn-login-2fa-back').onclick = () => {
@@ -3518,11 +3539,49 @@ app.get(ADMIN_PAGE_PATHS, (req, res) => {
   if (!isAdminConfigured()) return res.status(404).send('Not Found');
   const cookies = parseCookies(req);
   const parsed = parseAdminSession(cookies[ADMIN_COOKIE] || '');
-  const html = renderAdminPage();
+  const html = renderAdminPage({
+    loginErrorMessage: normalizeAdminLoginError(req.query?.login_error || ''),
+  });
   if (!parsed.ok) {
     return res.status(200).type('html').send(html);
   }
   return res.status(200).type('html').send(html);
+});
+
+const ADMIN_FORM_LOGIN_PATHS = Array.from(new Set([
+  `${ADMIN_PATH}/login`,
+  '/admin/login',
+  '/vault-admin/login',
+]));
+app.post(ADMIN_FORM_LOGIN_PATHS, async (req, res) => {
+  if (!isAdminConfigured()) return res.status(404).send('Not Found');
+  const sourcePath = String(req.path || '/admin/login');
+  const adminPagePath = sourcePath.endsWith('/login') ? sourcePath.slice(0, -6) : '/admin';
+  const safeTarget = ADMIN_PAGE_PATHS.includes(adminPagePath) ? adminPagePath : '/admin';
+  const login = String(req.body?.login || '').trim();
+  const password = String(req.body?.password || '');
+  const failRedirect = (message) => {
+    const query = message ? `?login_error=${encodeURIComponent(String(message || '').slice(0, 120))}` : '';
+    return res.redirect(302, `${safeTarget}${query}`);
+  };
+  try {
+    const db = await readDb();
+    cleanup(db);
+    normalizeAllConfig(db);
+    const account = db.admins?.[login] || null;
+    if (!account || !verifyAdminPassword(password, account)) {
+      return failRedirect('Invalid credentials');
+    }
+    if (account.twoFactorEnabled) {
+      return failRedirect('2FA для этого аккаунта: войдите через JS-форму');
+    }
+    const token = makeAdminSessionToken(account.login, account.role);
+    res.setHeader('Set-Cookie', buildAdminCookie(token, req));
+    return res.redirect(302, safeTarget);
+  } catch (e) {
+    console.error('[admin] form login failed:', e);
+    return failRedirect('Storage temporarily unavailable');
+  }
 });
 
 app.post('/admin/api/login', async (req, res) => {
