@@ -1559,7 +1559,7 @@ function ensureAdminAuth(options = {}) {
 function normalizeAdminLoginError(raw) {
   const text = String(raw || '').trim();
   if (!text) return '';
-  return text.replace(/[^\p{L}\p{N}\s:().,_+-]/gu, '').slice(0, 180);
+  return text.replace(/[^a-zA-Z0-9а-яА-ЯёЁ\s:().,_+-]/g, '').slice(0, 180);
 }
 
 function renderAdminPage(options = {}) {
