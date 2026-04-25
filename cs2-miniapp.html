@@ -1439,12 +1439,11 @@
   }
   .upgrade-wheel-arrow {
     position: absolute;
-    left: 50%;
-    top: auto;
-    bottom: 34px;
-    width: 12px;
-    height: 24px;
-    transform: translateX(-50%);
+    inset: 12px;
+    border-radius: 50%;
+    transform-origin: 50% 50%;
+    transform: rotate(var(--arrow-rotation, 0deg));
+    transition: transform var(--arrow-duration, 2.4s) var(--arrow-ease, cubic-bezier(0.12, 0.7, 0.2, 1));
     pointer-events: none;
     z-index: 4;
     filter: drop-shadow(0 0 8px rgba(232,166,48,0.35));
@@ -1453,9 +1452,9 @@
     content: '';
     position: absolute;
     left: 50%;
-    top: 0;
+    bottom: 19px;
     width: 2px;
-    height: 14px;
+    height: 10px;
     transform: translateX(-50%);
     background: linear-gradient(180deg, #ffe8a4, #f2b236);
     border-radius: 2px;
@@ -1464,17 +1463,14 @@
     content: '';
     position: absolute;
     left: 50%;
-    top: 10px;
+    bottom: 8px;
     width: 0;
     height: 0;
     transform: translateX(-50%);
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 13px solid #ffd45f;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 12px solid #ffd45f;
     filter: drop-shadow(0 0 6px rgba(255,202,74,0.35));
-  }
-  .upgrade-wheel.spinning .upgrade-wheel-arrow {
-    animation: up-pointer-bounce 430ms ease-in-out infinite;
   }
   .upgrade-wheel-dot { display: none !important; }
   .upgrade-wheel-label {
@@ -1516,6 +1512,7 @@
     margin-bottom: 8px;
   }
   .upgrade-settings-row:last-child { margin-bottom: 0; }
+  .upgrade-settings-row.upgrade-quick-row { display: none; }
   .upgrade-settings-label {
     font-size: 11px;
     color: var(--muted);
@@ -1571,10 +1568,6 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 10px;
-  }
-  @keyframes up-pointer-bounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(-1.5px); }
   }
   @media (min-width: 940px) {
     .upgrade-controls { grid-template-columns: 1fr 1fr; }
@@ -1634,9 +1627,9 @@
     .upgrade-wheel::before { inset: 34px; }
     .upgrade-wheel-label { font-size: 34px; }
     .upgrade-wheel-meta { bottom: 66px; font-size: 18px; }
-    .upgrade-wheel-arrow { bottom: 31px; width: 10px; height: 20px; }
-    .upgrade-wheel-arrow::before { height: 12px; }
-    .upgrade-wheel-arrow::after { top: 8px; border-left-width: 7px; border-right-width: 7px; border-bottom-width: 11px; }
+    .upgrade-wheel-arrow { inset: 10px; }
+    .upgrade-wheel-arrow::before { bottom: 17px; height: 9px; }
+    .upgrade-wheel-arrow::after { bottom: 7px; border-left-width: 6px; border-right-width: 6px; border-bottom-width: 10px; }
     .upgrade-controls { grid-template-columns: 1fr; }
     .upgrade-settings-label { min-width: 100%; }
     .up-pick { grid-template-columns: 44px 1fr auto; padding: 9px; gap: 8px; }
@@ -1790,7 +1783,7 @@
             <button class="upgrade-toggle-btn active" id="upgrade-speed-normal" onclick="setUpgradeSpinSpeed('normal')">Обычная</button>
             <button class="upgrade-toggle-btn" id="upgrade-speed-fast" onclick="setUpgradeSpinSpeed('fast')">Быстрая</button>
           </div>
-          <div class="upgrade-settings-row">
+          <div class="upgrade-settings-row upgrade-quick-row">
             <div class="upgrade-settings-label" id="upgrade-quick-label">Быстрый подбор</div>
             <button class="upgrade-toggle-btn active" id="upgrade-quick-coef" onclick="quickPickUpgrade('coef')">По коэф.</button>
             <button class="upgrade-toggle-btn" id="upgrade-quick-chance" onclick="quickPickUpgrade('chance')">По %</button>
@@ -3774,22 +3767,17 @@ async function runUpgradeSpin() {
     const finalDeg = upgradeArrowRotation + (turns * 360) + deltaToStop;
     const overshoot = (success ? 10 : 15) + Math.floor(Math.random() * 8);
     const isFast = upgradeSpinSpeed === 'fast';
-    const spinMainMs = isFast ? 1450 : 3000;
-    const settleMs = isFast ? 260 : 460;
-    const spinDuration = isFast ? '1.4s' : '2.95s';
-    const settleDuration = isFast ? '240ms' : '420ms';
+    const spinMainMs = isFast ? 260 : 2650;
+    const settleMs = isFast ? 90 : 360;
+    const spinDuration = isFast ? '240ms' : '2.6s';
+    const settleDuration = isFast ? '85ms' : '340ms';
 
     if (board) board.classList.add('spinning');
     if (wheel) wheel.classList.add('spinning');
     resetUpgradeLabelTicker();
-    let ticker = 0;
     if (label) {
-      const base = Math.max(0, Math.min(100, Math.round(finalChance)));
-      upgradeLabelTicker = setInterval(() => {
-        ticker += 1;
-        const wobble = Math.sin(ticker * 0.9) * 1.8;
-        label.textContent = `${Math.max(0, Math.min(100, (base + wobble))).toFixed(2)}%`;
-      }, 90);
+      label.textContent = `${Number(finalChance || 0).toFixed(2)}%`;
+      label.classList.remove('win', 'lose');
     }
     setUpgradeStatus('spinning', finalChance);
 
